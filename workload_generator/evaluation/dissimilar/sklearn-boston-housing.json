@@ -1,0 +1,45 @@
+{
+  "name": "Boston Housing Data Analysis",
+  "version": "1.0",
+  "short_description": "Boston Housing Data analysis using Scikit-learn",
+  "full_description": "Utilizing Scikit-learn to analyze and predict housing prices in the Boston Housing Dataset",
+  "keywords": "boston housing, scikit-learn, regression, prediction",
+  "author": "James Bryant",
+  "input_type": "Tabular",
+  "category": "Regression",
+  "input_data": "https://www.cs.toronto.edu/~delve/data/boston/bostonDetail.html",
+  "output_data": "https://github.com/jamesbryant/models/boston_housing_prediction",
+  "ai_model": {
+    "name": "Boston Housing Scikit-learn model",
+    "version": "1.0",
+    "description": "Regression model for predicting housing prices in Boston using Scikit-learn",
+    "owner": "James Bryant",
+    "location": "https://hub.docker.com/r/d2i/boston_housing_model",
+    "license": "MIT",
+    "framework": "Scikit-learn",
+    "model_type": "Linear regression",
+    "test_accuracy": 0.75,
+    "foundational_model" : "",
+    "model_structure": "",
+    "metrics": {
+            "learning_rate": 0.0001,
+            "num_epochs": 1000,
+            "batch_size": 64,
+            "train_accuracy": 0.8,
+            "mean_squared_error": 0.00058
+        }
+  },
+  "bias_analysis": {
+    "demographic_parity_diff": 0.02,
+    "equal_odds_difference": 0.03,
+    "true_positives": 256,
+    "true_negatives": 302,
+    "false_positives": 12,
+    "false_negatives": 42,
+    "false_positive_rate": 0.03,
+    "false_negative_rate": 0.15,
+    "true_positive_rate": 0.85,
+    "true_negative_rate": 0.96
+  },
+  "xai_analysis": null
+}

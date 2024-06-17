@@ -1,0 +1,33 @@
+{
+  "id": "https://www.kaggle.com/c/titanic/data",
+  "name": "Titanic Dataset",
+  "version": "1",
+  "license": "CC0: Public Domain",
+  "description": "The Titanic dataset contains information about passengers aboard the RMS Titanic, including whether they survived or not.",
+  "source": "Kaggle",
+  "download_url": "https://www.kaggle.com/c/titanic/data",
+  "features": [
+    "PassengerId",
+    "Survived",
+    "Pclass",
+    "Name",
+    "Sex",
+    "Age",
+    "SibSp",
+    "Parch",
+    "Ticket",
+    "Fare",
+    "Cabin",
+    "Embarked"
+  ],
+  "target_variable": "Survived",
+  "categories": "0 (did not survive), 1 (survived)",
+  "datapoints": 891,
+  "missing_values": true,
+  "attribute_types": "categorical, integer, text",
+  "additional_metadata": {
+    "subject_area": "transportation",
+    "Associated_tasks": "binary classification",
+    "Dataset_characteristics": "Multivariate"
+  }
+}

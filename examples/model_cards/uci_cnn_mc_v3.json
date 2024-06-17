@@ -1,0 +1,49 @@
+{
+    "name": "New UCI Adult Data Analysis",
+    "version": "0.3",
+    "short_description": "UCI Adult Data analysis using Tensorflow",
+    "full_description": "Using a tensorflow trained neural network to analyse fairness and explainability in the UCI Adult Dataset",
+    "keywords": "uci adult, tensorflow, explainability, fairness, fairlearn, shap",
+    "author": "Sachith Withana",
+    "input_type": "Images",
+    "category": "Classification",
+    "input_data": "https://archive.ics.uci.edu/dataset/2/adult",
+    "output_data": "https://github.iu.edu/swithana/mcwork/tensorflow/adult_model3",
+    "ai_model": {
+        "name": "UCI Adult tensorflow model",
+        "version": "0.3",
+        "description": "Census classification problem using Tensorflow Neural Network",
+        "owner": "Sachith Withana",
+        "location": "https://hub.docker.com/r/d2i/adult_model",
+        "license": "BSD-3 Clause",
+        "framework": "tensorflow",
+        "model_type": "dnn",
+        "test_accuracy": 0.94589131355286,
+        "foundational_model" : "",
+        "model_structure": "",
+        "metrics": {
+            "learning_rate": 0.0001,
+            "num_epochs": 1000,
+            "batch_size": 64,
+            "train_accuracy": 0.8,
+            "mean_squared_error": 0.00058
+        }
+    },
+    "bias_analysis": {
+        "demographic_parity_diff": 0.010589475747317245,
+        "equal_odds_difference": 0.00725373210929131,
+        "true_positives": 360,
+        "true_negatives": 4884,
+        "false_positives": 58,
+        "false_negatives": 1211,
+        "false_positive_rate": 0.011736139214892756,
+        "false_negative_rate": 0.7708465945257797,
+        "true_positive_rate": 0.22915340547422025,
+        "true_negative_rate": 0.9882638607851072
+    },
+    "xai_analysis": {
+        "capital_gain": 0.0953,
+        "capital_loss": 0.0354,
+        "age": 0.027
+    }
+}

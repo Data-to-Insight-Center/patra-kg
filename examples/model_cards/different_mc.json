@@ -1,0 +1,45 @@
+{
+    "name": "UCI Adult Data Analysis test",
+    "version": "0.2",
+    "short_description": "UCI Adult Data analysis using Pytorch",
+    "full_description": "Using a Pytorch trained neural network to analyse fairness and explainability in the UCI Adult Dataset",
+    "keywords": "uci adult, pytorch, explainability, fairness, fairlearn, shap",
+    "author": "Michael Jamison",
+    "input_type": "Images",
+    "category": "Classification",
+    "input_data": "https://archive.ics.uci.edu/dataset/2/adult",
+    "output_data": "https://github.iu.edu/swithana/mcwork/pytorch/adult_model",
+    "ai_model": {
+        "name": "UCI Adult pytorch model",
+        "version": "0.2",
+        "description": "Census classification problem using pytorch Neural Network",
+        "owner": "Michael Jamison",
+        "location": "https://hub.docker.com/r/d2i/adult_model_ptorch",
+        "license": "BSD-3 Clause",
+        "framework": "pytorch",
+        "model_type": "dnn",
+        "test_accuracy": 0.75589131355286,
+        "foundational_model" : "",
+        "model_structure": "",
+        "metrics": {
+            "learning_rate": 0.0001,
+            "num_epochs": 1000,
+            "batch_size": 64,
+            "train_accuracy": 0.8,
+            "mean_squared_error": 0.00058
+        }
+    },
+    "bias_analysis": {
+        "demographic_parity_diff": 0.040589475747317245,
+        "equal_odds_difference": 0.01725373210929131,
+        "true_positives": 360,
+        "true_negatives": 4884,
+        "false_positives": 58,
+        "false_negatives": 1211,
+        "false_positive_rate": 0.011736139214892756,
+        "false_negative_rate": 0.7708465945257797,
+        "true_positive_rate": 0.22915340547422025,
+        "true_negative_rate": 0.9882638607851072
+    },
+    "xai_analysis": null
+}

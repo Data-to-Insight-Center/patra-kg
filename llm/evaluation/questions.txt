@@ -1,0 +1,20 @@
+Who's the author of the model e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788 ?
+What's the framework used for the model e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788 ?
+How many models have been created using the UCI Adult Dataset?
+Models trained on UCI Adult Dataset, how many have been deployed in chicago-03-city?
+How many deployments have used UCI Adult Dataset as the training data?
+Of the models deployed on jetson-nano, how many are trained on UCI Adult Dataset?
+What's the average peak power wattage of deployments on raspberry-pi-3?
+What's the average requests served of all deployments on jetson-nano?
+How many total models are in the database?
+How many device types are in the database?
+Which model has the best fairness?
+Which model has the lowest demographic parity trained on UCI Adult Dataset?
+What are the explainability values of model 3075715e-bac0-4783-bff9-4d8ea6a5f638?
+Which model has the best fairness deployed in sf-zone-02?
+Which top 3 models are similar to e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788 ?
+What are the 5 closest models to e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788 ?
+Which model has the highest deployment accuracy on jetson-nano?
+Which model trained on the UCI Adult Dataset has the lowest power consumption average on raspberry-pi-3?
+Which unique devices has been used at sf-zone-22?
+In how many distinct locations have models trained on the UCI Adult Dataset been deployed?

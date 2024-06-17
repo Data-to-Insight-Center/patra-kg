@@ -1,0 +1,300 @@
+The author of the model e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788 is Sachith Withana.
+The framework used for the model e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788 is Tensorflow.
+2000 models have been created using the UCI Adult Dataset.
+Only one model trained on UCI Adult Dataset has been deployed in chicago-03-city.
+120 deployments have used UCI Adult Dataset as the training data.
+There are 3 models deployed on jetson-nano that are trained on the UCI Adult Dataset.
+The average peak power wattage of deployments on raspberry-pi-3 is approximately 20.30 watts.
+The average requests served of all deployments on jetson-nano is 4881.082752251415.
+There are 2000 total models in the database.
+There are 2 device types in the database.
+The model with the external ID 'a3145d3a-a16b-42f4-b823-c15905e44c9b' has the best fairness.
+The model with the lowest demographic parity trained on UCI Adult Dataset has the external ID '8d9e489c-15ab-4f9b-b3b4-5ea18056e583'.
+The explainability values of model 3075715e-bac0-4783-bff9-4d8ea6a5f638 are as follows: capital loss is 0.0354, age is 0.0077, and capital gain is 0.0853.
+The model with the best fairness deployed in sf-zone-02 is the one with the external ID 'e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788'.
+The top 3 models similar to e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788 are 3075715e-bac0-4783-bff9-4d8ea6a5f638 and 24c54077-675f-4812-82f5-b1157dfa81d5.
+The five closest models to e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788 are 3075715e-bac0-4783-bff9-4d8ea6a5f638, 24c54077-675f-4812-82f5-b1157dfa81d5, c9a29fef-b505-4309-880e-72bf8ac3539c, and b000271e-cafb-4b3e-bd01-00f78319f40d.
+The model 'e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788' has the highest deployment accuracy on jetson-nano.
+The model e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788 trained on the UCI Adult Dataset has the lowest power consumption average on raspberry-pi-3.
+The unique devices that have been used at sf-zone-22 are Raspberry Pi 3 and Jetson Nano.
+Models trained on the UCI Adult Dataset have been deployed in 3 distinct locations.
+Time per query: [5.358500957489014, 7.0331032276153564, 2.6562130451202393, 4.116492986679077, 3.0890939235687256, 3.985368251800537, 3.585301160812378, 3.2328569889068604, 2.4772400856018066, 7.685917139053345, 9.980682849884033, 9.580960035324097, 11.491238355636597, 8.180780172348022, 11.5085129737854, 9.13452959060669, 9.819764852523804, 11.011352062225342, 4.276380300521851, 8.244548082351685]
+
+
+
+AVG_TIME: 6.822441852092743
+Question: 1	:Who's the author of the model e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788 ?
+
+
+
+> Entering new GraphCypherQAChain chain...
+Generated Cypher:
+MATCH (mc:ModelCard {external_id: 'e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788'}) RETURN mc.author
+Full Context:
+[{'mc.author': 'Sachith Withana'}]
+
+> Finished chain.
+The author of the model e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788 is Sachith Withana.
+Question: 2	:What's the framework used for the model e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788 ?
+
+
+
+> Entering new GraphCypherQAChain chain...
+Generated Cypher:
+MATCH (mc:ModelCard {external_id: 'e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788'})-[:AI_MODEL]->(ai:AIModel)
+RETURN ai.framework
+Full Context:
+[{'ai.framework': 'tensorflow'}]
+
+> Finished chain.
+The framework used for the model e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788 is Tensorflow.
+Question: 3	:How many models have been created using the UCI Adult Dataset?
+
+
+
+> Entering new GraphCypherQAChain chain...
+Generated Cypher:
+MATCH (d:Datasheet {name: "UCI Adult Dataset"})-[:TRAINED_ON]-(mc:ModelCard)
+RETURN COUNT(mc.external_id)
+Full Context:
+[{'COUNT(mc.external_id)': 2000}]
+
+> Finished chain.
+2000 models have been created using the UCI Adult Dataset.
+Question: 4	:Models trained on UCI Adult Dataset, how many have been deployed in chicago-03-city?
+
+
+
+> Entering new GraphCypherQAChain chain...
+Generated Cypher:
+MATCH (mc:ModelCard)-[:TRAINED_ON]->(d:Datasheet {name: "UCI Adult Dataset"}), (mc)-[:Deployed_On]->(dep:Deployment {deployment_location: "chicago-03-city"})
+RETURN COUNT(DISTINCT mc.external_id)
+Full Context:
+[{'COUNT(DISTINCT mc.external_id)': 1}]
+
+> Finished chain.
+Only one model trained on UCI Adult Dataset has been deployed in chicago-03-city.
+Question: 5	:How many deployments have used UCI Adult Dataset as the training data?
+
+
+
+> Entering new GraphCypherQAChain chain...
+Generated Cypher:
+MATCH (d:Datasheet {name: 'UCI Adult Dataset'})<-[:TRAINED_ON]-(mc:ModelCard)-[:Deployed_On]->(dep:Deployment)
+RETURN COUNT(dep) AS DeploymentsCount
+Full Context:
+[{'DeploymentsCount': 120}]
+
+> Finished chain.
+120 deployments have used UCI Adult Dataset as the training data.
+Question: 6	:Of the models deployed on jetson-nano, how many are trained on UCI Adult Dataset?
+
+
+
+> Entering new GraphCypherQAChain chain...
+Generated Cypher:
+MATCH (mc:ModelCard)-[:TRAINED_ON]->(d:Datasheet {name: 'UCI Adult Dataset'}), (mc)-[:Deployed_On]->(dep:Deployment)-[:On_Device_Type]->(ed:EdgeDevice {external_id: 'jetson-nano'})
+RETURN COUNT(DISTINCT mc.external_id)
+Full Context:
+[{'COUNT(DISTINCT mc.external_id)': 3}]
+
+> Finished chain.
+There are 3 models deployed on jetson-nano that are trained on the UCI Adult Dataset.
+Question: 7	:What's the average peak power wattage of deployments on raspberry-pi-3?
+
+
+
+> Entering new GraphCypherQAChain chain...
+Generated Cypher:
+MATCH (d:Deployment)-[:On_Device_Type]->(ed:EdgeDevice {external_id: 'raspberry-pi-3'})
+RETURN AVG(d.power_consumption_peak_watts)
+Full Context:
+[{'AVG(d.power_consumption_peak_watts)': 20.30289898656683}]
+
+> Finished chain.
+The average peak power wattage of deployments on raspberry-pi-3 is approximately 20.30 watts.
+Question: 8	:What's the average requests served of all deployments on jetson-nano?
+
+
+
+> Entering new GraphCypherQAChain chain...
+Generated Cypher:
+MATCH (d:Deployment)-[:On_Device_Type]->(ed:EdgeDevice {external_id: 'jetson-nano'})
+RETURN AVG(d.requests_served)
+Full Context:
+[{'AVG(d.requests_served)': 4881.082752251415}]
+
+> Finished chain.
+The average requests served of all deployments on jetson-nano is 4881.082752251415.
+Question: 9	:How many total models are in the database?
+
+
+
+> Entering new GraphCypherQAChain chain...
+Generated Cypher:
+MATCH (n:AIModel) RETURN COUNT(n)
+Full Context:
+[{'COUNT(n)': 2000}]
+
+> Finished chain.
+There are 2000 total models in the database.
+Question: 10	:How many device types are in the database?
+
+
+
+> Entering new GraphCypherQAChain chain...
+Generated Cypher:
+MATCH (d:EdgeDevice) RETURN COUNT(d)
+Full Context:
+[{'COUNT(d)': 2}]
+
+> Finished chain.
+There are 2 device types in the database.
+Question: 11	:Which model has the best fairness?
+
+
+
+> Entering new GraphCypherQAChain chain...
+Generated Cypher:
+MATCH(n:ModelCard)-[]->(f:BiasAnalysis)
+WITH n, ABS(f.demographic_parity_diff) as dem, ABS(f.equal_odds_difference) as eq
+ORDER BY dem + eq ASC
+LIMIT 1
+RETURN n.external_id, dem, eq
+Full Context:
+[{'n.external_id': 'a3145d3a-a16b-42f4-b823-c15905e44c9b', 'dem': 0.005243696939918108, 'eq': 0.004116978381464964}]
+
+> Finished chain.
+The model with the external ID 'a3145d3a-a16b-42f4-b823-c15905e44c9b' has the best fairness.
+Question: 12	:Which model has the lowest demographic parity trained on UCI Adult Dataset?
+
+
+
+> Entering new GraphCypherQAChain chain...
+Generated Cypher:
+MATCH (mc:ModelCard)-[:TRAINED_ON]->(d:Datasheet {name: 'UCI Adult Dataset'}), (mc)-[:BIAS_ANALYSIS]->(b:BiasAnalysis)
+RETURN mc.external_id, ABS(b.demographic_parity_diff) as demographic_parity_diff
+ORDER BY demographic_parity_diff ASC
+LIMIT 1
+Full Context:
+[{'mc.external_id': '8d9e489c-15ab-4f9b-b3b4-5ea18056e583', 'demographic_parity_diff': 0.00014646519244676526}]
+
+> Finished chain.
+The model with the lowest demographic parity trained on UCI Adult Dataset has the external ID '8d9e489c-15ab-4f9b-b3b4-5ea18056e583'.
+Question: 13	:What are the explainability values of model 3075715e-bac0-4783-bff9-4d8ea6a5f638?
+
+
+
+> Entering new GraphCypherQAChain chain...
+Generated Cypher:
+MATCH (mc:ModelCard {external_id: '3075715e-bac0-4783-bff9-4d8ea6a5f638'})-[:XAI_ANALYSIS]->(ea:ExplainabilityAnalysis)
+RETURN ea.capital_loss, ea.age, ea.capital_gain
+Full Context:
+[{'ea.capital_loss': 0.0354, 'ea.age': 0.0077, 'ea.capital_gain': 0.0853}]
+
+> Finished chain.
+The explainability values of model 3075715e-bac0-4783-bff9-4d8ea6a5f638 are as follows: capital loss is 0.0354, age is 0.0077, and capital gain is 0.0853.
+Question: 14	:Which model has the best fairness deployed in sf-zone-02?
+
+
+
+> Entering new GraphCypherQAChain chain...
+Generated Cypher:
+MATCH (n:ModelCard)-[:Deployed_On]->(d:Deployment)
+WHERE d.deployment_location = 'sf-zone-02'
+WITH n, d
+MATCH (n)-[:BIAS_ANALYSIS]->(f:BiasAnalysis)
+WITH n, ABS(f.demographic_parity_diff) as dem, ABS(f.equal_odds_difference) as eq
+ORDER BY dem + eq ASC
+LIMIT 1
+RETURN n.external_id, dem, eq
+Full Context:
+[{'n.external_id': 'e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788', 'dem': 0.6020067505767892, 'eq': 0.6549150465507907}]
+
+> Finished chain.
+The model with the best fairness deployed in sf-zone-02 is the one with the external ID 'e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788'.
+Question: 15	:Which top 3 models are similar to e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788 ?
+
+
+
+> Entering new GraphCypherQAChain chain...
+Generated Cypher:
+MATCH (mc:ModelCard {external_id: 'e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788'})
+WITH mc.embedding AS given_embedding
+CALL db.index.vector.queryNodes('embedding', 3, given_embedding) yield node, score
+RETURN score, node.external_id AS id
+Full Context:
+[{'score': 1.0, 'id': 'e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788'}, {'score': 0.5984518527984619, 'id': '3075715e-bac0-4783-bff9-4d8ea6a5f638'}, {'score': 0.5936095714569092, 'id': '24c54077-675f-4812-82f5-b1157dfa81d5'}]
+
+> Finished chain.
+The top 3 models similar to e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788 are 3075715e-bac0-4783-bff9-4d8ea6a5f638 and 24c54077-675f-4812-82f5-b1157dfa81d5.
+Question: 16	:What are the 5 closest models to e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788 ?
+
+
+
+> Entering new GraphCypherQAChain chain...
+Generated Cypher:
+MATCH (mc:ModelCard {external_id: 'e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788'})
+WITH mc.embedding AS given_embedding
+CALL db.index.vector.queryNodes('embedding', 5, given_embedding) YIELD node, score
+RETURN score, node.external_id AS id
+Full Context:
+[{'score': 1.0, 'id': 'e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788'}, {'score': 0.5984518527984619, 'id': '3075715e-bac0-4783-bff9-4d8ea6a5f638'}, {'score': 0.5936095714569092, 'id': '24c54077-675f-4812-82f5-b1157dfa81d5'}, {'score': 0.5864496827125549, 'id': 'c9a29fef-b505-4309-880e-72bf8ac3539c'}, {'score': 0.5864255428314209, 'id': 'b000271e-cafb-4b3e-bd01-00f78319f40d'}]
+
+> Finished chain.
+The five closest models to e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788 are 3075715e-bac0-4783-bff9-4d8ea6a5f638, 24c54077-675f-4812-82f5-b1157dfa81d5, c9a29fef-b505-4309-880e-72bf8ac3539c, and b000271e-cafb-4b3e-bd01-00f78319f40d.
+Question: 17	:Which model has the highest deployment accuracy on jetson-nano?
+
+
+
+> Entering new GraphCypherQAChain chain...
+Generated Cypher:
+MATCH (mc:ModelCard)-[:Deployed_On]->(d:Deployment)-[:On_Device_Type]->(ed:EdgeDevice {external_id: 'jetson-nano'})
+RETURN mc.external_id as Model, d.mean_accuracy as Deployment_Accuracy
+ORDER BY d.mean_accuracy DESC
+LIMIT 1
+Full Context:
+[{'Model': 'e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788', 'Deployment_Accuracy': 0.9994328592437394}]
+
+> Finished chain.
+The model 'e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788' has the highest deployment accuracy on jetson-nano.
+Question: 18	:Which model trained on the UCI Adult Dataset has the lowest power consumption average on raspberry-pi-3?
+
+
+
+> Entering new GraphCypherQAChain chain...
+Generated Cypher:
+MATCH (mc:ModelCard)-[:TRAINED_ON]->(d:Datasheet {name: 'UCI Adult Dataset'}), (mc)-[:Deployed_On]->(dep:Deployment), (dep)-[:On_Device_Type]->(ed:EdgeDevice {external_id: 'raspberry-pi-3'})
+RETURN mc.external_id AS Model, dep.power_consumption_average_watts AS Power_Consumption
+ORDER BY dep.power_consumption_average_watts ASC
+LIMIT 1
+Full Context:
+[{'Model': 'e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788', 'Power_Consumption': 25}]
+
+> Finished chain.
+The model e835e0f3-3c13-4ab8-9b17-a8c5ea8dc788 trained on the UCI Adult Dataset has the lowest power consumption average on raspberry-pi-3.
+Question: 19	:Which unique devices has been used at sf-zone-22?
+
+
+
+> Entering new GraphCypherQAChain chain...
+Generated Cypher:
+MATCH (d:Deployment {deployment_location: 'sf-zone-22'})-[:On_Device_Type]->(ed:EdgeDevice)
+RETURN DISTINCT ed.external_id
+Full Context:
+[{'ed.external_id': 'raspberry-pi-3'}, {'ed.external_id': 'jetson-nano'}]
+
+> Finished chain.
+The unique devices that have been used at sf-zone-22 are Raspberry Pi 3 and Jetson Nano.
+Question: 20	:In how many distinct locations have models trained on the UCI Adult Dataset been deployed?
+
+
+> Entering new GraphCypherQAChain chain...
+Generated Cypher:
+MATCH (mc:ModelCard)-[:TRAINED_ON]->(d:Datasheet {name: 'UCI Adult Dataset'}), (mc)-[:Deployed_On]->(dep:Deployment)
+RETURN COUNT(DISTINCT dep.deployment_location)
+Full Context:
+[{'COUNT(DISTINCT dep.deployment_location)': 3}]
+
+> Finished chain.
+Models trained on the UCI Adult Dataset have been deployed in 3 distinct locations.

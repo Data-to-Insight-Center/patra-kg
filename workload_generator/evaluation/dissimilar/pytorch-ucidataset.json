@@ -1,0 +1,67 @@
+{
+    "name": "Boston Housing Data Analysis using pytorch",
+    "version": "0.1",
+    "short_description": "Boston dataset analysis using pytorch",
+    "full_description": "Using pytorch to develop a model for the boston housing dataset to compare the performance of the embedding model in Patra.",
+    "keywords": "Boston, pytorch, explainability, fairness, patra",
+    "author": "Robert Martin",
+    "input_type": "Tabular",
+    "category": "Analysis",
+    "input_data": "https://archive.ics.boston.edu/bostondata",
+    "output_data": "https://github.iu.edu/d2i/dockerhub/pytorch/bostonmodel",
+    "ai_model": {
+        "name": "Income prediction pytorch model",
+        "version": "1.0",
+        "description": "Boston housing problem using pytorch Neural Network using the Boston Dataset",
+        "owner": "Robert Martin",
+        "location": "https://github.iu.edu/d2i/bostonhousing/pytorch_model",
+        "license": "BSD-3 Clause",
+        "framework": "pytorch",
+        "model_type": "dnn",
+        "test_accuracy": 0.7980961203575134,
+        "foundational_model": "None",
+        "model_structure":{},
+        "metrics": [
+            {
+                "key": "Test loss",
+                "value": 0.49563485383987427
+            },
+            {
+                "key": "Epochs",
+                "value": 100
+            },
+            {
+                "key": "Batch Size",
+                "value": 32
+            },
+            {
+                "key": "Optimizer",
+                "value": "Adam"
+            },
+            {
+                "key": "Learning Rate",
+                "value": 0.0001
+            },
+            {
+                "key": "Input Shape",
+                "value": "(26048, 100)"
+            }
+        ]
+    },
+    "bias_analysis": {
+        "demographic_parity_diff": 0.04268373096686717,
+        "equal_odds_difference": 0.04169312983955298
+    },
+    "xai_analysis": {
+        "capital-gain": 0.04943593070968624,
+        "fnlwgt": 0.007977424863480671,
+        "capital-loss": 0.0016644893624441271,
+        "age": 2.839242701838145e-05,
+        "martial-status_ Married-civ-spouse": 1.6070720708102193e-05,
+        "relationship_ Not-in-family": 1.3571421730930955e-05,
+        "martial-status_ Never-married": 1.1598601625075779e-05,
+        "education-num": 1.0616391369266047e-05,
+        "hours-per-week": 9.01362025913249e-06,
+        "occupation_ Exec-managerial": 8.548350777930122e-06
+    }
+}

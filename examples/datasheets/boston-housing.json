@@ -1,0 +1,36 @@
+{
+  "id": "https://www.cs.toronto.edu/~delve/data/boston/bostonDetail.html",
+  "name": "Boston Housing Dataset",
+  "version": "1",
+  "license": "Public Domain",
+  "doi": "10.24432/testdoi",
+  "description": "The Boston Housing dataset contains information about housing in Boston, including various attributes such as crime rate, pupil-teacher ratio, and median home value.",
+  "source": "Delve, Data for Evaluating Learning in Valid Experiments",
+  "download_url": "https://www.cs.toronto.edu/~delve/data/boston/bostonDetail.html",
+  "features": [
+    "CRIM",
+    "ZN",
+    "INDUS",
+    "CHAS",
+    "NOX",
+    "RM",
+    "AGE",
+    "DIS",
+    "RAD",
+    "TAX",
+    "PTRATIO",
+    "B",
+    "LSTAT",
+    "MEDV"
+  ],
+  "target_variable": "MEDV",
+  "categories": "continuous",
+  "datapoints": 506,
+  "missing_values": false,
+  "attribute_types": "continuous",
+  "additional_metadata": {
+    "subject_area": "housing",
+    "Associated_tasks": "regression",
+    "Dataset_characteristics": "Multivariate"
+  }
+}

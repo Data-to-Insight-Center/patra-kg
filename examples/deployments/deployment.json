@@ -1,0 +1,21 @@
+{
+  "model_id": "62ba7797-8d9a-48fc-b74e-d739d6fcb7b5",
+  "device_id": "jetson-nano",
+  "start_time": "2024-02-14T08:00:00",
+  "end_time": "2024-02-14T11:03:42",
+  "duration_minutes": 3210,
+  "deployment_environment": "production",
+  "deployment_location": "africa-zone-223",
+  "power_consumption_average_watts": 25,
+  "power_consumption_peak_watts": 40,
+  "cpu_consumption_average_percentage": 60,
+  "cpu_consumption_peak_percentage": 80,
+  "gpu_consumption_average_percentage": 0,
+  "gpu_consumption_peak_percentage": 0,
+  "requests_served": 1000,
+  "mean_accuracy": 0.85,
+  "mean_latency_ms": 43
+}
+
+
+

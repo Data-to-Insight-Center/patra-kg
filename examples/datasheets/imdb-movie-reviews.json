@@ -1,0 +1,23 @@
+{
+  "id": "https://ai.stanford.edu/~amaas/data/sentiment/",
+  "name": "IMDB Movie Reviews",
+  "version": "1",
+  "license": "CC BY-SA 3.0",
+  "description": "The IMDB Movie Reviews dataset contains movie reviews labeled as positive or negative sentiments.",
+  "source": "Stanford AI Lab",
+  "download_url": "https://ai.stanford.edu/~amaas/data/sentiment/",
+  "features": [
+    "Review Text",
+    "Sentiment"
+  ],
+  "target_variable": "Sentiment",
+  "categories": "positive, negative",
+  "datapoints": 50000,
+  "missing_values": false,
+  "attribute_types": "text, categorical",
+  "additional_metadata": {
+    "subject_area": "entertainment",
+    "Associated_tasks": "sentiment analysis",
+    "Dataset_characteristics": "Univariate"
+  }
+}

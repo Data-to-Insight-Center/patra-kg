@@ -1,0 +1,34 @@
+{
+  "id": "https://archive.ics.uci.edu/dataset/2/adult",
+  "name": "UCI Adult Dataset",
+  "version": "1",
+  "license": "CC BY 4.0",
+  "doi": "10.24432/C5XW20",
+  "description": "This dataset contains census data collected by the U.S. Census Bureau. It is used to predict whether a person's income is above or below the $50k threshold.",
+  "source": "UCI Machine Learning Repository",
+  "download_url": "https://archive.ics.uci.edu/dataset/2/adult",
+  "features": [
+    "Age",
+    "Workclass",
+    "Education",
+    "Marital Status",
+    "Occupation",
+    "Relationship",
+    "Race",
+    "Sex",
+    "Capital Gain",
+    "Capital Loss",
+    "Hours per Week",
+    "Native Country"
+  ],
+  "target_variable": "Income",
+  "categories": "<=50K, >50K",
+  "datapoints": 48842,
+  "missing_values": true,
+  "attribute_types": "categorical, integer",
+  "additional_metadata": {
+    "subject_area": "social_science",
+    "Associated_tasks": "classification",
+    "Dataset_characteristics": "Multivariate"
+  }
+}

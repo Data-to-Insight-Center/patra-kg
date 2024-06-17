@@ -1,0 +1,22 @@
+{
+  "id": "randomUID_IMAGENET",
+  "name": "ImageNet Dataset",
+  "version": "1",
+  "license": "",
+  "doi": "",
+  "description": "The ImageNet dataset is a large-scale image database used for training and evaluating computer vision models.",
+  "source": "ImageNet project",
+  "download_url": "http://www.image-net.org/",
+  "features": [
+    "Image URL",
+    "Label",
+    "Class"
+  ],
+  "target_variable": "Label",
+  "categories": "Cat, Dog, Car, Flower, Person, Building, Fruit",
+  "datapoints": 1000000,
+  "missing_values": false,
+  "attribute_types": "images",
+  "additional_metadata": {
+  }
+}

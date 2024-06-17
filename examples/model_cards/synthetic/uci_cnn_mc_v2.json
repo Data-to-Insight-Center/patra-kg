@@ -1,0 +1,53 @@
+{
+  "id": "UID_UCI_CNN_TF",
+  "name": "UCI Adult Data Analysis",
+  "version": "0.2",
+  "short_description": "UCI Adult Data analysis using Tensorflow",
+  "full_description": "Using a tensorflow trained neural network to analyse fairness and explainability in the UCI Adult Dataset",
+  "keywords": "uci adult, tensorflow, explainability, fairness, fairlearn, shap",
+  "author": "Sachith Withana",
+  "input_data": "https://archive.ics.uci.edu/ml/datasets/adult",
+  "input_type": "images",
+  "output_data": "",
+  "categories": "classification",
+  "source_url": "github.com/swsachith/cnn_UCI",
+  "ai_model": {
+    "name": "UCI Adult tensorflow model",
+    "version": "0.2",
+    "description": "Census classification problem using Neural Network",
+    "owner": "Sachith Withana",
+    "location": "github.com/swsachith/ai-model",
+    "licence": "BSD-3 Clause",
+    "metrics":
+      {
+        "Test loss": 15.227148056030273,
+        "Test Accuracy": 0.8877890372276306
+      }
+
+  },
+  "bias_analysis": {
+    "name": "Fairlearn Bias Analysis",
+    "metrics":
+      {
+        "sensitive_feature": "gender",
+        "Feature 0": "Male",
+        "Feature 1": "Female",
+        "Demographic Parity": 0.0050633811399198,
+        "recall":"0 : 0.3171, 1: 0.2894",
+        "false_positive_rate":"0 : 0.0326, 1: 0.0543",
+        "true_negative_rate":"0 : 0.9674, 1: 0.9457",
+        "selection_rate":"0 : 0.0637, 1: 0.1262",
+        "count":"0 :  8645.0, 1: 17403.0"
+      }
+  },
+  "xai_analysis": {
+    "name": "SHAP XAI analysis",
+    "metrics": {
+      "Top Features": "mean_shap_value",
+      "capital_gain": 0.0853,
+      "fnlwgt": 0.046,
+      "capital_loss": 0.0354,
+      "age": 0.0077
+    }
+  }
+}
