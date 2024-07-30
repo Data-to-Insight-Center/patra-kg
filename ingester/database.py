@@ -46,7 +46,7 @@ class GraphDB:
         model_id = str(model_card_id + "-model")
         with self.driver.session() as session:
             query = """
-               CREATE (model:AIModel {external_id: $id, name: $name, version: $version, description: $description,
+               CREATE (model:Model {model_id: $id, name: $name, version: $version, description: $description,
                                    owner: $owner, location: $location, license: $license, framework: $framework, 
                                    model_type: $model_type, test_accuracy: $test_accuracy, 
                                    foundational_model: $foundational_model})
@@ -57,13 +57,13 @@ class GraphDB:
             for key, value in metrics.items():
                 key = key.replace(" ", "_")
                 query = f"""
-                            MATCH (model:AIModel {{external_id: $model_id}})
+                            MATCH (model:Model {{model_id: $model_id}})
                             SET model.{key} = $value
                             """
                 session.run(query, model_id=model_id, value=value)
 
             query = """
-                MATCH (model:AIModel {external_id: $model_id}), (mc:ModelCard {external_id: $mc_id})
+                MATCH (model:Model {model_id: $model_id}), (mc:ModelCard {external_id: $mc_id})
                 CREATE (model)<-[:AI_MODEL]-(mc)
                 """
             session.run(query, model_id=model_id, mc_id=model_card_id)
@@ -238,9 +238,9 @@ class GraphDB:
         query = """        
                         MATCH (mc:ModelCard{external_id: $mc_id})
                         WITH mc.external_id AS model_id, mc.embedding AS given_embedding
-                        CALL db.index.vector.queryNodes('embedding', $num_nodes, given_embedding) yield node, score 
+                        CALL db.index.vector.queryNodes('modelEmbeddings', $num_nodes, given_embedding) yield node, score 
                         WHERE score > $threshold
-                        RETURN score, node.external_id AS id
+                        RETURN score, node.external_id AS model_id
                 """
 
         version_search_start_time = time.time()
@@ -264,21 +264,22 @@ class GraphDB:
         # version_list = [rs for rs in results if rs is not None]
         #
         #
-        # version_query = """
-        # MATCH (mc1:ModelCard {external_id: $mc1_id}), (mc2:ModelCard {external_id: $mc2_id})
-        # CREATE (mc1)-[r1:version_of {value: $similarity}]->(mc2)
-        # CREATE (mc2)-[r2:version_of {value: $similarity}]->(mc1)
-        # RETURN r1
-        # """
+        version_query = """
+        MATCH (mc1:ModelCard {external_id: $mc1_id}), (mc2:ModelCard {external_id: $mc2_id})
+        CREATE (mc1)-[r1:VERSION_OF {value: $similarity}]->(mc2)
+        CREATE (mc2)-[r2:VERSION_OF {value: $similarity}]->(mc1)
+        RETURN r1
+        """
         version_ingest_start_time = time.time()
-        #
-        # for record in records:
-        #     model_id = record['model_id']
-        #     similarity = record['similarity']
-        #
-        #     with self.driver.session() as session:
-        #         session.run(version_query, mc1_id=model_card['id'], mc2_id=model_id, similarity=similarity)
-        #
+
+        for record in records:
+            model_id = record['model_id']
+            similarity = record['score']
+            if model_id == model_card['id']:
+                continue
+            with self.driver.session() as session:
+                session.run(version_query, mc1_id=model_card['id'], mc2_id=model_id, similarity=similarity)
+
         version_ingest_total_time = time.time() - version_ingest_start_time
 
         return version_ingest_total_time, version_search_total_time
