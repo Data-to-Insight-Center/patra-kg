@@ -12,3 +12,4 @@ transformers~=4.39.1
 rouge~=1.0.1
 openai~=1.14.2
 pandas~=2.2.1
+python-dotenv~=1.0.1

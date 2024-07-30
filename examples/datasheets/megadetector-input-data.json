@@ -1,0 +1,27 @@
+{
+  "id": "https://github.com/microsoft/CameraTraps/tree/main/data/sample_images",
+  "name": "Camera Trap Images Dataset",
+  "version": "1.0",
+  "license": "CC BY 4.0",
+  "doi": "10.24432/sampledoimegadataset",
+  "description": "The Camera Trap Images dataset contains images captured by camera traps in various wildlife habitats. The dataset includes images with animals, humans, and empty frames.",
+  "source": "Microsoft AI for Earth",
+  "download_url": "https://github.com/microsoft/CameraTraps/tree/main/data/sample_images",
+  "features": [
+    "Image ID",
+    "Timestamp",
+    "Location",
+    "Species",
+    "Bounding Box Coordinates"
+  ],
+  "target_variable": "Species",
+  "categories": "object detection",
+  "datapoints": 10000,
+  "missing_values": false,
+  "attribute_types": "categorical",
+  "additional_metadata": {
+    "subject_area": "wildlife conservation",
+    "Associated_tasks": "object detection",
+    "Dataset_characteristics": "Multimedia"
+  }
+}

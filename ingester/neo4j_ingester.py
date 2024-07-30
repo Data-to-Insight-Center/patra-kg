@@ -39,7 +39,6 @@ class MCIngester:
 
         version_embedding = embed_model_versioning(model_card)
 
-        # model_card['v_embedding'] = version_embedding
         model_card['embedding'] = version_embedding
 
         embedding_total_time = time.time() - embedding_start_time
@@ -62,7 +61,7 @@ class MCIngester:
             self.db.insert_xai_analysis_metadata(base_mc_id, xai_id, xai_analysis)
 
         # infer versioning
-        # version_ingest_total_time, version_search_total_time = self.db.infer_versioning(model_card)
+        version_ingest_total_time, version_search_total_time = self.db.infer_versioning(model_card)
         version_ingest_total_time, version_search_total_time = 0, 0
 
         return embedding_total_time, version_ingest_total_time, version_search_total_time

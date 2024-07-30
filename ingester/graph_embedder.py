@@ -10,11 +10,15 @@ import time
 from openai import OpenAI
 import torch
 from transformers import BertModel, BertTokenizer
-import ollama
+import os
+from dotenv import load_dotenv
 
+
+load_dotenv()
 
 # glove2word2vec(glove_input_file="../ingester/glove.6B.200d.txt", word2vec_output_file="gensim_glove_vectors.txt")
-client = OpenAI(api_key="")
+openai_api_key = os.getenv('OPENAI_API_KEY')
+client = OpenAI(api_key=openai_api_key)
 
 # llama 3 through Ollama
 
@@ -82,10 +86,10 @@ def open_ai_embedding(model_card, fields=None):
 
     return response.data[0].embedding
 
-def llama3_embedding(model_card, fields, llm='llama3'):
-    tokenized_text = " ".join(str(model_card[field]) for field in fields if field in model_card)
-    response = ollama.embeddings(model=llm, prompt=tokenized_text)
-    return response["embedding"]
+# def llama3_embedding(model_card, fields, llm='llama3'):
+#     tokenized_text = " ".join(str(model_card[field]) for field in fields if field in model_card)
+#     response = ollama.embeddings(model=llm, prompt=tokenized_text)
+#     return response["embedding"]
 
 
 

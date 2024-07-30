@@ -1,18 +1,19 @@
 from parser.json_mc_parser import parse_json_mc
 from neo4j_ingester import MCIngester
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 def main():
-    uri = "bolt://localhost:7689"
-    user = "neo4j"
-    password = "rootroot"
+    NEO4J_URI = os.getenv("NEO4J_URI")
+    NEO4J_USERNAME = os.getenv("NEO4J_USER")
+    NEO4J_PWD = os.getenv("NEO4J_PWD")
+    mc_ingester = MCIngester(NEO4J_URI, NEO4J_USERNAME, NEO4J_PWD)
 
-    # uri = "bolt+s://a3433c07.databases.neo4j.io:7687"
-    # user = "neo4j"
-    # password = "FI3rVpZwsEmekGGX4HJkWV6aOpe_pSvkj7CvciN2DY4"
 
-    mc_ingester = MCIngester(uri, user, password)
-
-    datasheet = parse_json_mc("../examples/datasheets/uci_adult_datasheet.json")
+    datasheet = parse_json_mc("../examples/datasheets/megadetector-input-data.json")
 
     mc_ingester.add_datasheet(datasheet)
 
