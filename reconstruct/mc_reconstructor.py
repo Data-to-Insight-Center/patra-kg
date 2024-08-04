@@ -37,9 +37,16 @@ class MCReconstructor:
             '''
         base_mc = self.get_result_dict(mc_query, "mc", metadata)
 
+        if base_mc is None:
+            return None
+
+        # do not return the model embeddings
+        if 'embedding' in base_mc:
+            del base_mc["embedding"]
+
         # retrieve the ai_model information
         ai_model_query = '''
-            MATCH (ai:AIModel {external_id: $ai_model_id})
+            MATCH (ai:Model {model_id: $ai_model_id})
             RETURN ai
             '''
         ai_model = self.get_result_dict(ai_model_query, "ai", metadata)

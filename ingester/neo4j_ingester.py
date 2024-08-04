@@ -64,7 +64,7 @@ class MCIngester:
         version_ingest_total_time, version_search_total_time = self.db.infer_versioning(model_card)
         version_ingest_total_time, version_search_total_time = 0, 0
 
-        return embedding_total_time, version_ingest_total_time, version_search_total_time
+        return base_mc_id
 
     def add_datasheet(self, datasheet):
         self.db.insert_datasheet(datasheet)
