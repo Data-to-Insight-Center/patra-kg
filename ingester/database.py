@@ -7,6 +7,7 @@ from concurrent.futures import ProcessPoolExecutor
 import numpy as np
 from numpy.linalg import norm
 
+
 def calculate_cosine(zipped_input):
     threshold = 0.90
     new_embedding, model_id, model_embedding = zipped_input
@@ -215,8 +216,6 @@ class GraphDB:
                                                 """
                     session.run(query, data_id=device["id"], value=value)
 
-
-
     def infer_versioning(self, model_card, threshold=0.95, max_nodes=1000):
         """
         Compare the inserting model with the existing models for version inferencing using cosine similarity analysis
@@ -284,6 +283,26 @@ class GraphDB:
 
         return version_ingest_total_time, version_search_total_time
 
+    def rag_search(self, embedded_query, threshold=0.80, max_nodes=5):
+        """
+        Searches the knowledge graph based on the embedded query using cosine similarity and returns the results.
+        :param model_card:
+        :param threshold: threshold for similarity for it to be a version
+        :return:
+        """
+        query = """        
+                            CALL db.index.vector.queryNodes('modelEmbeddings', $num_nodes, $query_embedding) yield node, score 
+                            WHERE score > $threshold
+                            RETURN score, node.external_id AS model_id
+                    """
+
+        version_search_start_time = time.time()
+        records = []
+        with self.driver.session() as session:
+            result = session.run(query, query_embedding=embedded_query, threshold=threshold, num_nodes=max_nodes)
+            records = list(result)
+        return records
+
     def versioning_perf_test(self, model_card, threshold=0.95, max_nodes=3000):
         """
         Compare the inserting model with the existing models for version inferencing using cosine similarity analysis
@@ -320,7 +339,8 @@ class GraphDB:
 
         version_index_start_time = time.time()
         with self.driver.session() as session:
-            indexed_result = session.run(query, mc_id=model_card['external_id'], threshold=threshold, num_nodes=max_nodes)
+            indexed_result = session.run(query, mc_id=model_card['external_id'], threshold=threshold,
+                                         num_nodes=max_nodes)
             indexed_records = list(indexed_result)
 
         print(indexed_records)
@@ -328,9 +348,7 @@ class GraphDB:
 
         return version_index_total_time, version_search_total_time
 
-
     def get_result_query(self, query, parameters):
         with self.driver.session() as session:
             result = session.run(query, parameters).single()
         return result
-

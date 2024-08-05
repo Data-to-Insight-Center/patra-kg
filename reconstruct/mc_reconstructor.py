@@ -1,6 +1,8 @@
 from ingester.database import GraphDB
 import json
 
+from ingester.graph_embedder import embed_query
+
 
 class MCReconstructor:
     """
@@ -84,6 +86,10 @@ class MCReconstructor:
             return None
         return result_dict
 
+    def search_kg(self, query):
+        embedded_query = embed_query(query)
+        results = self.db.rag_search(embedded_query)
+        return results
 
 def main():
     uri = "bolt://localhost:7687"

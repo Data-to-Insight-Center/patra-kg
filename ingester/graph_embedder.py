@@ -86,6 +86,17 @@ def open_ai_embedding(model_card, fields=None):
 
     return response.data[0].embedding
 
+
+def embed_query(query):
+    response = client.embeddings.create(
+        input=query,
+        model="text-embedding-3-small",
+        encoding_format="float",
+        dimensions=300
+    )
+    return response.data[0].embedding
+
+
 # def llama3_embedding(model_card, fields, llm='llama3'):
 #     tokenized_text = " ".join(str(model_card[field]) for field in fields if field in model_card)
 #     response = ollama.embeddings(model=llm, prompt=tokenized_text)

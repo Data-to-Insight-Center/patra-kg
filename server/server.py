@@ -1,6 +1,10 @@
+import json
+
 from flask import Flask, request, jsonify
 import os
 from dotenv import load_dotenv
+
+from ingester.graph_embedder import embed_query
 from ingester.neo4j_ingester import MCIngester
 from reconstruct.mc_reconstructor import MCReconstructor
 
@@ -36,6 +40,21 @@ def upload_datasheet():
     datasheet = request.get_json()
     mc_ingester.add_datasheet(datasheet)
     return jsonify({"message": "Successfully uploaded the datasheet"}), 200
+
+
+@app.route('/search', methods=['GET'])
+def search_kg():
+    """
+    Full text search for model cards using pre-existing embeddings.
+    NOTE: THIS IS NOT PRODUCTION GRADE YET. NEEDS TESTING.
+    """
+    query = request.args.get('q')
+    if not query:
+        return jsonify({"error": "Query (q) is required"}), 400
+
+    results = mc_reconstructor.search_kg(query)
+
+    return json.dumps(results), 200
 
 
 @app.route('/download_mc', methods=['GET'])
