@@ -76,6 +76,9 @@ class MCReconstructor:
 
     def get_result_dict(self, query, type, metadata):
         response = self.db.get_result_query(query, metadata)
+        if response is None:
+            return None
+
         node = response[type]
 
         result_dict = {}
@@ -87,6 +90,11 @@ class MCReconstructor:
         return result_dict
 
     def search_kg(self, query):
+        """
+        Search the KG using embeddings.
+        :param query:
+        :return:
+        """
         embedded_query = embed_query(query)
         results = self.db.rag_search(embedded_query)
         return results

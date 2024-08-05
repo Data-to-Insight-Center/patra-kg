@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  patra-server:
+    image: iud2i/patra-server:latest
+    ports:
+      - "5002:5002"
+    environment:
+      - OPENAI_API_KEY=''
+      - NEO4J_URI=bolt://<IP>:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PWD=pwd

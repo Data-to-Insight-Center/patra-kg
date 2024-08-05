@@ -6,18 +6,14 @@ from dotenv import load_dotenv
 
 from ingester.graph_embedder import embed_query
 from ingester.neo4j_ingester import MCIngester
-from reconstruct.mc_reconstructor import MCReconstructor
+from reconstructor.mc_reconstructor import MCReconstructor
 
-# NEO4J_URI = os.getenv("NEO4J_URI")
-# NEO4J_USERNAME = os.getenv("NEO4J_USER")
-# NEO4J_PWD = os.getenv("NEO4J_PWD")
+NEO4J_URI = os.getenv("NEO4J_URI")
+NEO4J_USERNAME = os.getenv("NEO4J_USER")
+NEO4J_PWD = os.getenv("NEO4J_PWD")
 
-NEO4J_LOCAL = "bolt://localhost:7689"
-NEO4J_USERNAME = "neo4j"
-NEO4J_PWD = "rootroot"
-
-mc_ingester = MCIngester(NEO4J_LOCAL, NEO4J_USERNAME, NEO4J_PWD)
-mc_reconstructor = MCReconstructor(NEO4J_LOCAL, NEO4J_USERNAME, NEO4J_PWD)
+mc_ingester = MCIngester(NEO4J_URI, NEO4J_USERNAME, NEO4J_PWD)
+mc_reconstructor = MCReconstructor(NEO4J_URI, NEO4J_USERNAME, NEO4J_PWD)
 
 app = Flask(__name__)
 
@@ -85,4 +81,4 @@ def list_models():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5002)
