@@ -91,6 +91,22 @@ class MCReconstructor:
         results = self.db.rag_search(embedded_query)
         return results
 
+    def get_all_mcs(self):
+        """
+        "Get all the model cards as a list"
+        """
+        model_cards = self.db.get_all_modelcards()
+        json_mcs = [
+            {
+                "mc_id": record["mc_id"],
+                "name": record["name"],
+                "version": record["version"],
+                "short_description": record["short_description"]
+            }
+            for record in model_cards
+        ]
+        return json_mcs
+
 def main():
     uri = "bolt://localhost:7687"
     user = "neo4j"

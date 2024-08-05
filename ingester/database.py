@@ -283,6 +283,25 @@ class GraphDB:
 
         return version_ingest_total_time, version_search_total_time
 
+    def get_all_modelcards(self, limit=1000):
+        """
+        Retrieve all the model cards.
+        :return:
+        """
+        query = """
+            MATCH (mc:ModelCard)
+            RETURN mc.external_id as mc_id, mc.name as name, mc.version as version, 
+            mc.short_description as short_description
+            LIMIT $limit
+        """
+
+        records = []
+        with self.driver.session() as session:
+            result = session.run(query, query_embedding=query, limit=limit)
+            records = list(result)
+        return records
+
+
     def rag_search(self, embedded_query, threshold=0.80, max_nodes=5):
         """
         Searches the knowledge graph based on the embedded query using cosine similarity and returns the results.

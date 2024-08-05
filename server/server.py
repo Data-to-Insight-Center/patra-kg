@@ -75,5 +75,14 @@ def download_model_card():
     return model_card, 200
 
 
+@app.route('/list', methods=['GET'])
+def list_models():
+    """
+    Lists all the models in Patra KG.
+    """
+    model_card_dict = mc_reconstructor.get_all_mcs()
+    return json.dumps(model_card_dict, indent=4), 200
+
+
 if __name__ == '__main__':
     app.run(debug=True)
