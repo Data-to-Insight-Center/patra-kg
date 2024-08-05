@@ -68,7 +68,7 @@ class MCReconstructor:
             '''
         xai_analysis = self.get_result_dict(xai_query, "xai", metadata)
         if xai_analysis is not None:
-            base_mc["xai_analysis"] = bias_analysis
+            base_mc["xai_analysis"] = xai_analysis
 
         return json.dumps(base_mc, indent=4)
 
