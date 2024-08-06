@@ -95,9 +95,18 @@ class MCReconstructor:
         :param query:
         :return:
         """
-        embedded_query = embed_query(query)
-        results = self.db.rag_search(embedded_query)
-        return results
+        results = self.db.full_text_search(query)
+        json_mcs = [
+            {
+                "mc_id": record["mc_id"],
+                "name": record["name"],
+                "version": record["version"],
+                "short_description": record["short_description"],
+                "score": record["score"]
+            }
+            for record in results
+        ]
+        return json_mcs
 
     def get_all_mcs(self):
         """
@@ -114,17 +123,17 @@ class MCReconstructor:
             for record in model_cards
         ]
         return json_mcs
+#
+# def main():
+#     uri = "bolt://localhost:7687"
+#     user = "neo4j"
+#     password = "root"
+#
+#     mc_reconstructor = MCReconstructor(uri, user, password)
+#     result = mc_reconstructor.reconstruct("UID_UCI_CNN_TF")
+#
+#
 
-def main():
-    uri = "bolt://localhost:7687"
-    user = "neo4j"
-    password = "root"
 
-    mc_reconstructor = MCReconstructor(uri, user, password)
-    result = mc_reconstructor.reconstruct("UID_UCI_CNN_TF")
-
-    print(result)
-
-
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+    # main()

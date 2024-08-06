@@ -41,7 +41,7 @@ def upload_datasheet():
 @app.route('/search', methods=['GET'])
 def search_kg():
     """
-    Full text search for model cards using pre-existing embeddings.
+    Full text search for model cards using full text search.
     NOTE: THIS IS NOT PRODUCTION GRADE YET. NEEDS TESTING.
     """
     query = request.args.get('q')
@@ -49,7 +49,6 @@ def search_kg():
         return jsonify({"error": "Query (q) is required"}), 400
 
     results = mc_reconstructor.search_kg(query)
-
     return json.dumps(results), 200
 
 

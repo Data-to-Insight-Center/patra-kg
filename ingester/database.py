@@ -301,7 +301,6 @@ class GraphDB:
             records = list(result)
         return records
 
-
     def rag_search(self, embedded_query, threshold=0.80, max_nodes=5):
         """
         Searches the knowledge graph based on the embedded query using cosine similarity and returns the results.
@@ -319,6 +318,24 @@ class GraphDB:
         records = []
         with self.driver.session() as session:
             result = session.run(query, query_embedding=embedded_query, threshold=threshold, num_nodes=max_nodes)
+            records = list(result)
+        return records
+
+    def full_text_search(self, prompt, max_nodes=10):
+        """
+        Searches the knowledge graph using the full text indexes on Model Cards.
+        :return: list of model cards
+        """
+        query = """        
+                 CALL db.index.fulltext.queryNodes("mcFullIndex", $prompt) YIELD node, score
+                RETURN node.external_id as mc_id, node.name as name, node.version as version, 
+                node.short_description as short_description, score as score
+                LIMIT $num_nodes
+                """
+        version_search_start_time = time.time()
+        records = []
+        with self.driver.session() as session:
+            result = session.run(query, prompt=prompt, num_nodes=max_nodes)
             records = list(result)
         return records
 
