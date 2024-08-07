@@ -65,7 +65,7 @@ class GraphDB:
 
             query = """
                 MATCH (model:Model {model_id: $model_id}), (mc:ModelCard {external_id: $mc_id})
-                CREATE (model)<-[:AI_MODEL]-(mc)
+                CREATE (model)<-[:USED]-(mc)
                 """
             session.run(query, model_id=model_id, mc_id=model_card_id)
 

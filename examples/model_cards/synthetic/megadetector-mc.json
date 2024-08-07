@@ -6,7 +6,7 @@
   "keywords": "wildlife, camera traps, object detection, microsoft, conservation",
   "author": "jstubbs",
   "input_type": "images",
-  "category": "object detection",
+  "category": "classification",
   "input_data": "https://github.com/microsoft/CameraTraps/tree/main/data/sample_images",
   "output_data": "Annotated images with bounding boxes for animals.",
   "ai_model": {
