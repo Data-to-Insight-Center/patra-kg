@@ -1,11 +1,7 @@
-import json
-
 from flask import Flask, request, jsonify
 from flask_restx import Api, Resource, fields
 import os
-from dotenv import load_dotenv
 
-from ingester.graph_embedder import embed_query
 from ingester.neo4j_ingester import MCIngester
 from reconstructor.mc_reconstructor import MCReconstructor
 
@@ -82,6 +78,25 @@ class DownloadModelCard(Resource):
             return {"error": "Model card could not be found!"}, 400
 
         return model_card, 200
+
+@api.route('/download_url')
+class ModelDownloadURL(Resource):
+    @api.param('model_id', 'The model ID')
+    def get(self):
+        """
+        Download url for a given model id.
+        """
+        model_id = request.args.get('model_id')
+        if not model_id:
+            return {"error": "Model ID is required"}, 400
+
+        # get the model information
+        model = mc_reconstructor.get_model_location(str(model_id))
+
+        if model is None:
+            return {"error": "Model could not be found!"}, 400
+
+        return model, 200
 
 
 @api.route('/list')

@@ -301,6 +301,23 @@ class GraphDB:
             records = list(result)
         return records
 
+    def get_model_location(self, model_id):
+        """
+        Retrieve download location for a given model
+        :return:
+        """
+        query = """
+           MATCH (n:Model {model_id: $model_id}) 
+           RETURN n.model_id as model_id, n.name as name, n.version as version, n.location as download_url 
+        """
+
+        record = None
+        with self.driver.session() as session:
+            result = session.run(query, model_id=model_id)
+            record = result.single()
+
+        return record
+
     def rag_search(self, embedded_query, threshold=0.80, max_nodes=5):
         """
         Searches the knowledge graph based on the embedded query using cosine similarity and returns the results.
