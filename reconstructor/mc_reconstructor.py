@@ -129,13 +129,17 @@ class MCReconstructor:
         Get the model location as the download URL
         """
         model_info = self.db.get_model_location(model_id)
-        json_model = {
-            "model_id": model_info["model_id"],
-            "name": model_info["name"],
-            "version": model_info["version"],
-            "download_url": model_info["download_url"]
-        }
-        return json_model
+
+        if model_info is None:
+            return None
+        else:
+            json_model = {
+                "model_id": model_info["model_id"],
+                "name": model_info["name"],
+                "version": model_info["version"],
+                "download_url": model_info["download_url"]
+            }
+            return json_model
 #
 # def main():
 #     uri = "bolt://localhost:7687"
