@@ -108,6 +108,15 @@ class ListModels(Resource):
         model_card_dict = mc_reconstructor.get_all_mcs()
         return model_card_dict, 200
 
+# Get all deployments
+@api.route('/deployment_ids')
+class ListDeployments(Resource):
+    def get(self):
+        """
+        Lists all the deployments in Patra KG.
+        """
+        deployments = mc_reconstructor.get_deployment_ids()
+        return deployments, 200
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5002)
