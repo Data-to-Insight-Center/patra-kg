@@ -118,5 +118,24 @@ class ListDeployments(Resource):
         deployments = mc_reconstructor.get_deployment_ids()
         return deployments, 200
 
+# Get deployment information
+@api.route('/deployment_info')
+class DeploymentInfo(Resource):
+    @api.param('deployment_id', 'The deployment ID')
+    def get(self):
+        """
+        Get deployment information for a given deployment ID.
+        """
+        deployment_id = request.args.get('deployment_id')
+        if not deployment_id:
+            return {"error": "Deployment ID is required"}, 400
+
+        deployment_info = mc_reconstructor.get_deployment_info(deployment_id)
+
+        if deployment_info is None:
+            return {"error": "Deployment could not be found!"}, 400
+
+        return deployment_info, 200
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5002)

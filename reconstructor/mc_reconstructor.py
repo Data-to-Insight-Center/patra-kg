@@ -152,6 +152,16 @@ class MCReconstructor:
 
         return {"deployment_ids": deployment_id_list}
 
+    def get_deployment_info(self, deployment_id):
+        """
+        Get the deployment information
+        """
+        deployment_info = self.db.get_deployment_info(deployment_id)
+        if deployment_info is None:
+            return None
+
+        return deployment_info
+
 # def main():
 #     uri = "bolt://localhost:7687"
 #     user = "neo4j"

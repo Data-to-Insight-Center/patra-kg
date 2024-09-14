@@ -415,3 +415,13 @@ class GraphDB:
             result = session.run(query)
             records = result.values()
         return [record[0] for record in records]
+
+    def get_deployment_info(self, deployment_id):
+        query = """
+            MATCH (d:Deployment {deployment_id: $deployment_id})
+            RETURN properties(d) as deployment_info
+        """
+        with self.driver.session() as session:
+            result = session.run(query, deployment_id=deployment_id)
+            record = result.single()
+            return record
