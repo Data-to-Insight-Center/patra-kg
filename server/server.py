@@ -108,6 +108,24 @@ class ListModels(Resource):
         model_card_dict = mc_reconstructor.get_all_mcs()
         return model_card_dict, 200
 
+# Get deployment information
+@api.route('/model_deployments')
+class DeploymentInfo(Resource):
+    @api.param('model_id', 'The model ID')
+    def get(self):
+        """
+        Get all deployments for a given model ID.
+        """
+        model_id = request.args.get('model_id')
+        if not model_id:
+            return {"error": "Model ID is required"}, 400
+
+        deployments = mc_reconstructor.get_deployments(model_id)
+
+        if deployments is None:
+            return {"error": "Deployments not found!"}, 400
+
+        return deployments, 200
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5002)

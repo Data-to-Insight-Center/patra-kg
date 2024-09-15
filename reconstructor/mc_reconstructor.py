@@ -140,7 +140,17 @@ class MCReconstructor:
                 "download_url": model_info["download_url"]
             }
             return json_model
-#
+
+    def get_deployments(self, model_id):
+        """
+        Get the deployments for a given model_id
+        """
+        deployment_info = self.db.get_deployments(model_id)
+        if deployment_info is None:
+            return None
+
+        return deployment_info
+
 # def main():
 #     uri = "bolt://localhost:7687"
 #     user = "neo4j"
