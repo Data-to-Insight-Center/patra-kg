@@ -127,5 +127,23 @@ class DeploymentInfo(Resource):
 
         return deployments, 200
 
+# Update model location
+@api.route('/update_location')
+class UpdateModelLocation(Resource):
+    @api.param('model_id', 'The model ID')
+    @api.param('location', 'The new location')
+    def post(self):
+        """
+        Update the model location.
+        """
+        model_id = request.args.get('model_id')
+        location = request.args.get('location')
+
+        if not model_id or not location:
+            return {"error": "Model ID and Location are required"}, 400
+
+        mc_reconstructor.set_model_location(model_id, location)
+        return {"message": "Model location updated successfully"}, 200
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5002)

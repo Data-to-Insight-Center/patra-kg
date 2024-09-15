@@ -151,6 +151,12 @@ class MCReconstructor:
 
         return deployment_info
 
+    def set_model_location(self, model_id, location):
+        """
+        Update the model location
+        """
+        self.db.set_model_location(model_id, location)
+
 # def main():
 #     uri = "bolt://localhost:7687"
 #     user = "neo4j"
