@@ -109,7 +109,7 @@ class ListModels(Resource):
         return model_card_dict, 200
 
 # Get deployment information
-@api.route('/deployments')
+@api.route('/model_deployments')
 class DeploymentInfo(Resource):
     @api.param('model_id', 'The model ID')
     def get(self):
@@ -147,6 +147,7 @@ class UpdateModelLocation(Resource):
 
         mc_reconstructor.set_model_location(model_id, location)
         return {"message": "Model location updated successfully"}, 200
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5002)
