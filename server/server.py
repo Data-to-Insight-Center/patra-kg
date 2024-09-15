@@ -142,6 +142,9 @@ class UpdateModelLocation(Resource):
         if not model_id or not location:
             return {"error": "Model ID and Location are required"}, 400
 
+        if not location.startswith("http://") and not location.startswith("https://"):
+            return {"error": "Location must be a valid URL"}, 400
+
         mc_reconstructor.set_model_location(model_id, location)
         return {"message": "Model location updated successfully"}, 200
 
