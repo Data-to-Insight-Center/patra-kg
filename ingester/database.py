@@ -413,5 +413,5 @@ class GraphDB:
         """
         with self.driver.session() as session:
             result = session.run(query, model_id=model_id)
-            record = result.single()
-            return record
+            records = [record["deployment_info"] for record in result]
+            return records
