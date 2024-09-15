@@ -128,7 +128,7 @@ class DeploymentInfo(Resource):
         return deployments, 200
 
 # Update model location
-@api.route('/update_location')
+@api.route('/update_model_location')
 class UpdateModelLocation(Resource):
     @api.param('model_id', 'The model ID')
     @api.param('location', 'The new location')
