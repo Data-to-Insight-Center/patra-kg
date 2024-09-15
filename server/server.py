@@ -109,7 +109,7 @@ class ListModels(Resource):
         return model_card_dict, 200
 
 # Get deployment information
-@api.route('/deployments')
+@api.route('/model_deployments')
 class DeploymentInfo(Resource):
     @api.param('model_id', 'The model ID')
     def get(self):
