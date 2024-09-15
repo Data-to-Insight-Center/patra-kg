@@ -141,22 +141,11 @@ class MCReconstructor:
             }
             return json_model
 
-    def get_deployment_ids(self):
+    def get_deployments(self, model_id):
         """
-        Get the deployment information
+        Get the deployments for a given model_id
         """
-        deployment_id_list = self.db.get_deployment_ids()
-
-        if not deployment_id_list:
-            return None
-
-        return {"deployment_ids": deployment_id_list}
-
-    def get_deployment_info(self, deployment_id):
-        """
-        Get the deployment information
-        """
-        deployment_info = self.db.get_deployment_info(deployment_id)
+        deployment_info = self.db.get_deployments(model_id)
         if deployment_info is None:
             return None
 

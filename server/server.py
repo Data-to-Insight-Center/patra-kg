@@ -108,34 +108,24 @@ class ListModels(Resource):
         model_card_dict = mc_reconstructor.get_all_mcs()
         return model_card_dict, 200
 
-# Get all deployments
-@api.route('/deployment_ids')
-class ListDeployments(Resource):
-    def get(self):
-        """
-        Lists all the deployments in Patra KG.
-        """
-        deployments = mc_reconstructor.get_deployment_ids()
-        return deployments, 200
-
 # Get deployment information
-@api.route('/deployment_info')
+@api.route('/deployments')
 class DeploymentInfo(Resource):
-    @api.param('deployment_id', 'The deployment ID')
+    @api.param('model_id', 'The model ID')
     def get(self):
         """
-        Get deployment information for a given deployment ID.
+        Get all deployments for a given model ID.
         """
-        deployment_id = request.args.get('deployment_id')
-        if not deployment_id:
-            return {"error": "Deployment ID is required"}, 400
+        model_id = request.args.get('model_id')
+        if not model_id:
+            return {"error": "Model ID is required"}, 400
 
-        deployment_info = mc_reconstructor.get_deployment_info(deployment_id)
+        deployments = mc_reconstructor.get_deployments(model_id)
 
-        if deployment_info is None:
-            return {"error": "Deployment could not be found!"}, 400
+        if deployments is None:
+            return {"error": "Deployments not found!"}, 400
 
-        return deployment_info, 200
+        return deployments, 200
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5002)

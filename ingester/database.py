@@ -406,22 +406,12 @@ class GraphDB:
             result = session.run(query, parameters).single()
         return result
 
-    def get_deployment_ids(self):
+    def get_deployments(self, model_id):
         query = """
-            MATCH (d:Deployment)
-            RETURN d.deployment_id as deployment_id
-        """
-        with self.driver.session() as session:
-            result = session.run(query)
-            records = result.values()
-        return [record[0] for record in records]
-
-    def get_deployment_info(self, deployment_id):
-        query = """
-            MATCH (d:Deployment {deployment_id: $deployment_id})
+            MATCH (m:Model {model_id: $model_id})-[:HAS_DEPLOYMENT]->(d:Deployment)
             RETURN properties(d) as deployment_info
         """
         with self.driver.session() as session:
-            result = session.run(query, deployment_id=deployment_id)
+            result = session.run(query, model_id=model_id)
             record = result.single()
             return record
