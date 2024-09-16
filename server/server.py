@@ -4,6 +4,7 @@ import os
 
 from ingester.neo4j_ingester import MCIngester
 from reconstructor.mc_reconstructor import MCReconstructor
+from urllib.parse import urlparse
 
 NEO4J_URI = os.getenv("NEO4J_URI")
 NEO4J_USERNAME = os.getenv("NEO4J_USER")
@@ -142,7 +143,8 @@ class UpdateModelLocation(Resource):
         if not model_id or not location:
             return {"error": "Model ID and Location are required"}, 400
 
-        if not location.startswith("http://") and not location.startswith("https://"):
+        parsed_url = urlparse(location)
+        if not all([parsed_url.scheme, parsed_url.netloc]):
             return {"error": "Location must be a valid URL"}, 400
 
         mc_reconstructor.set_model_location(model_id, location)
