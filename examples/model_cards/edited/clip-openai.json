@@ -1,0 +1,34 @@
+{
+    "name": "CLIP ViT-Large-Patch14 Model",
+    "version": "1.0",
+    "short_description": "OpenAI's CLIP model with ViT-Large-Patch14 architecture for image-text representation learning.",
+    "full_description": "CLIP (Contrastive Language–Image Pretraining) is a neural network trained on 400 million (image, text) pairs collected from the internet. It can be used for zero-shot image classification, image search, and more. This version utilizes the ViT-Large-Patch14 architecture.",
+    "keywords": "OpenAI, CLIP, ViT-Large-Patch14, Image-Text, Contrastive Learning, Vision Transformer",
+    "author": "OpenAI",
+    "input_type": "Images and Text",
+    "category": "Representation Learning",
+    "input_data": "https://github.com/openai/CLIP/blob/main/data.md",
+    "output_data": "https://huggingface.co/openai/clip-vit-large-patch14",
+    "ai_model": {
+        "name": "CLIP ViT-Large-Patch14",
+        "version": "1.0",
+        "description": "A CLIP model using the ViT-Large-Patch14 architecture for learning joint representations of images and text.",
+        "owner": "OpenAI",
+        "location": "https://huggingface.co/openai/clip-vit-large-patch14",
+        "license": "MIT License",
+        "framework": "PyTorch",
+        "model_type": "Transformer-based dual encoder",
+        "test_accuracy": {
+            "zero_shot_imagenet_top1": 76.2,
+            "zero_shot_imagenet_top5": 93.2
+        },
+        "foundational_model": "Based on the CLIP architecture introduced by OpenAI.",
+        "model_structure": "Dual encoder with ViT-Large-Patch14 for images and a Transformer for text.",
+        "metrics": {
+            "learning_rate": "Peak learning rate of 1e-3 with cosine decay schedule",
+            "optimizer": "AdamW optimizer with weight decay 0.2, β1=0.9, β2=0.98",
+            "training_loss": null,
+            "validation_loss": null
+        }
+    }
+}

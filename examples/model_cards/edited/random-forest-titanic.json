@@ -1,0 +1,33 @@
+{
+    "name": "Random Forest Titanic Survival Model",
+    "version": "1.0",
+    "short_description": "Random Forest model for predicting Titanic passenger survival.",
+    "full_description": "This model employs the Random Forest algorithm to classify whether passengers survived the Titanic disaster based on features like age, gender, and passenger class.",
+    "keywords": "Titanic, Random Forest, Survival Prediction, Classification, Tabular Data",
+    "author": "Your Name or Organization",
+    "input_type": "Tabular Data",
+    "category": "Classification",
+    "input_data": "https://www.kaggle.com/c/titanic/data",
+    "output_data": "https://huggingface.co/your-username/randomforest-titanic/output",
+    "ai_model": {
+        "name": "Random Forest Titanic Survival Model",
+        "version": "1.0",
+        "description": "Random Forest model trained on the Titanic dataset for survival prediction.",
+        "owner": "Your Name or Organization",
+        "location": "https://huggingface.co/your-username/randomforest-titanic",
+        "license": "MIT License",
+        "framework": "Scikit-learn",
+        "model_type": "Random Forest Classifier",
+        "test_accuracy": 0.82,
+        "foundational_model": "",
+        "model_structure": "Random Forest with 100 trees and default hyperparameters",
+        "metrics": {
+            "n_estimators": 100,
+            "max_depth": null,
+            "min_samples_split": 2,
+            "min_samples_leaf": 1,
+            "train_accuracy": 0.85,
+            "validation_accuracy": 0.82
+        }
+    }
+}
