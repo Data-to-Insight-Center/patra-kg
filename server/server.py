@@ -131,14 +131,16 @@ class DeploymentInfo(Resource):
 # Update model location
 @api.route('/update_model_location')
 class UpdateModelLocation(Resource):
-    @api.param('model_id', 'The model ID')
-    @api.param('location', 'The new location')
     def post(self):
         """
         Update the model location.
+        Expects a JSON payload.
         """
-        model_id = request.args.get('model_id')
-        location = request.args.get('location')
+        data = request.get_json()
+        if data is None:
+            return {"error": "Invalid JSON payload"}, 400
+        model_id = data.get('model_id')
+        location = data.get('location')
 
         if not model_id or not location:
             return {"error": "Model ID and Location are required"}, 400
