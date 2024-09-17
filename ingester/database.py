@@ -415,3 +415,11 @@ class GraphDB:
             result = session.run(query, model_id=model_id)
             records = [record["deployment_info"] for record in result]
             return records
+
+    def set_model_location(self, model_id, location):
+        query = """
+            MATCH (m:Model {model_id: $model_id})
+            SET m.location = $location
+        """
+        with self.driver.session() as session:
+            session.run(query, model_id=model_id, location=location)

@@ -4,6 +4,7 @@ import os
 
 from ingester.neo4j_ingester import MCIngester
 from reconstructor.mc_reconstructor import MCReconstructor
+from urllib.parse import urlparse
 
 NEO4J_URI = os.getenv("NEO4J_URI")
 NEO4J_USERNAME = os.getenv("NEO4J_USER")
@@ -126,6 +127,31 @@ class DeploymentInfo(Resource):
             return {"error": "Deployments not found!"}, 400
 
         return deployments, 200
+
+# Update model location
+@api.route('/update_model_location')
+class UpdateModelLocation(Resource):
+    def post(self):
+        """
+        Update the model location.
+        Expects a JSON payload.
+        """
+        data = request.get_json()
+        if data is None:
+            return {"error": "Invalid JSON payload"}, 400
+        model_id = data.get('model_id')
+        location = data.get('location')
+
+        if not model_id or not location:
+            return {"error": "Model ID and Location are required"}, 400
+
+        parsed_url = urlparse(location)
+        if not all([parsed_url.scheme, parsed_url.netloc]):
+            return {"error": "Location must be a valid URL"}, 400
+
+        mc_reconstructor.set_model_location(model_id, location)
+        return {"message": "Model location updated successfully"}, 200
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5002)
