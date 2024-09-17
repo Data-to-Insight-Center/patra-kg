@@ -1,0 +1,29 @@
+{
+    "name": "Meta-Llama-3.1-8B Language Model",
+    "version": "3.1",
+    "short_description": "An advanced 8-billion-parameter language model developed by Meta AI.",
+    "full_description": "Meta-Llama-3.1-8B is a state-of-the-art language model designed to understand and generate human-like text. With 8 billion parameters, it excels in various natural language processing tasks such as text generation, translation, and summarization.",
+    "keywords": "Meta, Llama, Language Model, NLP, Text Generation, Transformer",
+    "author": "Meta AI",
+    "input_type": "Text",
+    "category": "MLP",
+    "input_data": "Trained on a diverse range of internet text data.",
+    "output_data": "Generates coherent and contextually relevant text based on input prompts.",
+    "ai_model": {
+        "name": "Meta-Llama-3.1-8B",
+        "version": "3.1",
+        "description": "An 8-billion-parameter transformer-based language model developed by Meta AI for advanced NLP tasks.",
+        "owner": "Meta AI",
+        "location": "https://huggingface.co/meta-llama/Meta-Llama-3.1-8B",
+        "license": "Custom Meta License",
+        "framework": "PyTorch",
+        "model_type": "Transformer",
+        "test_accuracy": null,
+        "foundational_model": "Built upon the Llama architecture.",
+        "model_structure": "Transformer architecture with multiple attention heads and layers.",
+        "metrics": {
+            "learning_rate": "Variable schedule during training",
+            "optimizer": "AdamW"
+        }
+    }
+}

@@ -31,15 +31,7 @@
     },
     "bias_analysis": {
         "demographic_parity_diff": 0.050589475747317245,
-        "equal_odds_difference": 0.03725373210929131,
-        "true_positives": 360,
-        "true_negatives": 4884,
-        "false_positives": 58,
-        "false_negatives": 1211,
-        "false_positive_rate": 0.011736139214892756,
-        "false_negative_rate": 0.7708465945257797,
-        "true_positive_rate": 0.22915340547422025,
-        "true_negative_rate": 0.9882638607851072
+        "equal_odds_difference": 0.03725373210929131
     },
     "xai_analysis": {
         "capital_gain": 0.0853,
