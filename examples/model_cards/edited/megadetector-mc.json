@@ -1,6 +1,6 @@
 {
   "name": "MegaDetector for Wildlife Detection",
-  "version": "4.1",
+  "version": "5a",
   "short_description": "Wildlife detection using MegaDetector from Microsoft.",
   "full_description": "MegaDetector is a machine learning model designed to detect animals in images collected from camera traps. It is developed by Microsoft and is widely used in wildlife conservation efforts.",
   "keywords": "wildlife, camera traps, object detection, microsoft, conservation",
@@ -11,7 +11,7 @@
   "output_data": "Annotated images with bounding boxes for animals.",
   "ai_model": {
     "name": "MegaDetector",
-    "version": "4.1",
+    "version": "5a",
     "description": "A convolutional neural network model for detecting animals in camera trap images.",
     "owner": "Microsoft AI for Earth",
     "location": "https://modelcommons.icicle.edu/models/megadetector.pkl",
