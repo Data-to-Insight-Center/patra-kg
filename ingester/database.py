@@ -147,7 +147,7 @@ class GraphDB:
         """
         with self.driver.session() as session:
             query = """
-                       CREATE (d:Deployment {external_id: $id, name: $id, start_time: $start_time, end_time: $end_time, 
+                       CREATE (d:Deployment {deployment_id: $id, name: $id, start_time: $start_time, end_time: $end_time, 
                        duration_minutes: $duration_minutes, deployment_environment: $deployment_environment, 
                        deployment_location: $deployment_location, power_consumption_average_watts: $power_consumption_average_watts,
                        power_consumption_peak_watts: $power_consumption_peak_watts, cpu_consumption_average_percentage: $cpu_consumption_average_percentage,
@@ -160,16 +160,16 @@ class GraphDB:
 
         with self.driver.session() as session:
             query = """
-                                    MATCH (ed:EdgeDevice {external_id: $device_id}), (dep:Deployment {external_id: $dept_id})
-                                    CREATE (dep)-[:On_Device_Type]->(ed)
+                                    MATCH (ed:EdgeDevice {device_id: $device_id}), (dep:Deployment {deployment_id: $dept_id})
+                                    CREATE (dep)-[:On_Device]->(ed)
                                     """
-            session.run(query, deployment, device=deployment['device_id'], dept_id=deployment['id'])
+            session.run(query, deployment, device_id=deployment['device_id'], dept_id=deployment['id'])
 
             query = """
-                                                MATCH (mc:ModelCard {external_id: $mc_id}), (dep:Deployment {external_id: $dept_id})
-                                                CREATE (mc)-[:Deployed_On]->(dep)
+                                                MATCH (m:Model {model_id: $model_id}), (dep:Deployment {deployment_id: $depl_id})
+                                                CREATE (m)-[:Deployed_On]->(dep)
                                                 """
-            session.run(query, deployment, mc_id=deployment['model_id'], dept_id=deployment['id'])
+            session.run(query, deployment, model_id=deployment['model_id'], depl_id=deployment['id'])
 
     def insert_datasheet(self, datasheet):
         """
@@ -203,7 +203,7 @@ class GraphDB:
         """
         with self.driver.session() as session:
             query = """
-                       CREATE (d:EdgeDevice {external_id: $id, name: $name, description: $description})
+                       CREATE (d:EdgeDevice {device_id: $device_id, name: $name, description: $description})
                        """
             session.run(query, device)
 
@@ -211,10 +211,10 @@ class GraphDB:
                 if key not in ["id", "name", "description"]:
                     key = key.replace(" ", "_")
                     query = f"""
-                                                MATCH (d:EdgeDevice {{external_id: $data_id}})
+                                                MATCH (d:EdgeDevice {{device_id: $device_id}})
                                                 SET d.{key} = $value
                                                 """
-                    session.run(query, data_id=device["id"], value=value)
+                    session.run(query, device_id=device["device_id"], value=value)
 
     def infer_versioning(self, model_card, threshold=0.95, max_nodes=1000):
         """

@@ -9,10 +9,8 @@ from datetime import datetime, timedelta
 
 def main():
     uri = "bolt://localhost:7689"
-    # uri = "bolt://localhost:7687"
     user = "neo4j"
     password = "rootroot"
-    # password = "q?fRLl%L^y7M"
 
     mc_ingester = MCIngester(uri, user, password)
 
@@ -25,12 +23,12 @@ def main():
     mc_ingest_total = 0
     mc_version_search = 0
     mc_version_ingest = 0
-    iterations = 1
+    iterations = 99
 
 
     for i in range(iterations):
 
-        if i % 100 == 0:
+        if i % 10 == 0:
             print("{}th iteration".format(i))
 
         model_id = str(uuid.uuid4())
@@ -51,7 +49,7 @@ def main():
         # new_mc['embedding'] = random_embedding
 
         # mc_ingest_start_time = time.time()
-        embedding_total_time, version_ingest_total_time, version_search_total_time = mc_ingester.add_mc(new_mc)
+        mc_ingester.add_mc(new_mc)
         #
         # mc_ingest_total_time = time.time() - mc_ingest_start_time
         #
@@ -61,25 +59,26 @@ def main():
         #
 
         # model_id = "56e444a8-f566-4c31-ae7e-3bb0be7f7e6d"
-        # device_id = "jetson-nano"
-        # # device_id = "raspberry-pi-3"
-        #
-        # new_depl = copy.deepcopy(deployment)
-        # new_depl['id'] = str(uuid.uuid4())
-        # new_depl['model_id'] = model_id
-        # new_depl['device_id'] = device_id
-        # new_depl['deployment_location'] = "sf-zone-22"
-        # new_depl['mean_accuracy'] = random.uniform(0, 1)
-        # new_depl['power_consumption_peak_watts'] = random.uniform(0, 40)
-        # new_depl['requests_served'] = random.uniform(0, 10000)
-        #
-        # start_time = datetime(2024, 2, 8)
-        # end_time = start_time + timedelta(hours=random.randint(0, 24))
-        #
-        # new_depl['start_time'] = start_time
-        # new_depl['end_time'] = end_time
-        #
-        # mc_ingester.add_deployment(new_depl)
+        device_id = "jetson-nano-"
+        # device_id = "raspberry-pi-3"
+        for i in range(10):
+            new_depl = copy.deepcopy(deployment)
+            device_location = str(random.randint(1, 10))
+            new_depl['id'] = str(uuid.uuid4())
+            new_depl['model_id'] = model_id + "-model"
+            new_depl['device_id'] = device_id + device_location
+            new_depl['deployment_location'] = "sf-zone-" + device_location
+            new_depl['mean_accuracy'] = random.uniform(0, 1)
+            new_depl['power_consumption_peak_watts'] = random.uniform(0, 40)
+            new_depl['requests_served'] = random.uniform(0, 10000)
+
+            start_time = datetime(2024, 2, 8)
+            end_time = start_time + timedelta(hours=random.randint(0, 24))
+
+            new_depl['start_time'] = start_time
+            new_depl['end_time'] = end_time
+
+            mc_ingester.add_deployment(new_depl)
 
     # print("MC ingest total time: {}".format(mc_ingest_total/iterations))
     # print("MC version search time: {}".format(mc_version_search/iterations))

@@ -1,7 +1,7 @@
 {
   "model_id": "62ba7797-8d9a-48fc-b74e-d739d6fcb7b5",
   "device_type": "jetson-nano",
-  "server_id": "africa-zone-223",
+  "device_id": "jetson-nano-1",
   "deployment_environment": "production",
   "start_time": "2024-02-14T08:00:00",
   "end_time": "2024-02-14T11:03:42",

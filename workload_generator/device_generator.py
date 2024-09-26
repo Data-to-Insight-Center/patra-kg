@@ -12,7 +12,7 @@ def main():
     mc_ingester = MCIngester(uri, user, password)
 
     device_json = {
-        "id": "jetson-nano",
+        "device_id": "jetson-nano-10",
         "name": "Nvidia Jetson Nano",
         "description": "A small, powerful computer for embedded AI systems and IoT devices.",
         "cpu_architecture": "ARM Cortex-A57",
@@ -27,7 +27,7 @@ def main():
     }
 
     device_pi3 = {
-        "id": "raspberry-pi-3",
+        "device_id": "raspberry-pi-3",
         "name": "Raspberry Pi 3",
         "description": "It is a low-cost, small form-factor solution for various computing projects.",
         "cpu_architecture": "ARM Cortex-A53",
@@ -41,7 +41,7 @@ def main():
         "ai_capabilities_computer_vision": False
     }
 
-    mc_ingester.add_device(device_pi3)
+    # mc_ingester.add_device(device_pi3)
     mc_ingester.add_device(device_json)
 
 if __name__ == "__main__":
