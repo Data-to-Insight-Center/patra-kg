@@ -33,6 +33,53 @@ class GraphDB:
         if self.driver:
             self.driver.close()
 
+    def check_mc(self, metadata):
+        with self.driver.session() as session:
+            check_query = """
+                      OPTIONAL MATCH (mc:ModelCard)
+                      WHERE mc.name = $name AND 
+                            mc.version = $version AND 
+                            mc.short_description = $short_description AND 
+                            mc.full_description = $full_description AND 
+                            mc.keywords = $keywords AND 
+                            mc.author = $author AND 
+                            mc.input_data = $input_data AND 
+                            mc.output_data = $output_data AND 
+                            mc.input_type = $input_type AND 
+                            mc.categories = $category
+                      RETURN mc
+                      LIMIT 1
+                      """
+
+            result = session.run(check_query, metadata)
+            matched_node = result.single()
+
+            if matched_node and matched_node.get('mc'):
+                return True, matched_node.get('mc')['external_id']
+            else:
+               return False, None
+
+    def check_update_mc(self, metadata):
+        with self.driver.session() as session:
+            check_query = """
+                      OPTIONAL MATCH (mc:ModelCard)
+                      WHERE mc.name = $name AND 
+                            mc.version = $version AND 
+                            mc.author = $author AND 
+                            mc.input_data = $input_data AND 
+                            mc.output_data = $output_data
+                      RETURN mc
+                      LIMIT 1
+                      """
+
+            result = session.run(check_query, metadata)
+            matched_node = result.single()
+
+            if matched_node and matched_node.get('mc'):
+                return True, matched_node.get('mc')['external_id']
+            else:
+               return False, None
+
     def insert_base_mc(self, metadata):
         with self.driver.session() as session:
             query = """
@@ -42,6 +89,24 @@ class GraphDB:
                                           categories: $category, embedding: $embedding})
                """
             session.run(query, metadata)
+
+    def update_base_mc(self, model_card_id, metadata):
+        external_id = str(model_card_id)
+        with self.driver.session() as session:
+            query = """
+                MATCH (mc:ModelCard {external_id: $id})
+                SET mc.name = $name,
+                    mc.version = $version,
+                    mc.short_description = $short_description,
+                    mc.full_description = $full_description,
+                    mc.keywords = $keywords,
+                    mc.author = $author,
+                    mc.input_data = $input_data,
+                    mc.output_data = $output_data,
+                    mc.input_type = $input_type,
+                    mc.categories = $category
+            """
+            session.run(query, metadata, id=external_id)
 
     def insert_ai_model(self, model_card_id, ai_model_metadata):
         model_id = str(model_card_id + "-model")
@@ -77,6 +142,49 @@ class GraphDB:
                                 """
                 session.run(query, fc_id=foundational_model, mc_id=model_card_id)
 
+    def update_ai_model(self, model_card_id, ai_model_metadata):
+        model_id = str(model_card_id + "-model")
+        with self.driver.session() as session:
+            # Use MATCH instead of CREATE to update an existing node
+            query = """
+                MATCH (model:Model {model_id: $id})
+                SET model.name = $name,
+                    model.version = $version,
+                    model.description = $description,
+                    model.owner = $owner,
+                    model.location = $location,
+                    model.license = $license,
+                    model.framework = $framework,
+                    model.model_type = $model_type,
+                    model.test_accuracy = $test_accuracy,
+                    model.foundational_model = $foundational_model
+            """
+            session.run(query, ai_model_metadata, id=model_id)
+
+            # Update the metrics properties on the model node
+            metrics = ai_model_metadata['metrics']
+            for key, value in metrics.items():
+                key = key.replace(" ", "_")
+                query = f"""
+                    MATCH (model:Model {{model_id: $model_id}})
+                    SET model.{key} = $value
+                """
+                session.run(query, model_id=model_id, value=value)
+
+            # query = """
+            #     MATCH (model:Model {model_id: $model_id}), (mc:ModelCard {external_id: $mc_id})
+            #     CREATE (model)<-[:USED]-(mc)
+            #     """
+            # session.run(query, model_id=model_id, mc_id=model_card_id)
+
+            # foundational_model = ai_model_metadata['foundational_model']
+            # if foundational_model is not None:
+            #     query = """
+            #                     MATCH (mc:ModelCard {external_id: $mc_id}), (foundational_model:ModelCard {external_id: $fc_id})
+            #                     CREATE (mc)-[:USED_BY]->(foundational_model)
+            #                     """
+            #     session.run(query, fc_id=foundational_model, mc_id=model_card_id)
+
     def insert_bias_analysis_metadata(self, model_card_id, bias_id, bias_analysis_metadata):
         bias_name = model_card_id + "bias_analysis"
         with self.driver.session() as session:
@@ -98,6 +206,31 @@ class GraphDB:
                     CREATE (ba)<-[:BIAS_ANALYSIS]-(mc)
                     """
             session.run(query, bias_id=bias_id, mc_id=model_card_id)
+
+    def update_bias_analysis_metadata(self, model_card_id, bias_id, bias_analysis_metadata):
+        bias_name = model_card_id + "bias_analysis"
+        with self.driver.session() as session:
+            # MERGE to ensure the node exists or create it if not
+            query = """
+            MERGE (bias_analysis:BiasAnalysis {external_id: $id})
+            ON CREATE SET bias_analysis.name = $name
+            """
+            session.run(query, name=bias_name, id=bias_id)
+
+            # Update the bias_analysis properties from bias_analysis_metadata
+            for key, value in bias_analysis_metadata.items():
+                key = key.replace(" ", "_")
+                query = f"""
+                            MATCH (ba:BiasAnalysis {{external_id: $bias_id}})
+                            SET ba.{key} = $value
+                            """
+                session.run(query, bias_id=bias_id, value=value)
+
+            # query = """
+            #         MATCH (ba:BiasAnalysis {external_id: $bias_id}), (mc:ModelCard {external_id: $mc_id})
+            #         CREATE (ba)<-[:BIAS_ANALYSIS]-(mc)
+            #         """
+            # session.run(query, bias_id=bias_id, mc_id=model_card_id)
 
     def insert_xai_analysis_metadata(self, model_card_id, xai_id, xai_analysis_metadata):
         xai_name = model_card_id + "xai_analysis"
@@ -122,6 +255,32 @@ class GraphDB:
                     """
             session.run(query, xai_id=xai_id, mc_id=model_card_id)
 
+    def update_xai_analysis_metadata(self, model_card_id, xai_id, xai_analysis_metadata):
+        xai_name = model_card_id + "xai_analysis"
+
+        with self.driver.session() as session:
+            # Match the existing ExplainabilityAnalysis node
+            query = """
+            MATCH (xai:ExplainabilityAnalysis {external_id: $id})
+            SET xai.name = $name
+            """
+            session.run(query, name=xai_name, id=xai_id)
+
+            # Update existing node properties
+            for key, value in xai_analysis_metadata.items():
+                key = key.replace(" ", "_")
+                query = f"""
+                            MATCH (xai:ExplainabilityAnalysis {{external_id: $bias_id}})
+                            SET xai.{key} = $value
+                            """
+                session.run(query, bias_id=xai_id, value=value)
+
+            # query = """
+            #         MATCH (xai:ExplainabilityAnalysis {external_id: $xai_id}), (mc:ModelCard {external_id: $mc_id})
+            #         CREATE (xai)<-[:XAI_ANALYSIS]-(mc)
+            #         """
+            # session.run(query, xai_id=xai_id, mc_id=model_card_id)
+
     def connect_datasheet_mc(self, datasheet_id, mc_id):
         """
         Connects the datasheet and the Model Card.
@@ -133,8 +292,34 @@ class GraphDB:
             query = """
                                 MATCH (ds:Datasheet {external_id: $data_id}), (mc:ModelCard {external_id: $mc_id})
                                 CREATE (mc)-[:TRAINED_ON]->(ds)
-                                """
-            session.run(query, data_id=datasheet_id, mc_id=mc_id)
+                                RETURN ds
+                                LIMIT 1
+                      """
+
+            result =  session.run(query, data_id=datasheet_id, mc_id=mc_id)
+            matched_node = result.single()
+
+            if not matched_node or not matched_node.get('ds'):
+                query = """
+                                   MATCH (mc:ModelCard {external_id: $mc_id})
+                                   CREATE (d:Datasheet {
+                                       external_id: $data_id,
+                                       name: 'Default Datasheet',
+                                       description: 'No description available',
+                                       source: 'Unknown source',
+                                       download_url: 'No URL provided',
+                                       version: '1.0',
+                                       license: 'Unknown license',
+                                       doi: 'No DOI provided',
+                                       target_variable: 'None',
+                                       categories: [],
+                                       datapoints: 0,
+                                       missing_values: 0,
+                                       attribute_types: []
+                                   })
+                                   CREATE (mc)-[:TRAINED_ON]->(d)
+                               """
+                session.run(query, data_id=datasheet_id, mc_id=mc_id)
 
     def insert_deployment(self, deployment):
         """

@@ -31,8 +31,23 @@ class UploadModelCard(Resource):
         Expects a JSON payload.
         """
         data = request.get_json()
-        base_mc_id = mc_ingester.add_mc(data)
+        exists, base_mc_id = mc_ingester.add_mc(data)
+        if exists:
+            return {"message": "Model card already exists", "model_card_id": base_mc_id}, 200
         return {"message": "Successfully uploaded the model card", "model_card_id": base_mc_id}, 200
+
+@api.route('/update_mc')
+class UpdateModelCard(Resource):
+    def post(self):
+        """
+        Upload model card to the Patra Knowledge Graph.
+        Expects a JSON payload.
+        """
+        data = request.get_json()
+        exists, base_mc_id = mc_ingester.update_mc(data)
+        if exists:
+            return {"message": "Successfully updated the model card", "model_card_id": base_mc_id}, 200
+        return {"message": "Failed to update the model card", "model_card_id": base_mc_id}, 200
 
 
 @api.route('/upload_ds')
