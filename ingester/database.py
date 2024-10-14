@@ -34,9 +34,15 @@ class GraphDB:
             self.driver.close()
 
     def check_mc_exists(self, metadata):
+        """
+        check existing model card
+        :param metadata:
+        :return:
+        """
+
         with self.driver.session() as session:
             check_query = """
-                      OPTIONAL MATCH (mc:ModelCard)
+                      MATCH (mc:ModelCard)
                       WHERE mc.name = $name AND 
                             mc.version = $version AND 
                             mc.short_description = $short_description AND 
@@ -60,9 +66,14 @@ class GraphDB:
                return False, None
 
     def check_update_mc(self, metadata):
+        """
+        check existing model card for update
+        :param metadata:
+        :return:
+        """
         with self.driver.session() as session:
             check_query = """
-                      OPTIONAL MATCH (mc:ModelCard)
+                      MATCH (mc:ModelCard)
                       WHERE mc.name = $name AND 
                             mc.version = $version AND 
                             mc.author = $author AND 
@@ -91,6 +102,12 @@ class GraphDB:
             session.run(query, metadata)
 
     def update_base_mc(self, model_card_id, metadata):
+        """
+        update existing model card
+        :param model_card_id:
+        :param metadata:
+        :return:
+        """
         external_id = str(model_card_id)
         with self.driver.session() as session:
             query = """
@@ -143,6 +160,12 @@ class GraphDB:
                 session.run(query, fc_id=foundational_model, mc_id=model_card_id)
 
     def update_ai_model(self, model_card_id, ai_model_metadata):
+        """
+        update ai model card
+        :param model_card_id:
+        :param ai_model_metadata:
+        :return:
+        """
         model_id = str(model_card_id + "-model")
         with self.driver.session() as session:
 
@@ -209,9 +232,15 @@ class GraphDB:
             session.run(query, bias_id=bias_id, mc_id=model_card_id)
 
     def update_bias_analysis_metadata(self, model_card_id, bias_id, bias_analysis_metadata):
+        """
+        update bias analysis metadata
+        :param model_card_id:
+        :param bias_id:
+        :param bias_analysis_metadata:
+        :return:
+        """
         bias_name = model_card_id + "bias_analysis"
         with self.driver.session() as session:
-            # MERGE to ensure the node exists or create it if not
             query = """
             MERGE (bias_analysis:BiasAnalysis {external_id: $id})
             ON CREATE SET bias_analysis.name = $name
@@ -257,8 +286,14 @@ class GraphDB:
             session.run(query, xai_id=xai_id, mc_id=model_card_id)
 
     def update_xai_analysis_metadata(self, model_card_id, xai_id, xai_analysis_metadata):
+        """
+        update xai analysis metadata
+        :param model_card_id:
+        :param xai_id:
+        :param xai_analysis_metadata:
+        :return:
+        """
         xai_name = model_card_id + "xai_analysis"
-
         with self.driver.session() as session:
             # Match the existing ExplainabilityAnalysis node
             query = """
