@@ -31,7 +31,7 @@ class MCIngester:
         :param xai_metadata:
         :return:
         """
-        exists, model_id = self.db.check_mc(model_card)
+        exists, model_id = self.db.check_mc_exists(model_card)
         if exists:
             return exists, model_id
 
@@ -79,8 +79,8 @@ class MCIngester:
         :param xai_metadata:
         :return:
         """
-        exists, base_mc_id = self.db.check_update_mc(model_card)
-        if exists:
+        base_mc_id = self.db.check_update_mc(model_card)
+        if base_mc_id:
             self.db.update_base_mc(base_mc_id, model_card)
             self.db.update_ai_model(base_mc_id, model_card['ai_model'])
 
@@ -94,7 +94,7 @@ class MCIngester:
                 xai_id = base_mc_id + "-xai"
                 self.db.update_xai_analysis_metadata(base_mc_id, xai_id, xai_analysis)
 
-        return exists,base_mc_id
+        return base_mc_id
 
     def add_datasheet(self, datasheet):
         self.db.insert_datasheet(datasheet)

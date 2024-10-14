@@ -33,7 +33,7 @@ class GraphDB:
         if self.driver:
             self.driver.close()
 
-    def check_mc(self, metadata):
+    def check_mc_exists(self, metadata):
         with self.driver.session() as session:
             check_query = """
                       OPTIONAL MATCH (mc:ModelCard)
@@ -76,9 +76,9 @@ class GraphDB:
             matched_node = result.single()
 
             if matched_node and matched_node.get('mc'):
-                return True, matched_node.get('mc')['external_id']
+                return matched_node.get('mc')['external_id']
             else:
-               return False, None
+               return None
 
     def insert_base_mc(self, metadata):
         with self.driver.session() as session:
@@ -145,7 +145,7 @@ class GraphDB:
     def update_ai_model(self, model_card_id, ai_model_metadata):
         model_id = str(model_card_id + "-model")
         with self.driver.session() as session:
-            # Use MATCH instead of CREATE to update an existing node
+
             query = """
                 MATCH (model:Model {model_id: $id})
                 SET model.name = $name,
@@ -159,6 +159,7 @@ class GraphDB:
                     model.test_accuracy = $test_accuracy,
                     model.foundational_model = $foundational_model
             """
+
             session.run(query, ai_model_metadata, id=model_id)
 
             # Update the metrics properties on the model node
@@ -303,19 +304,7 @@ class GraphDB:
                 query = """
                                    MATCH (mc:ModelCard {external_id: $mc_id})
                                    CREATE (d:Datasheet {
-                                       external_id: $data_id,
-                                       name: 'Default Datasheet',
-                                       description: 'No description available',
-                                       source: 'Unknown source',
-                                       download_url: 'No URL provided',
-                                       version: '1.0',
-                                       license: 'Unknown license',
-                                       doi: 'No DOI provided',
-                                       target_variable: 'None',
-                                       categories: [],
-                                       datapoints: 0,
-                                       missing_values: 0,
-                                       attribute_types: []
+                                       external_id: $data_id
                                    })
                                    CREATE (mc)-[:TRAINED_ON]->(d)
                                """
