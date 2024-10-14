@@ -65,8 +65,8 @@ class MCIngester:
             self.db.insert_xai_analysis_metadata(base_mc_id, xai_id, xai_analysis)
 
         # infer versioning
-        # version_ingest_total_time, version_search_total_time = self.db.infer_versioning(model_card)
-        # version_ingest_total_time, version_search_total_time = 0, 0
+        version_ingest_total_time, version_search_total_time = self.db.infer_versioning(model_card)
+        version_ingest_total_time, version_search_total_time = 0, 0
 
         return exists,base_mc_id
 
