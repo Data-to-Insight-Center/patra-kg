@@ -35,7 +35,7 @@ class GraphDB:
 
     def check_mc_exists(self, metadata):
         """
-        check existing model card
+        Check existing model card
         :param metadata:
         :return:
         """
@@ -153,7 +153,7 @@ class GraphDB:
 
     def update_ai_model(self, model_card_id, ai_model_metadata):
         """
-        update ai model card
+        Update ai model card
         :param model_card_id:
         :param ai_model_metadata:
         :return:
@@ -224,7 +224,7 @@ class GraphDB:
 
     def update_bias_analysis_metadata(self, model_card_id, bias_id, bias_analysis_metadata):
         """
-        update bias analysis metadata
+        Update bias analysis metadata
         :param model_card_id:
         :param bias_id:
         :param bias_analysis_metadata:
@@ -265,10 +265,10 @@ class GraphDB:
             for key, value in xai_analysis_metadata.items():
                 key = key.replace(" ", "_")
                 query = f"""
-                            MATCH (xai:ExplainabilityAnalysis {{external_id: $bias_id}})
+                            MATCH (xai:ExplainabilityAnalysis {{external_id: $xai_id}})
                             SET xai.{key} = $value
                             """
-                session.run(query, bias_id=xai_id, value=value)
+                session.run(query, xai_id=xai_id, value=value)
 
             query = """
                     MATCH (xai:ExplainabilityAnalysis {external_id: $xai_id}), (mc:ModelCard {external_id: $mc_id})
@@ -278,7 +278,7 @@ class GraphDB:
 
     def update_xai_analysis_metadata(self, model_card_id, xai_id, xai_analysis_metadata):
         """
-        update xai analysis metadata
+        Update xai analysis metadata
         :param model_card_id:
         :param xai_id:
         :param xai_analysis_metadata:
@@ -297,10 +297,10 @@ class GraphDB:
             for key, value in xai_analysis_metadata.items():
                 key = key.replace(" ", "_")
                 query = f"""
-                            MATCH (xai:ExplainabilityAnalysis {{external_id: $bias_id}})
+                            MATCH (xai:ExplainabilityAnalysis {{external_id: $xai_id}})
                             SET xai.{key} = $value
                             """
-                session.run(query, bias_id=xai_id, value=value)
+                session.run(query, xai_id=xai_id, value=value)
 
             # query = """
             #         MATCH (xai:ExplainabilityAnalysis {external_id: $xai_id}), (mc:ModelCard {external_id: $mc_id})
@@ -356,7 +356,7 @@ class GraphDB:
 
     def check_model_card_exists(self, mc_id):
         """
-        check existing model card
+        Check if the model card exists in the system
         :param mc_id
         :return model_card_node
         """
