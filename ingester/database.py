@@ -230,7 +230,7 @@ class GraphDB:
         :param bias_analysis_metadata:
         :return:
         """
-        bias_name = model_card_id + "bias_analysis"
+        bias_name = model_card_id + "-bias_analysis"
         with self.driver.session() as session:
             query = """
             MERGE (bias_analysis:BiasAnalysis {external_id: $id})
@@ -254,7 +254,7 @@ class GraphDB:
             # session.run(query, bias_id=bias_id, mc_id=model_card_id)
 
     def insert_xai_analysis_metadata(self, model_card_id, xai_id, xai_analysis_metadata):
-        xai_name = model_card_id + "xai_analysis"
+        xai_name = model_card_id + "-xai_analysis"
 
         with self.driver.session() as session:
             query = """
@@ -275,6 +275,54 @@ class GraphDB:
                     CREATE (xai)<-[:XAI_ANALYSIS]-(mc)
                     """
             session.run(query, xai_id=xai_id, mc_id=model_card_id)
+
+    def insert_model_requirements_metadata(self, model_card_id, requirement_id, model_req_metadata):
+        """
+        Insert model requirements metadata
+        :param model_card_id:
+        :param requirement_id:
+        :param model_req_metadata:
+        :return:
+        """
+
+        with self.driver.session() as session:
+            query = """
+              CREATE (req:ModelRequirements {external_id: $id, name: $name})
+              """
+            session.run(query, name=requirement_id, id=requirement_id)
+
+            for requirement in model_req_metadata:
+                key, value = requirement.split("==")
+                key = key.replace("-", "_").replace(" ", "_")
+                query = f"""
+                              MATCH (req:ModelRequirements {{external_id: $requirement_id}})
+                              SET req.{key} = $value
+                              """
+                session.run(query, requirement_id=requirement_id, value=value)
+
+            query = """
+                      MATCH (req:ModelRequirements {external_id: $requirement_id}), (mc:ModelCard {external_id: $mc_id})
+                      CREATE (req)<-[:REQUIREMENTS]-(mc)
+                      """
+            session.run(query, requirement_id=requirement_id, mc_id=model_card_id)
+
+    def update_model_requirements_metadata(self, requirement_id, model_req_metadata):
+        """
+        Update model requirements metadata
+        :param requirement_id:
+        :param model_req_metadata:
+        :return:
+        """
+
+        with self.driver.session() as session:
+            for requirement in model_req_metadata:
+                key, value = requirement.split("==")
+                key = key.replace("-", "_").replace(" ", "_")
+                query = f"""
+                              MATCH (req:ModelRequirements {{external_id: $requirement_id}})
+                              SET req.{key} = $value
+                              """
+                session.run(query, requirement_id=requirement_id, value=value)
 
     def update_xai_analysis_metadata(self, model_card_id, xai_id, xai_analysis_metadata):
         """
