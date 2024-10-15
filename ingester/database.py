@@ -302,7 +302,7 @@ class GraphDB:
 
             query = """
                       MATCH (req:ModelRequirements {external_id: $requirement_id}), (mc:ModelCard {external_id: $mc_id})
-                      CREATE (req)<-[:Requirements]-(mc)
+                      CREATE (req)<-[:REQUIREMENTS]-(mc)
                       """
             session.run(query, requirement_id=requirement_id, mc_id=model_card_id)
 
