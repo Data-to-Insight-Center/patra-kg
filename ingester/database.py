@@ -35,7 +35,7 @@ class GraphDB:
 
     def check_mc_exists(self, metadata):
         """
-        check existing model card
+        Check existing model card
         :param metadata:
         :return:
         """
@@ -67,7 +67,7 @@ class GraphDB:
 
     def check_update_mc(self, metadata):
         """
-        check existing model card for update
+        Check if the model card exists in the system
         :param metadata:
         :return:
         """
@@ -121,7 +121,8 @@ class GraphDB:
                     mc.input_data = $input_data,
                     mc.output_data = $output_data,
                     mc.input_type = $input_type,
-                    mc.categories = $category
+                    mc.categories = $category,
+                    mc.foundational_model = $foundational_model
             """
             session.run(query, metadata, id=external_id)
 
@@ -131,8 +132,7 @@ class GraphDB:
             query = """
                CREATE (model:Model {model_id: $id, name: $name, version: $version, description: $description,
                                    owner: $owner, location: $location, license: $license, framework: $framework, 
-                                   model_type: $model_type, test_accuracy: $test_accuracy, 
-                                   foundational_model: $foundational_model})
+                                   model_type: $model_type, test_accuracy: $test_accuracy})
             """
             session.run(query, ai_model_metadata, id=model_id)
 
@@ -151,17 +151,9 @@ class GraphDB:
                 """
             session.run(query, model_id=model_id, mc_id=model_card_id)
 
-            foundational_model = ai_model_metadata['foundational_model']
-            if foundational_model is not None:
-                query = """
-                                MATCH (mc:ModelCard {external_id: $mc_id}), (foundational_model:ModelCard {external_id: $fc_id})
-                                CREATE (mc)-[:USED_BY]->(foundational_model)
-                                """
-                session.run(query, fc_id=foundational_model, mc_id=model_card_id)
-
     def update_ai_model(self, model_card_id, ai_model_metadata):
         """
-        update ai model card
+        Update ai model card
         :param model_card_id:
         :param ai_model_metadata:
         :return:
@@ -179,8 +171,7 @@ class GraphDB:
                     model.license = $license,
                     model.framework = $framework,
                     model.model_type = $model_type,
-                    model.test_accuracy = $test_accuracy,
-                    model.foundational_model = $foundational_model
+                    model.test_accuracy = $test_accuracy
             """
 
             session.run(query, ai_model_metadata, id=model_id)
@@ -233,7 +224,7 @@ class GraphDB:
 
     def update_bias_analysis_metadata(self, model_card_id, bias_id, bias_analysis_metadata):
         """
-        update bias analysis metadata
+        Update bias analysis metadata
         :param model_card_id:
         :param bias_id:
         :param bias_analysis_metadata:
@@ -274,10 +265,10 @@ class GraphDB:
             for key, value in xai_analysis_metadata.items():
                 key = key.replace(" ", "_")
                 query = f"""
-                            MATCH (xai:ExplainabilityAnalysis {{external_id: $bias_id}})
+                            MATCH (xai:ExplainabilityAnalysis {{external_id: $xai_id}})
                             SET xai.{key} = $value
                             """
-                session.run(query, bias_id=xai_id, value=value)
+                session.run(query, xai_id=xai_id, value=value)
 
             query = """
                     MATCH (xai:ExplainabilityAnalysis {external_id: $xai_id}), (mc:ModelCard {external_id: $mc_id})
@@ -287,7 +278,7 @@ class GraphDB:
 
     def update_xai_analysis_metadata(self, model_card_id, xai_id, xai_analysis_metadata):
         """
-        update xai analysis metadata
+        Update xai analysis metadata
         :param model_card_id:
         :param xai_id:
         :param xai_analysis_metadata:
@@ -306,10 +297,10 @@ class GraphDB:
             for key, value in xai_analysis_metadata.items():
                 key = key.replace(" ", "_")
                 query = f"""
-                            MATCH (xai:ExplainabilityAnalysis {{external_id: $bias_id}})
+                            MATCH (xai:ExplainabilityAnalysis {{external_id: $xai_id}})
                             SET xai.{key} = $value
                             """
-                session.run(query, bias_id=xai_id, value=value)
+                session.run(query, xai_id=xai_id, value=value)
 
             # query = """
             #         MATCH (xai:ExplainabilityAnalysis {external_id: $xai_id}), (mc:ModelCard {external_id: $mc_id})
@@ -339,11 +330,49 @@ class GraphDB:
                 query = """
                                    MATCH (mc:ModelCard {external_id: $mc_id})
                                    CREATE (d:Datasheet {
-                                       external_id: $data_id
+                                       external_id: $data_id,
+                                       name: 'Default Datasheet'
                                    })
                                    CREATE (mc)-[:TRAINED_ON]->(d)
                                """
                 session.run(query, data_id=datasheet_id, mc_id=mc_id)
+
+    def connect_foundational_model(self, retrain_mc_id, foundational_mc_id):
+        """
+        Connects the foundational model.
+        :param retrain_mc_id:
+        :param foundational_mc_id:
+        :return:
+        """
+        with self.driver.session() as session:
+
+            model_card = self.check_model_card_exists(foundational_mc_id)
+            if model_card:
+                query = """
+                               MATCH (retrain_mc:ModelCard {external_id: $retrain_mc_id}) , (foundational_mc:ModelCard {external_id: $foundational_mc_id})
+                               CREATE (retrain_mc)-[:TRANSFORMATIVE_USE_OF]->(foundational_mc)
+                               """
+                session.run(query, retrain_mc_id = retrain_mc_id, foundational_mc_id = foundational_mc_id)
+
+    def check_model_card_exists(self, mc_id):
+        """
+        Check if the model card exists in the system
+        :param mc_id
+        :return model_card_node
+        """
+        with self.driver.session() as session:
+            check_query = """
+                            MATCH (model_card:ModelCard)
+                            WHERE model_card.external_id = $mc_id
+                            RETURN model_card
+                            LIMIT 1
+                              """
+            result = session.run(check_query, mc_id = mc_id)
+            record = result.single()
+            if record:
+                model_card_node = record["model_card"]
+                return model_card_node
+            return None
 
     def insert_deployment(self, deployment):
         """
