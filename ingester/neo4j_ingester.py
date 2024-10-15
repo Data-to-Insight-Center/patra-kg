@@ -32,6 +32,7 @@ class MCIngester:
         :return:
         """
         exists, model_id = self.db.check_mc_exists(model_card)
+        print(model_id,exists)
         if exists:
             return exists, model_id
 
@@ -63,6 +64,11 @@ class MCIngester:
         if xai_analysis is not None:
             xai_id = base_mc_id + "-xai"
             self.db.insert_xai_analysis_metadata(base_mc_id, xai_id, xai_analysis)
+
+        foundational_location = model_card['foundational_model']
+        print(foundational_location)
+        if foundational_location is not None:
+            self.db.connect_foundational_model(base_mc_id, foundational_location)
 
         # infer versioning
         version_ingest_total_time, version_search_total_time = self.db.infer_versioning(model_card)
