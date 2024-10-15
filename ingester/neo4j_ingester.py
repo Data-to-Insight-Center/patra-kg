@@ -66,7 +66,7 @@ class MCIngester:
 
         model_requirements = model_card["model_requirements"]
         if model_requirements is not None:
-            requirements_id = base_mc_id + "-req"
+            requirements_id = base_mc_id + "-requirements"
             self.db.insert_model_requirements_metadata(base_mc_id, requirements_id, model_requirements)
 
         foundational_mc_id = model_card['foundational_model']
@@ -102,6 +102,11 @@ class MCIngester:
             if xai_analysis is not None:
                 xai_id = base_mc_id + "-xai"
                 self.db.update_xai_analysis_metadata(base_mc_id, xai_id, xai_analysis)
+
+            model_requirements = model_card["model_requirements"]
+            if model_requirements is not None:
+                requirements_id = base_mc_id + "-requirements"
+                self.db.update_model_requirements_metadata(requirements_id, model_requirements)
 
         return base_mc_id
 

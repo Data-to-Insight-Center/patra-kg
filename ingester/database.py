@@ -230,7 +230,7 @@ class GraphDB:
         :param bias_analysis_metadata:
         :return:
         """
-        bias_name = model_card_id + "bias_analysis"
+        bias_name = model_card_id + "-bias_analysis"
         with self.driver.session() as session:
             query = """
             MERGE (bias_analysis:BiasAnalysis {external_id: $id})
@@ -254,7 +254,7 @@ class GraphDB:
             # session.run(query, bias_id=bias_id, mc_id=model_card_id)
 
     def insert_xai_analysis_metadata(self, model_card_id, xai_id, xai_analysis_metadata):
-        xai_name = model_card_id + "xai_analysis"
+        xai_name = model_card_id + "-xai_analysis"
 
         with self.driver.session() as session:
             query = """
@@ -276,63 +276,53 @@ class GraphDB:
                     """
             session.run(query, xai_id=xai_id, mc_id=model_card_id)
 
-    def insert_model_requirements_metadata(self, model_card_id, req_id, model_req_metadata):
+    def insert_model_requirements_metadata(self, model_card_id, requirement_id, model_req_metadata):
         """
         Insert model requirements metadata
         :param model_card_id:
-        :param req_id:
+        :param requirement_id:
         :param model_req_metadata:
         :return:
         """
-        req_name = model_card_id + "model_requirements"
 
         with self.driver.session() as session:
             query = """
               CREATE (req:ModelRequirements {external_id: $id, name: $name})
               """
-            session.run(query, name=req_name, id=req_id)
+            session.run(query, name=requirement_id, id=requirement_id)
 
             for requirement in model_req_metadata:
                 key, value = requirement.split("==")
                 key = key.replace("-", "_").replace(" ", "_")
                 query = f"""
-                              MATCH (req:ModelRequirements {{external_id: $req_id}})
+                              MATCH (req:ModelRequirements {{external_id: $requirement_id}})
                               SET req.{key} = $value
                               """
-                session.run(query, req_id=req_id, value=value)
+                session.run(query, requirement_id=requirement_id, value=value)
 
             query = """
-                      MATCH (req:ModelRequirements {external_id: $req_id}), (mc:ModelCard {external_id: $mc_id})
-                      CREATE (req)<-[:XAI_ANALYSIS]-(mc)
+                      MATCH (req:ModelRequirements {external_id: $requirement_id}), (mc:ModelCard {external_id: $mc_id})
+                      CREATE (req)<-[:Requirements]-(mc)
                       """
-            session.run(query, req_id=req_id, mc_id=model_card_id)
+            session.run(query, requirement_id=requirement_id, mc_id=model_card_id)
 
-    def update_model_requirements_metadata(self, model_card_id, req_id, model_req_metadata):
+    def update_model_requirements_metadata(self, requirement_id, model_req_metadata):
         """
         Update model requirements metadata
-        :param model_card_id:
-        :param req_id:
+        :param requirement_id:
         :param model_req_metadata:
         :return:
         """
-        req_name = model_card_id + "model_requirements"
-        with self.driver.session() as session:
-            # Match the existing ExplainabilityAnalysis node
-            query = """
-              MATCH (req:ModelRequirements {external_id: $id})
-              SET req.name = $name
-              """
-            session.run(query, name=req_name, id=req_id)
 
-            # Update existing node properties
+        with self.driver.session() as session:
             for requirement in model_req_metadata:
                 key, value = requirement.split("==")
                 key = key.replace("-", "_").replace(" ", "_")
                 query = f"""
-                              MATCH (req:ModelRequirements {{external_id: $req_id}})
+                              MATCH (req:ModelRequirements {{external_id: $requirement_id}})
                               SET req.{key} = $value
                               """
-                session.run(query, req_id=req_id, value=value)
+                session.run(query, requirement_id=requirement_id, value=value)
 
     def update_xai_analysis_metadata(self, model_card_id, xai_id, xai_analysis_metadata):
         """
