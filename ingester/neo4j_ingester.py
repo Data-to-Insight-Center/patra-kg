@@ -65,7 +65,7 @@ class MCIngester:
             self.db.insert_xai_analysis_metadata(base_mc_id, xai_id, xai_analysis)
 
         foundational_mc_id = model_card['foundational_model']
-        if foundational_mc_id is not None:
+        if foundational_mc_id:
             self.db.connect_foundational_model(base_mc_id, foundational_mc_id)
 
         # infer versioning

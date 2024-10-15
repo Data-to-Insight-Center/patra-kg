@@ -67,7 +67,7 @@ class GraphDB:
 
     def check_update_mc(self, metadata):
         """
-        check existing model card for update
+        Check if the model card exists in the system
         :param metadata:
         :return:
         """
@@ -150,14 +150,6 @@ class GraphDB:
                 CREATE (model)<-[:USED]-(mc)
                 """
             session.run(query, model_id=model_id, mc_id=model_card_id)
-
-            # foundational_model = ai_model_metadata['foundational_model']
-            # if foundational_model is not None:
-            #     query = """
-            #                     MATCH (mc:ModelCard {external_id: $mc_id}), (foundational_model:ModelCard {external_id: $fc_id})
-            #                     CREATE (mc)-[:USED_BY]->(foundational_model)
-            #                     """
-            #     session.run(query, fc_id=foundational_model, mc_id=model_card_id)
 
     def update_ai_model(self, model_card_id, ai_model_metadata):
         """
