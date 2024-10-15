@@ -364,7 +364,7 @@ class GraphDB:
 
     def check_model_card_exists(self, mc_id):
         """
-        check_model_card_exists
+        check existing model card
         :param mc_id
         :return model_card_node
         """

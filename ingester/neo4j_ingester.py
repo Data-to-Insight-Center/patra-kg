@@ -64,10 +64,9 @@ class MCIngester:
             xai_id = base_mc_id + "-xai"
             self.db.insert_xai_analysis_metadata(base_mc_id, xai_id, xai_analysis)
 
-        foundational_location = model_card['foundational_model']
-        print(foundational_location)
-        if foundational_location is not None:
-            self.db.connect_foundational_model(base_mc_id, foundational_location)
+        foundational_mc_id = model_card['foundational_model']
+        if foundational_mc_id is not None:
+            self.db.connect_foundational_model(base_mc_id, foundational_mc_id)
 
         # infer versioning
         version_ingest_total_time, version_search_total_time = self.db.infer_versioning(model_card)
