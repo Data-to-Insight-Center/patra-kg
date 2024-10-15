@@ -345,39 +345,26 @@ class GraphDB:
                                """
                 session.run(query, data_id=datasheet_id, mc_id=mc_id)
 
-    def connect_foundational_model(self, mc_id1, foundational_model_id):
+    def connect_foundational_model(self, retrain_mc_id, foundational_mc_id):
         """
         Connects the foundational model.
-        :param mc_id1:
-        :param foundational_model_id:
+        :param retrain_mc_id:
+        :param foundational_mc_id:
         :return:
         """
         with self.driver.session() as session:
-            check_query = """
-                                  OPTIONAL MATCH (model:Model)
-                                  WHERE model.location = $foundational_model_id
-                                  RETURN model
-                                  LIMIT 1
-                                  """
 
-            result = session.run(check_query, {"foundational_model_id": foundational_model_id})
-            record = result.single()
-            if record and record.get('model'):
-                model_node = record.get('model')
-                if model_node:
-                    model_id = model_node["model_id"].replace('-model', '')
-                    model_card = self.find_model_card(model_id)
-                    if model_card:
-                        mc_id2 = model_card['external_id']
-                        query = """
-                                       MATCH (mc1:ModelCard {external_id: $mc_id1}) , (mc2:ModelCard {external_id: $mc_id2})
-                                       CREATE (mc1)-[:TRANSFORMATIVE_USE_OF]->(mc2)
-                                       """
-                        session.run(query, mc_id1=mc_id1, mc_id2 = mc_id2)
+            model_card = self.check_model_card_exists(foundational_mc_id)
+            if model_card:
+                query = """
+                               MATCH (retrain_mc:ModelCard {external_id: $retrain_mc_id}) , (foundational_mc:ModelCard {external_id: $foundational_mc_id})
+                               CREATE (retrain_mc)-[:TRANSFORMATIVE_USE_OF]->(foundational_mc)
+                               """
+                session.run(query, retrain_mc_id = retrain_mc_id, foundational_mc_id = foundational_mc_id)
 
-    def find_model_card(self, mc_id):
+    def check_model_card_exists(self, mc_id):
         """
-        find model card
+        check_model_card_exists
         :param mc_id
         :return model_card_node
         """
