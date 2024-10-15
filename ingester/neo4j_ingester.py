@@ -32,7 +32,6 @@ class MCIngester:
         :return:
         """
         exists, model_id = self.db.check_mc_exists(model_card)
-        print(model_id,exists)
         if exists:
             return exists, model_id
 
