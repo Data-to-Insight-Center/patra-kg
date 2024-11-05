@@ -179,7 +179,7 @@ class GenerateHashId(Resource):
 
         # Validate input parameters
         if not combined_string:
-            return {"error": " author name and version are required"}, 400
+            return {"error": " combined string is required"}, 400
 
         # Generate a unique hash using SHA-256
         id_hash = hashlib.sha256(combined_string.encode()).hexdigest()
