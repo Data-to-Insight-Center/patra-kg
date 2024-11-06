@@ -293,7 +293,7 @@ class GraphDB:
 
             for requirement in model_req_metadata:
                 key, value = requirement.split("==")
-                key = key.replace("-", "_").replace(" ", "_")
+                key = key.replace("-", "_").replace(" ", "_").replace(".", "_")
                 query = f"""
                               MATCH (req:ModelRequirements {{external_id: $requirement_id}})
                               SET req.{key} = $value

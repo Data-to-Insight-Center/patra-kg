@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_restx import Api, Resource, fields
 import os
+import hashlib
 
 from ingester.neo4j_ingester import MCIngester
 from reconstructor.mc_reconstructor import MCReconstructor
@@ -167,6 +168,24 @@ class UpdateModelLocation(Resource):
         mc_reconstructor.set_model_location(model_id, location)
         return {"message": "Model location updated successfully"}, 200
 
+@api.route('/get_hash_id')
+class GenerateHashId(Resource):
+    @api.param('combined_string', 'The combined string to be hashed')
+    def get(self):
+        """
+        Return a unique hash for the provided combined_string.
+        """
+        combined_string = request.args.get('combined_string')
+
+        # Validate input parameters
+        if not combined_string:
+            return {"error": " combined string is required"}, 400
+
+        # Generate a unique hash using SHA-256
+        id_hash = hashlib.sha256(combined_string.encode()).hexdigest()
+        if id_hash is None:
+            return {"error": "Hash ID has not been generated"}, 400
+        return id_hash, 200
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5002)
