@@ -4,6 +4,7 @@ from ingester.database import GraphDB
 from ingester.graph_embedder import embed_model_versioning
 import uuid
 import numpy as np
+import hashlib
 
 class MCIngester:
 
@@ -36,8 +37,9 @@ class MCIngester:
             return exists, model_id
 
         if 'id' not in model_card:
-            random_uid = uuid.uuid4()
-            model_card['id'] = str(random_uid)
+            combined_string = model_card['name']+ ":" + model_card['version'] + ":" + model_card['author']
+            hash_id = self.get_hash_id(combined_string)
+            model_card['id'] = str(hash_id)
 
         embedding_start_time = time.time()
 
@@ -109,6 +111,11 @@ class MCIngester:
                 self.db.update_model_requirements_metadata(requirements_id, model_requirements)
 
         return base_mc_id
+
+    def get_hash_id(self, combined_string):
+        # Generate a unique hash using SHA-256
+        id_hash = hashlib.sha256(combined_string.encode()).hexdigest()
+        return id_hash
 
     def add_datasheet(self, datasheet):
         self.db.insert_datasheet(datasheet)
