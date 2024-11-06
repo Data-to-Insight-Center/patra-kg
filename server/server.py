@@ -181,8 +181,7 @@ class GenerateHashId(Resource):
         if not combined_string:
             return {"error": " combined string is required"}, 400
 
-        # Generate a unique hash using SHA-256
-        id_hash = hashlib.sha256(combined_string.encode()).hexdigest()
+        id_hash = mc_ingester.get_hash_id(combined_string)
         if id_hash is None:
             return {"error": "Hash ID has not been generated"}, 400
         return id_hash, 200
