@@ -9,6 +9,7 @@
   "category": "classification",
   "input_data": "https://github.com/microsoft/CameraTraps/tree/main/data/sample_images",
   "output_data": "https://github.com/ICICLE-ai/camera_traps/blob/main/models",
+  "foundational_model": "None",
   "ai_model": {
     "name": "MegaDetector",
     "version": "5a",
@@ -19,7 +20,6 @@
     "framework": "PyTorch",
     "model_type": "convolutional neural network",
     "test_accuracy": 0.85,
-    "foundational_model": "",
     "model_structure": "Faster R-CNN",
     "metrics": {
       "Precision": 0.9,

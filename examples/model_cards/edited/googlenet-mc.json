@@ -9,6 +9,7 @@
   "category": "classification",
   "input_data": "https://github.com/microsoft/CameraTraps/tree/main/data/sample_images",
   "output_data": "https://modelcommons.icicle.edu/models/googlenet",
+  "foundational_model": "None",
   "ai_model": {
     "name": "GoogLeNet",
     "version": "1.0",
@@ -19,7 +20,6 @@
     "framework": "tensorflow",
     "model_type": "convolutional neural network",
     "test_accuracy": 0.93,
-    "foundational_model": "",
     "model_structure": "Inception v1",
     "metrics": {
       "Precision": 0.92,

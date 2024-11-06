@@ -9,6 +9,7 @@
   "category": "Regression",
   "input_data": "https://www.cs.toronto.edu/~delve/data/boston/bostonDetail.html",
   "output_data": "https://github.com/jamesbryant/models/boston_housing_prediction",
+  "foundational_model" : "None",
   "ai_model": {
     "name": "Boston Housing Scikit-learn model",
     "version": "1.0",
@@ -19,7 +20,6 @@
     "framework": "Scikit-learn",
     "model_type": "Linear regression",
     "test_accuracy": 0.75,
-    "foundational_model" : "",
     "model_structure": "",
     "metrics": {
             "learning_rate": 0.0001,

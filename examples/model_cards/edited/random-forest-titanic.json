@@ -9,6 +9,7 @@
     "category": "Classification",
     "input_data": "https://www.kaggle.com/c/titanic/data",
     "output_data": "https://huggingface.co/your-username/randomforest-titanic/output",
+    "foundational_model": "None",
     "ai_model": {
         "name": "Random Forest Titanic Survival Model",
         "version": "1.0",
@@ -19,7 +20,6 @@
         "framework": "Scikit-learn",
         "model_type": "Random Forest Classifier",
         "test_accuracy": 0.82,
-        "foundational_model": "",
         "model_structure": "Random Forest with 100 trees and default hyperparameters",
         "metrics": {
             "n_estimators": 100,
