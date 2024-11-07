@@ -21,7 +21,7 @@ Key features and capabilities of the Patra ModelCards Framework include:
 
 By combining these capabilities, the Patra Knowledge Base provides a robust foundation for **trustworthy and accountable AI/ML model management within the edge-cloud continuum**. This framework addresses crucial aspects of transparency, provenance tracking, and performance monitoring, ultimately contributing to more responsible and reliable AI deployments.
 
-For more information, please refer to the [Patra ModelCards paper](https://arxiv.org/abs/2109.15000).
+For more information, please refer to the [Patra ModelCards paper](https://ieeexplore.ieee.org/document/10678710).
 
 ## Patra Knowledge Base Server
 The server is built using Flask and exposes a RESTful API for interaction with the Patra Knowledge Graph (KG).
