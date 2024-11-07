@@ -1,23 +1,8 @@
-CREATE CONSTRAINT edge_device_id_unique IF NOT EXISTS
-FOR (es:EdgeDevice) REQUIRE es.device_id IS UNIQUE;
-
-CREATE CONSTRAINT raw_image_uuid_unique IF NOT EXISTS
-FOR (ri:RawImage) REQUIRE ri.UUID IS UNIQUE;
-
 CREATE CONSTRAINT model_id_unique IF NOT EXISTS
 FOR (md:Model) REQUIRE md.model_id IS UNIQUE;
 
-CREATE CONSTRAINT experiment_uuid_unique IF NOT EXISTS
-FOR (ex:Experiment) REQUIRE ex.experiment_id IS UNIQUE;
-
 CREATE CONSTRAINT user_id_unique IF NOT EXISTS
 FOR (user:User) REQUIRE user.user_id IS UNIQUE;
-
-CREATE CONSTRAINT compiler_app_id IF NOT EXISTS
-FOR (app:Application) REQUIRE app.name IS UNIQUE;
-
-CREATE CONSTRAINT compiler_profiler IF NOT EXISTS
-FOR (opt:Profiling) REQUIRE opt.uuid IS UNIQUE;
 
 CREATE CONSTRAINT modelcard_id IF NOT EXISTS
 FOR (mc:ModelCard) REQUIRE mc.external_id IS UNIQUE;
