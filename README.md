@@ -1,12 +1,17 @@
 # Patra Knowledge Base
 
-The **Patra Knowledge Base** simplifies and accelerates the creation of AI/ML model cards by automating the integration of essential model details. It streamlines the process of documenting key characteristics of AI/ML models, enhancing transparency, accountability, and usability in model documentation.
 
-By leveraging a semi-automated pipeline, this toolkit reduces the time and effort required to generate model cards. Descriptive fields such as fairness metrics, explainability insights, and more are populated automatically through scanners.
+The Patra Knowledge Base is a system designed to manage and track AI/ML models, with the objective of making them more accountable and trustworthy. It's a key part of the Patra ModelCards framework, which aims to improve transparency and accountability in AI/ML models throughout their entire lifecycle. This includes the model's initial training phase, subsequent deployments, and ongoing usage, whether by the same or different individuals.
 
-The server is built using Flask and exposes a RESTful API for interaction with the **Patra Knowledge Graph** (KG).
+At the heart of the Patra Knowledge Base is the concept of Model Cards. These cards are essentially detailed records that provide essential information about each AI/ML model. This information includes technical details like the model's accuracy and latency, but it goes beyond that to include non-technical aspects such as fairness, explainability, and the model's behavior in various deployment environments. This holistic approach is intended to create a comprehensive understanding of the model's strengths and weaknesses, enabling more informed decisions about its use and deployment
+
+For more information, please refer to the [Patra ModelCards paper](https://arxiv.org/abs/2109.15000).
+
+Patra Toolkit for generation of model cards can be found at the [Patra Toolkit Repository](https://github.com/Data-to-Insight-Center/patra-toolkit)
 
 ## API Endpoints
+The server is built using Flask and exposes a RESTful API for interaction with the Patra Knowledge Graph (KG).
+
 
 | Endpoint                 | Method | Description                                                   |
 |--------------------------|--------|---------------------------------------------------------------|
