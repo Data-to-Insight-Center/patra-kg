@@ -28,7 +28,7 @@ The server for the Patra Knowledge Base is built using Flask to provide a RESTfu
 Ensure the following requirements are met before starting:
 
 - **Docker** and **Docker Compose** are installed and running.
-- **Ports**: The following ports are available on your machine: `7474`, `7687`, `2181`, `9092`, `8083`, `8502`, `5002`.
+- **Ports**: The following ports are available on your machine: `7474`, `7687`
 - **OpenAI API Key**: Refer [OpenAI documentation](https://platform.openai.com) for more information.
 
 ---
@@ -47,10 +47,11 @@ Ensure the following requirements are met before starting:
     make up
     ```
 
-   View the ingested model cards at the [Neo4j Browser](http://localhost:7474/browser/). Use `neo4j` as the username and replace `PWD_HERE` with your password, then run:
-   ```cypher
-   MATCH (n) RETURN n
-   ```
+   View the ingested model cards at the [Neo4j Browser](http://localhost:7474/browser/).
+   Use `neo4j` as the username and replace `PWD_HERE` with your password, then run:
+   `MATCH (n) RETURN n`
+
+  Use `make down` to stop and remove all running containers.
 
 ---
 
