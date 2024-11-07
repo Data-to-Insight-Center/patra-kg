@@ -1,8 +1,23 @@
 # Patra Knowledge Base
 
-The **Patra Model Card Toolkit** is designed to simplify and accelerate the creation of AI/ML model cards, automating the addition of essential descriptive information. This toolkit streamlines the integration of standardized details through a schema that captures key characteristics of AI/ML models, supporting transparency, accountability, and ease of use in model documentation.
+The **Patra Knowledge Base** is designed to simplify and accelerate the creation of AI/ML model cards, automating the addition of essential descriptive information. This toolkit streamlines the integration of standardized details through a schema that captures key characteristics of AI/ML models, supporting transparency, accountability, and ease of use in model documentation.
 
 The toolkit's semi-automated pipeline reduces the time and effort required to develop model cards by populating descriptive fields such as fairness metrics and explainability insights through automated scanners.
+
+The server for the Patra Knowledge Base is built using Flask to provide a RESTful API for interacting with the Patra Knowledge Graph. 
+
+| Endpoint                 | Method | Description                                                   |
+|--------------------------|--------|---------------------------------------------------------------|
+| `/upload_mc`             | POST   | Upload model card to the Patra Knowledge Graph.               |
+| `/update_mc`             | POST   | Update the existing model card.                               |
+| `/upload_ds`             | POST   | Upload datasheet to the Patra Knowledge Graph.                |
+| `/search`                | GET    | Full text search for model cards.                             |
+| `/download_mc`           | GET    | Download a reconstructed model card from the Patra Knowledge Graph. |
+| `/download_url`          | GET    | Download URL for a given model ID.                            |
+| `/list`                  | GET    | Lists all the models in Patra KG.                             |
+| `/model_deployments`     | GET    | Get all deployments for a given model ID.                     |
+| `/update_model_location` | POST   | Update the model location.                                    |
+| `/get_hash_id`           | GET    | Return a unique hash for the provided combined string.        |
 
 ---
 
@@ -20,18 +35,24 @@ Ensure the following requirements are met before starting:
 
 ## Quickstart
 
-### Step 1: Set Up the Knowledge Graph
-- If a message broker is unavailable, start one using the [CKN repository](https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network).
+### Step 1: Configure Environment Variables
+- Set OpenAI API key using the following command:
     ```bash
-    git clone https://github.com/Data-to-Insight-Center/cyberinfrastructure-knowledge-network
-    cd cyberinfrastructure-knowledge-network
-    make up
+    export OPENAI_API_KEY=<YOUR_OPENAI_API_KEY>
     ```
 
-### Step 2: Configure Environment Variables
-- Set the environment variables in the `config.env` file.
+- Set the Neo4j credentials if available:
+    ```bash
+    export neo4j_user=<NEO4J_USER>
+    export neo4j_password=<NEO4J_PASSWORD>
+    export neo4j_uri=<NEO4J_URI>
+    ```
+  Else, start the Neo4j database using:
+    ```bash
+    make kg
+    ```
 
-### Step 3: Start the Patra Knowledge Base
+### Step 2: Start the Patra Knowledge Base
 - Launch the Patra Knowledge Base by running:
     ```bash
     docker compose up

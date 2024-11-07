@@ -5,11 +5,8 @@ services:
     image: iud2i/patra-server:latest
     ports:
       - "5002:5002"
-    env_file:
-      - config.env
-    networks:
-      - ckn-network
-
-networks:
-  ckn-network:
-    external: True
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - NEO4J_URI=${NEO4J_URI}
+      - NEO4J_USER=${NEO4J_USER}
+      - NEO4J_PWD=${NEO4J_PWD}
