@@ -38,25 +38,19 @@ Ensure the following requirements are met before starting:
 ### Step 1: Configure Environment Variables
 - Set OpenAI API key using the following command:
     ```bash
-    export OPENAI_API_KEY=<YOUR_OPENAI_API_KEY>
-    ```
-
-- Set the Neo4j credentials if available:
-    ```bash
-    export neo4j_user=<NEO4J_USER>
-    export neo4j_password=<NEO4J_PASSWORD>
-    export neo4j_uri=<NEO4J_URI>
-    ```
-  Else, start the Neo4j database using:
-    ```bash
-    make kg
+    export OPENAI_API_KEY=<OPENAI_API_KEY>
     ```
 
 ### Step 2: Start the Patra Knowledge Base
 - Launch the Patra Knowledge Base by running:
     ```bash
-    docker compose up
+    make up
     ```
+
+   View the ingested model cards at the [Neo4j Browser](http://localhost:7474/browser/). Use `neo4j` as the username and replace `PWD_HERE` with your password, then run:
+   ```cypher
+   MATCH (n) RETURN n
+   ```
 
 ---
 
