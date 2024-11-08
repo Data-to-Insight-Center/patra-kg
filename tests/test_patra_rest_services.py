@@ -1,18 +1,15 @@
-
-
 import unittest
 import json
 import requests
 from neo4j import GraphDatabase
-                            # *** BEFORE RUN THIS TEST FILE CLEAN THE DATABASE ***
 
 class TestPatraAPI(unittest.TestCase):
     BASE_URL = 'http://localhost:5002'
 
     # Neo4j connection details
-    NEO4J_URI = "neo4j://149.165.153.142:7687"
+    NEO4J_URI = "bolt://localhost:7687"
     NEO4J_USER = "neo4j"
-    NEO4J_PASSWORD = "#d2i-patra-kg-test#21"
+    NEO4J_PASSWORD = "PWD_HERE"
 
     def load_json(self, filename):
         with open(f'../examples/model_cards/{filename}', 'r') as file:
