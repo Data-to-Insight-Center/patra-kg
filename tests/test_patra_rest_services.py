@@ -3,11 +3,16 @@
 import unittest
 import json
 import requests
-
+from neo4j import GraphDatabase
                             # *** BEFORE RUN THIS TEST FILE CLEAN THE DATABASE ***
 
 class TestPatraAPI(unittest.TestCase):
     BASE_URL = 'http://localhost:5002'
+
+    # Neo4j connection details
+    NEO4J_URI = "neo4j://149.165.153.142:7687"
+    NEO4J_USER = "neo4j"
+    NEO4J_PASSWORD = "#d2i-patra-kg-test#21"
 
     def load_json(self, filename):
         with open(f'../examples/model_cards/{filename}', 'r') as file:
@@ -95,6 +100,18 @@ class TestPatraAPI(unittest.TestCase):
         response = requests.get(f'{self.BASE_URL}/get_hash_id', params={'combined_string': combined_string})
 
         self.assertEqual(response.status_code, 200)
+
+    @classmethod
+    def tearDownClass(cls):
+        """Clean up by clearing all nodes in the Neo4j database after all tests."""
+        driver = GraphDatabase.driver(cls.NEO4J_URI, auth=(cls.NEO4J_USER, cls.NEO4J_PASSWORD))
+        try:
+            with driver.session() as session:
+                # Run query to delete all nodes and relationships
+                session.run("MATCH (n) DETACH DELETE n")
+                print("All nodes and relationships have been deleted from Neo4j.")
+        finally:
+            driver.close()
 
 
 if __name__ == '__main__':
