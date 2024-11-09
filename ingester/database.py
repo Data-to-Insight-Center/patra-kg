@@ -551,8 +551,8 @@ class GraphDB:
         #
         version_query = """
         MATCH (mc1:ModelCard {external_id: $mc1_id}), (mc2:ModelCard {external_id: $mc2_id})
-        CREATE (mc1)-[r1:VERSION_OF {value: $similarity}]->(mc2)
-        CREATE (mc2)-[r2:VERSION_OF {value: $similarity}]->(mc1)
+        CREATE (mc1)-[r1:REVISION_OF {value: $similarity}]->(mc2)
+        CREATE (mc2)-[r2:REVISION_OF {value: $similarity}]->(mc1)
         RETURN r1
         """
         version_ingest_start_time = time.time()
