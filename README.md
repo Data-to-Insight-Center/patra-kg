@@ -67,6 +67,8 @@ Before starting, make sure the following are in place:
     ```bash
     make up
     ```
+  
+   The server will be running at port `5002`. To view Swagger documentation, navigate to `http://localhost:5002/swagger`.
 
    Once the containers are up, you can view the ingested model cards in the [Neo4j Browser](http://localhost:7474/browser/).
    - Login with the username `neo4j` and the password `PWD_HERE`.
@@ -74,6 +76,7 @@ Before starting, make sure the following are in place:
      ```cypher
      MATCH (n) RETURN n
      ```
+   
 
 - To stop and remove all running containers, use:
     ```bash
