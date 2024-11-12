@@ -87,7 +87,7 @@ Before starting, make sure the following are in place:
 
 ## License
 
-The **Patra Knowledge Base** toolkit is copyrighted by the **Indiana University Board of Trustees** and distributed under the **BSD 3-Clause License**. See the `LICENSE.txt` file for more details.
+The **Patra Knowledge Base** is copyrighted by the **Indiana University Board of Trustees** and distributed under the **BSD 3-Clause License**. See the `LICENSE.txt` file for more details.
 
 ## Reference
 
