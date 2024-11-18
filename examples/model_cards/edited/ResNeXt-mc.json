@@ -1,0 +1,36 @@
+{
+  "name": "ResNeXt-50 32x4d for Image Classification",
+  "version": "1.0",
+  "short_description": "Image classification using ResNeXt-50 32x4d.",
+  "full_description": "ResNeXt-50 32x4d is a deep convolutional neural network with a modularized design based on aggregated residual transformations. It achieves high performance on image classification tasks by combining the efficiency of ResNet with additional parallel paths, allowing for more complex representations with fewer parameters.",
+  "keywords": "image classification, deep learning, ResNeXt, image recognition, convolutional neural network",
+  "author": "swithana",
+  "input_type": "images",
+  "category": "classification",
+  "input_data": "https://www.image-net.org/challenges/LSVRC/2017/index.php",
+  "output_data": "https://patra.d2i.edu/models/resnext50_32x4d",
+  "foundational_model": "None",
+  "ai_model": {
+    "name": "ResNeXt-50 32x4d",
+    "version": "1.0",
+    "description": "A deep convolutional neural network model for classifying images, utilizing ResNeXt architecture with 50 layers and a 32x4d configuration.",
+    "owner": "Facebook AI Research",
+    "location": "https://modelcommons.icicle.edu/models/resnext50_32x4d.pkl",
+    "license": "Apache License 2.0",
+    "framework": "pytorch",
+    "model_type": "convolutional neural network",
+    "test_accuracy": 0.94,
+    "model_structure": "ResNeXt 50 32x4d",
+    "metrics": {
+      "Precision": 0.93,
+      "Recall": 0.92,
+      "Backbone": "ResNeXt-50 32x4d",
+      "Learning_Rate": 0.001,
+      "Batch_Size": 64,
+      "Input Shape": "(3, 224, 224)"
+    }
+  },
+  "bias_analysis": {},
+  "xai_analysis": {},
+  "model_requirements": []
+}
