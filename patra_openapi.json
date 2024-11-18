@@ -1,0 +1,215 @@
+{
+    "swagger": "2.0",
+    "basePath": "/",
+    "paths": {
+        "/download_mc": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "Download a reconstructed model card from the Patra Knowledge Graph",
+                "operationId": "get_download_model_card",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "description": "The model card ID",
+                        "name": "id",
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "default"
+                ]
+            }
+        },
+        "/download_url": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "Download url for a given model id",
+                "operationId": "get_model_download_url",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "description": "The model ID",
+                        "name": "model_id",
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "default"
+                ]
+            }
+        },
+        "/get_hash_id": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "Return a unique hash for the provided combined_string",
+                "operationId": "get_generate_hash_id",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "description": "The combined string to be hashed",
+                        "name": "combined_string",
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "default"
+                ]
+            }
+        },
+        "/list": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "Lists all the models in Patra KG",
+                "operationId": "get_list_models",
+                "tags": [
+                    "default"
+                ]
+            }
+        },
+        "/model_deployments": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "Get all deployments for a given model ID",
+                "operationId": "get_deployment_info",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "description": "The model ID",
+                        "name": "model_id",
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "default"
+                ]
+            }
+        },
+        "/search": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "Full text search for model cards",
+                "operationId": "get_search_kg",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "description": "The search query",
+                        "name": "q",
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "default"
+                ]
+            }
+        },
+        "/update_mc": {
+            "post": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "Update the existing model card",
+                "description": "Expects a JSON payload.",
+                "operationId": "post_update_model_card",
+                "tags": [
+                    "default"
+                ]
+            }
+        },
+        "/update_model_location": {
+            "post": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "Update the model location",
+                "description": "Expects a JSON payload.",
+                "operationId": "post_update_model_location",
+                "tags": [
+                    "default"
+                ]
+            }
+        },
+        "/upload_ds": {
+            "post": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "Upload datasheet to the Patra Knowledge Graph",
+                "description": "Expects a JSON payload.",
+                "operationId": "post_upload_datasheet",
+                "tags": [
+                    "default"
+                ]
+            }
+        },
+        "/upload_mc": {
+            "post": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "Upload model card to the Patra Knowledge Graph",
+                "description": "Expects a JSON payload.",
+                "operationId": "post_upload_model_card",
+                "tags": [
+                    "default"
+                ]
+            }
+        }
+    },
+    "info": {
+        "title": "Patra API",
+        "version": "1.0",
+        "description": "API to interact with Patra Knowledge Graph"
+    },
+    "produces": [
+        "application/json"
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "tags": [
+        {
+            "name": "default",
+            "description": "Default namespace"
+        }
+    ],
+    "responses": {
+        "ParseError": {
+            "description": "When a mask can't be parsed"
+        },
+        "MaskError": {
+            "description": "When any error occurs on mask"
+        }
+    }
+}

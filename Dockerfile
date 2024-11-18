@@ -1,9 +1,9 @@
-FROM --platform=linux/amd64 python:3.9-slim
+FROM  --platform=linux/amd64 python:3.9-slim
 
 WORKDIR /app
 
-COPY ingester /app/ingester
-COPY reconstructor /app/reconstructor
+COPY ../ingester /app/ingester
+COPY ../reconstructor /app/reconstructor
 COPY server /app/server
 
 RUN pip install -r /app/server/requirements.txt

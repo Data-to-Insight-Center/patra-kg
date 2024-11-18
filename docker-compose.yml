@@ -1,15 +1,42 @@
 version: '3.8'
 
 services:
+  patra-neo4j:
+    image: neo4j:5.21.0-community
+    container_name: patra_neo4j_server
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      - NEO4J_AUTH=neo4j/PWD_HERE
+      - NEO4J_apoc_export_file_enabled=true
+      - NEO4J_apoc_import_file_enabled=true
+      - NEO4J_apoc_import_file_use__neo4j__config=true
+      - NEO4JLABS_PLUGINS=["apoc", "graph-data-science"]
+      - NEO4J_dbms_security_procedures_whitelist=gds.*, apoc.*
+      - NEO4J_dbms_security_procedures_unrestricted=gds.*, apoc.*
+    healthcheck:
+      test: ["CMD-SHELL", "neo4j status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - patra-network
+
   patra-server:
     image: iud2i/patra-server:latest
+    container_name: patra_kg_server
     ports:
       - "5002:5002"
-    env_file:
-      - config.env
+    depends_on:
+      - patra-neo4j
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - NEO4J_URI=bolt://patra-neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PWD=PWD_HERE
     networks:
-      - ckn-network
+      - patra-network
 
 networks:
-  ckn-network:
-    external: True
+  patra-network:

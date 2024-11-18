@@ -14,10 +14,6 @@ class MCReconstructor:
         self.user = user
         self.password = password
 
-        # testing DB connection
-        self.test_db_connect()
-
-    def test_db_connect(self):
         try:
             self.db = GraphDB(self.uri, self.user, self.password)
             print("Connected to the Neo4j database.")

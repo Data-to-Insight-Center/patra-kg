@@ -9,6 +9,7 @@
     "category": "Representation Learning",
     "input_data": "https://github.com/openai/CLIP/blob/main/data.md",
     "output_data": "https://huggingface.co/openai/clip-vit-large-patch14",
+    "foundational_model": "None",
     "ai_model": {
         "name": "CLIP ViT-Large-Patch14",
         "version": "1.0",
@@ -22,7 +23,6 @@
             "zero_shot_imagenet_top1": 76.2,
             "zero_shot_imagenet_top5": 93.2
         },
-        "foundational_model": "Based on the CLIP architecture introduced by OpenAI.",
         "model_structure": "Dual encoder with ViT-Large-Patch14 for images and a Transformer for text.",
         "metrics": {
             "learning_rate": "Peak learning rate of 1e-3 with cosine decay schedule",

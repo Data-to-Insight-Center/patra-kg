@@ -9,6 +9,7 @@
     "category": "MLP",
     "input_data": "Trained on a diverse range of internet text data.",
     "output_data": "Generates coherent and contextually relevant text based on input prompts.",
+    "foundational_model": "None",
     "ai_model": {
         "name": "Meta-Llama-3.1-8B",
         "version": "3.1",
@@ -19,7 +20,6 @@
         "framework": "PyTorch",
         "model_type": "Transformer",
         "test_accuracy": null,
-        "foundational_model": "Built upon the Llama architecture.",
         "model_structure": "Transformer architecture with multiple attention heads and layers.",
         "metrics": {
             "learning_rate": "Variable schedule during training",
