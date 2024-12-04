@@ -2,7 +2,7 @@
   name: Patra Model Card Toolkit
   status: Release
   website: https://github.com/Data-to-Insight-Center/patra-kg
-  description: Toolkit for semi-automated modelcard creation for AI/ML models.
+  description: Knowledge Graph to capture AI/ML model lifecycle from creation through deployments.
   owner: Beth Plale
   primaryThrust: core/AI4CI
   sourceCodeUrl: https://github.com/Data-to-Insight-Center/patra-kg
