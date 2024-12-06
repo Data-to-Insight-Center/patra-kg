@@ -13,7 +13,7 @@
   doi: https://doi.org/10.1109/e-Science62913.2024.10678710
   citation: S. Withana and B. Plale, Patra ModelCards':' AI/ML Accountability in the Edge-Cloud Continuum
   pypiPackage:
-  containerImage: https://hub.docker.com/u/iud2i
+  containerImage: https://hub.docker.com/r/iud2i/patra-server
   codeReviewConducted: true
   testsWritten: true
   securityReviewConducted: false
