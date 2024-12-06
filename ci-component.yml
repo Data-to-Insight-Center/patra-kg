@@ -1,6 +1,6 @@
 - id: PatraKG:0.1.0
   name: Patra Model Card Toolkit
-  status: Release
+  status: ProductionRelease
   website: https://github.com/Data-to-Insight-Center/patra-kg
   description: Knowledge Graph to capture AI/ML model lifecycle from creation through deployments.
   owner: Beth Plale
