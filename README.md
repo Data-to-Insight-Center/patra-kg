@@ -1,5 +1,6 @@
 # Patra Knowledge Base
 
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 The Patra Knowledge Base is a system designed to manage and track AI/ML models, with the objective of making them more accountable and trustworthy. It's a key part of the Patra ModelCards framework, which aims to improve transparency and accountability in AI/ML models throughout their entire lifecycle. This includes the model's initial training phase, subsequent deployments, and ongoing usage, whether by the same or different individuals.
 
@@ -67,6 +68,8 @@ Before starting, make sure the following are in place:
     ```bash
     make up
     ```
+  
+   The server will be running at port `5002`. To view Swagger documentation, navigate to `http://localhost:5002/swagger`.
 
    Once the containers are up, you can view the ingested model cards in the [Neo4j Browser](http://localhost:7474/browser/).
    - Login with the username `neo4j` and the password `PWD_HERE`.
@@ -74,6 +77,7 @@ Before starting, make sure the following are in place:
      ```cypher
      MATCH (n) RETURN n
      ```
+   
 
 - To stop and remove all running containers, use:
     ```bash
@@ -84,7 +88,10 @@ Before starting, make sure the following are in place:
 
 ## License
 
-The **Patra Knowledge Base** toolkit is copyrighted by the **Indiana University Board of Trustees** and distributed under the **BSD 3-Clause License**. See the `LICENSE.txt` file for more details.
+The **Patra Knowledge Base** is copyrighted by the **Indiana University Board of Trustees** and distributed under the **BSD 3-Clause License**. See the `LICENSE.txt` file for more details.
+
+## Acknowledgements
+This research is funded in part through the National Science Foundation under award #2112606, AI Institute for Intelligent CyberInfrastructure with Computational Learning in the Environment (ICICLE), and in part through Data to Insight Center (D2I) at Indiana University.
 
 ## Reference
 
