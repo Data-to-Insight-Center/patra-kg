@@ -142,7 +142,7 @@ class DeploymentInfo(Resource):
         if deployments is None:
             return {"error": "Deployments not found!"}, 400
 
-        return deployments, 200
+        return jsonify(deployments), 200
 
 # Update model location
 @api.route('/update_model_location')

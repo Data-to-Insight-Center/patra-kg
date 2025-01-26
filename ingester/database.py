@@ -695,11 +695,25 @@ class GraphDB:
     def get_deployments(self, model_id):
         query = """
             MATCH (m:Model {model_id: $model_id})-[:HAS_DEPLOYMENT]->(d:Deployment)
-            RETURN properties(d) as deployment_info
+            OPTIONAL MATCH (d)-[:DEPLOYED_IN]->(e:EdgeDevice)
+            OPTIONAL MATCH (d)<-[:DEPLOYMENT_INFO]-(exp:Experiment)-[:SUBMITTED_BY]->(u:User)
+            RETURN properties(d) AS deployment_info,
+                   {
+                       device_id: e.device_id,
+                       device_type: e.device_type,
+                       location: e.location,
+                       name: e.name
+                   } AS device_info,
+                   u.user_id AS user
         """
         with self.driver.session() as session:
             result = session.run(query, model_id=model_id)
-            records = [record["deployment_info"] for record in result]
+            records = []
+            for record in result:
+                deployment = record["deployment_info"]
+                deployment["device"] = record.get("device_info")
+                deployment["user"] = record.get("user")
+                records.append(deployment)
             return records
 
     def set_model_location(self, model_id, location):
