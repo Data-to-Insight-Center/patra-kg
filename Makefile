@@ -1,4 +1,6 @@
 .PHONY: up down
+# Detect Docker Compose command
+DOCKER_COMPOSE = $(shell if command -v docker-compose > /dev/null 2>&1; then echo "docker-compose"; else echo "docker compose"; fi)
 
 # Check Neo4j health
 check-neo4j-server:
@@ -9,7 +11,7 @@ check-neo4j-server:
 
 # Bring up services
 up:
-	docker-compose up -d
+	$(DOCKER_COMPOSE) up -d
 
 	$(MAKE) check-neo4j-server
 	docker cp server/kg_config/constraints.cypher patra_neo4j_server:/constraints.cypher
@@ -17,4 +19,4 @@ up:
 
 # Bring down services
 down:
-	docker-compose down
+	$(DOCKER_COMPOSE) down
