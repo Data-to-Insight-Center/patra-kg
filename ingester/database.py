@@ -698,21 +698,21 @@ class GraphDB:
             OPTIONAL MATCH (d)-[:DEPLOYED_IN]->(e:EdgeDevice)
             OPTIONAL MATCH (d)<-[:DEPLOYMENT_INFO]-(exp:Experiment)-[:SUBMITTED_BY]->(u:User)
             RETURN properties(d) AS deployment_info,
-                   {
-                       device_id: e.device_id,
-                       device_type: e.device_type,
-                       location: e.location,
-                       name: e.name
-                   } AS device_info,
-                   u.user_id AS user
+                {
+                    device_id: COALESCE(e.device_id, ""),
+                    device_type: COALESCE(e.device_type, ""),
+                    location: COALESCE(e.location, ""),
+                    name: COALESCE(e.name, "")
+                } AS device_info,
+                COALESCE(u.user_id, "") AS user
         """
         with self.driver.session() as session:
             result = session.run(query, model_id=model_id)
             records = []
             for record in result:
                 deployment = record["deployment_info"]
-                deployment["device"] = record.get("device_info")
-                deployment["user"] = record.get("user")
+                deployment["device"] = record.get("device_info", {})
+                deployment["user"] = record.get("user", "")
                 records.append(deployment)
             return records
 
