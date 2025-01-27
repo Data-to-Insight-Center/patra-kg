@@ -31,5 +31,6 @@
     }
   },
   "bias_analysis": {},
-  "xai_analysis": {}
+  "xai_analysis": {},
+  "model_requirements": {}
 }

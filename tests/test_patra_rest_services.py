@@ -4,10 +4,10 @@ import requests
 from neo4j import GraphDatabase
 
 class TestPatraAPI(unittest.TestCase):
-    BASE_URL = 'http://localhost:5002'
+    BASE_URL = 'http://10.20.84.48:5002'
 
     # Neo4j connection details
-    NEO4J_URI = "bolt://localhost:7687"
+    NEO4J_URI = "neo4j://149.165.170.250:7688"
     NEO4J_USER = "neo4j"
     NEO4J_PASSWORD = "PWD_HERE"
 
@@ -20,7 +20,7 @@ class TestPatraAPI(unittest.TestCase):
             return json.load(file)
 
     def test_0_upload_datasheet(self):
-        datasheet_data = self.load_datasheet_json('uci_adult_datasheet.json')
+        datasheet_data = self.load_datasheet_json('imagenet.json')
         response = requests.post(f'{self.BASE_URL}/upload_ds', json=datasheet_data)
 
         self.assertEqual(response.status_code, 200)

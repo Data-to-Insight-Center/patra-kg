@@ -1,0 +1,28 @@
+- id: PatraKG:0.1.0
+  name: Patra Model Card Toolkit
+  status: ProductionRelease
+  website: https://github.com/Data-to-Insight-Center/patra-kg
+  description: Knowledge Graph to capture AI/ML model lifecycle from creation through deployments.
+  owner: Beth Plale
+  primaryThrust: core/AI4CI
+  sourceCodeUrl: https://github.com/Data-to-Insight-Center/patra-kg
+  targetIcicleRelease: 2024-12
+  componentVersion: 0.1.0
+  licenseUrl: https://github.com/Data-to-Insight-Center/patra-kg/blob/main/LICENSE
+  releaseNotesUrl:
+  doi: https://doi.org/10.1109/e-Science62913.2024.10678710
+  citation: S. Withana and B. Plale, Patra ModelCards':' AI/ML Accountability in the Edge-Cloud Continuum
+  pypiPackage:
+  containerImage: https://hub.docker.com/r/iud2i/patra-server
+  codeReviewConducted: true
+  testsWritten: true
+  securityReviewConducted: false
+  biasAssessmentConducted: false
+  usageDocumentationAvailable: true
+  usageDocumentationUrl: https://github.com/Data-to-Insight-Center/patra-kg/blob/main/README.md
+  developerDocumentationAvailable: false
+  developerDocumentationUrl:
+  trainingTutorialsAvailable: false
+  trainingTutorialsUrl:
+  usageMetricsCollected: false
+  publicAccess: true

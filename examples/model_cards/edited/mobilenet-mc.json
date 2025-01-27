@@ -1,0 +1,36 @@
+{
+  "name": "MobileNetV3 Small for Image Classification",
+  "version": "1.0",
+  "short_description": "Image classification using MobileNetV3 Small.",
+  "full_description": "MobileNetV3 Small is a lightweight deep convolutional neural network optimized for mobile and edge devices. It combines depthwise separable convolutions with the advancements of MobileNetV2 and introduces novel block structures and squeeze-and-excitation layers to achieve high performance with minimal computational cost.",
+  "keywords": "image classification, deep learning, MobileNet, image recognition, lightweight CNN, mobile devices",
+  "author": "swithana",
+  "input_type": "images",
+  "category": "classification",
+  "input_data": "https://www.image-net.org/challenges/LSVRC/2017/index.php",
+  "output_data": "https://patra.d2i.edu/models/mobilenet_v3_small",
+  "foundational_model": "None",
+  "ai_model": {
+    "name": "MobileNetV3 Small",
+    "version": "1.0",
+    "description": "A lightweight deep convolutional neural network model optimized for mobile and edge devices, using MobileNetV3 architecture with small configurations.",
+    "owner": "Google AI",
+    "location": "https://modelcommons.icicle.edu/models/mobilenet_v3_small.pkl",
+    "license": "Apache License 2.0",
+    "framework": "pytorch",
+    "model_type": "lightweight convolutional neural network",
+    "test_accuracy": 0.89,
+    "model_structure": "MobileNetV3 Small",
+    "metrics": {
+      "Precision": 0.88,
+      "Recall": 0.87,
+      "Backbone": "MobileNetV3 Small",
+      "Learning_Rate": 0.001,
+      "Batch_Size": 128,
+      "Input Shape": "(3, 224, 224)"
+    }
+  },
+  "bias_analysis": {},
+  "xai_analysis": {},
+  "model_requirements": []
+}
