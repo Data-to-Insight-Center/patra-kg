@@ -1,11 +1,11 @@
-from flask import Flask, request, jsonify
-from flask_restx import Api, Resource, fields
 import os
-import hashlib
+from urllib.parse import urlparse
+
+from flask import Flask, request, jsonify
+from flask_restx import Api, Resource
 
 from ingester.neo4j_ingester import MCIngester
 from reconstructor.mc_reconstructor import MCReconstructor
-from urllib.parse import urlparse
 
 NEO4J_URI = os.getenv("NEO4J_URI")
 NEO4J_USERNAME = os.getenv("NEO4J_USER")
@@ -50,7 +50,6 @@ class UpdateModelCard(Resource):
             return {"message": "Successfully updated the model card", "model_card_id": base_mc_id}, 200
         return {"message": "Model card not found", "model_card_id": base_mc_id}, 200
 
-
 @api.route('/upload_ds')
 class UploadDatasheet(Resource):
     def post(self):
@@ -61,7 +60,6 @@ class UploadDatasheet(Resource):
         datasheet_data = request.get_json()
         mc_ingester.add_datasheet(datasheet_data)
         return {"message": "Successfully uploaded the datasheet"}, 200
-
 
 @api.route('/search')
 class SearchKG(Resource):
@@ -76,7 +74,6 @@ class SearchKG(Resource):
 
         results = mc_reconstructor.search_kg(query)
         return results, 200
-
 
 @api.route('/download_mc')
 class DownloadModelCard(Resource):
@@ -115,7 +112,6 @@ class ModelDownloadURL(Resource):
 
         return model, 200
 
-
 @api.route('/list')
 class ListModels(Resource):
     def get(self):
@@ -125,7 +121,6 @@ class ListModels(Resource):
         model_card_dict = mc_reconstructor.get_all_mcs()
         return model_card_dict, 200
 
-# Get deployment information
 @api.route('/model_deployments')
 class DeploymentInfo(Resource):
     @api.param('model_id', 'The model ID')
@@ -144,7 +139,6 @@ class DeploymentInfo(Resource):
 
         return jsonify(deployments), 200
 
-# Update model location
 @api.route('/update_model_location')
 class UpdateModelLocation(Resource):
     def post(self):
@@ -176,15 +170,51 @@ class GenerateHashId(Resource):
         Return a unique hash for the provided combined_string.
         """
         combined_string = request.args.get('combined_string')
-
-        # Validate input parameters
         if not combined_string:
-            return {"error": " combined string is required"}, 400
+            return {"error": "Combined string is required"}, 400
 
         id_hash = mc_ingester.get_hash_id(combined_string)
         if id_hash is None:
             return {"error": "Hash ID has not been generated"}, 400
         return id_hash, 200
+
+@api.route('/get_hf_credentials')
+class HFcredentials(Resource):
+    def get(self):
+        """
+        Retrieves Hugging Face credentials.
+        Returns a JSON object with 'username' and 'token'.
+        """
+        hf_username = os.getenv("HF_HUB_USERNAME")
+        hf_token = os.getenv("HF_HUB_TOKEN")
+        if not hf_username or not hf_token:
+            return {"error": "Hugging Face credentials not set."}, 400
+        return {"username": hf_username, "token": hf_token}, 200
+
+@api.route('/get_github_credentials')
+class GitHubCredentials(Resource):
+    def get(self):
+        """
+        Retrieves GitHub credentials.
+        Returns a JSON object with 'username' and 'token'.
+        """
+        gh_username = os.getenv("GITHUB_USERNAME")
+        gh_token = os.getenv("GITHUB_TOKEN")
+        if not gh_username or not gh_token:
+            return {"error": "GitHub credentials not set."}, 400
+        return {"username": gh_username, "token": gh_token}, 200
+
+@api.route('/get_ndp_credentials')
+class NDPCredentials(Resource):
+    def get(self):
+        """
+        Retrieves NDP credentials.
+        Returns a JSON object with 'api_key'.
+        """
+        ndp_api_key = os.getenv("NDP_API_KEY")
+        if not ndp_api_key:
+            return {"error": "NDP API key not set."}, 400
+        return {"api_key": ndp_api_key}, 200
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5002)
