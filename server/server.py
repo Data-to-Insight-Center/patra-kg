@@ -191,30 +191,5 @@ class HFcredentials(Resource):
             return {"error": "Hugging Face credentials not set."}, 400
         return {"username": hf_username, "token": hf_token}, 200
 
-@api.route('/get_github_credentials')
-class GitHubCredentials(Resource):
-    def get(self):
-        """
-        Retrieves GitHub credentials.
-        Returns a JSON object with 'username' and 'token'.
-        """
-        gh_username = os.getenv("GITHUB_USERNAME")
-        gh_token = os.getenv("GITHUB_TOKEN")
-        if not gh_username or not gh_token:
-            return {"error": "GitHub credentials not set."}, 400
-        return {"username": gh_username, "token": gh_token}, 200
-
-@api.route('/get_ndp_credentials')
-class NDPCredentials(Resource):
-    def get(self):
-        """
-        Retrieves NDP credentials.
-        Returns a JSON object with 'api_key'.
-        """
-        ndp_api_key = os.getenv("NDP_API_KEY")
-        if not ndp_api_key:
-            return {"error": "NDP API key not set."}, 400
-        return {"api_key": ndp_api_key}, 200
-
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5002)
