@@ -50,14 +50,14 @@ Ensure the following requirements are met before starting:
 
 #### System Requirements
 - Docker and Docker Compose installed and running.
-- Open network access to:
+- Open network access to the following ports:
   - `7474` (Neo4j Web UI)
   - `7687` (Neo4j Bolt)
   - `5002` (REST Server)
 
 #### Dependencies
-- **Neo4j**: Version **5.21.0-community** or later is deployed via Docker (manual installation is not required).
 - **OpenAI API Key**: Obtain and configure a valid key. See OpenAI documentation for details.
+- **Neo4j**: Version **5.21.0-community** is deployed via Docker (manual installation is not required).
 
 ---
 
