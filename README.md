@@ -48,7 +48,7 @@ The server is built using Flask and exposes a RESTful API for interaction with t
 ### Prerequisites
 
 #### System Requirements
-- Docker and Docker Compose installed and running.
+- [Docker](https://www.docker.com/get-started) and [Docker Compose](https://docs.docker.com/compose) installed and running.
 - Open network access to the following ports:
   - `7474` (Neo4j Web UI)
   - `7687` (Neo4j Bolt)
