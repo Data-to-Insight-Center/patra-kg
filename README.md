@@ -46,7 +46,6 @@ The server is built using Flask and exposes a RESTful API for interaction with t
 ## Getting Started
 
 ### Prerequisites
-Ensure the following requirements are met before starting:
 
 #### System Requirements
 - Docker and Docker Compose installed and running.
