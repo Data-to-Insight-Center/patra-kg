@@ -46,12 +46,18 @@ The server is built using Flask and exposes a RESTful API for interaction with t
 ## Getting Started
 
 ### Prerequisites
+Ensure the following requirements are met before starting:
 
-Before starting, make sure the following are in place:
+#### System Requirements
+- Docker and Docker Compose installed and running.
+- Open network access to:
+  - `7474` (Neo4j Web UI)
+  - `7687` (Neo4j Bolt)
+  - `5002` (REST Server)
 
-- **Docker** and **Docker Compose** are installed and running on your machine.
-- Ensure that the following ports are available: `7474` (Neo4j Web UI), `7687` (Neo4j Bolt), `5002` (REST Server).
-- An **OpenAI API Key** is required. Refer to the [OpenAI documentation](https://platform.openai.com) for instructions.
+#### Dependencies
+- **Neo4j**: Version **5.21.0-community** or later is deployed via Docker (manual installation is not required).
+- **OpenAI API Key**: Obtain and configure a valid key. See OpenAI documentation for details.
 
 ---
 
