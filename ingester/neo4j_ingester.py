@@ -108,9 +108,9 @@ class MCIngester:
         return base_mc_id
 
     def get_hash_id(self, combined_string):
-        # Generate a unique hash using SHA-256
-        id_hash = hashlib.sha256(combined_string.encode()).hexdigest()
-        return id_hash
+        # Generate a unique ID using auther, name and version
+        unq_id = combined_string
+        return unq_id
 
     def add_datasheet(self, datasheet):
         self.db.insert_datasheet(datasheet)
