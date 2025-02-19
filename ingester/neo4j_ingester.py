@@ -2,9 +2,7 @@ import time
 
 from ingester.database import GraphDB
 from ingester.graph_embedder import embed_model_versioning
-import uuid
-import numpy as np
-import hashlib
+
 
 class MCIngester:
 
@@ -20,21 +18,17 @@ class MCIngester:
 
     def add_mc(self, model_card):
         """
-        Add model cards to the Knowledge Graph
-        :param base_mc:
-        :param bias_analysis:
-        :param ai_model_metadata:
-        :param xai_metadata:
-        :return:
+        Add a model card to the knowledge graph.
+
+        :param model_card: Model card to add.
+        :return: Tuple of (exists, model_id) where exists is a boolean indicating if the model card already exists and
         """
         exists, model_id = self.db.check_mc_exists(model_card)
         if exists:
             return exists, model_id
 
         if 'id' not in model_card:
-            combined_string = model_card['name']+ ":" + model_card['version'] + ":" + model_card['author']
-            hash_id = self.get_hash_id(combined_string)
-            model_card['id'] = str(hash_id)
+            model_card['id'] = f"{model_card['author']}_{model_card['name']}_{model_card['version']}"
 
         embedding_start_time = time.time()
 
@@ -74,16 +68,14 @@ class MCIngester:
         version_ingest_total_time, version_search_total_time = self.db.infer_versioning(model_card)
         version_ingest_total_time, version_search_total_time = 0, 0
 
-        return exists,base_mc_id
+        return exists, base_mc_id
 
     def update_mc(self, model_card):
         """
-        update existing model card
-        :param base_mc:
-        :param bias_analysis:
-        :param ai_model_metadata:
-        :param xai_metadata:
-        :return:
+        Update the existing model card.
+
+        :param model_card: Model card to update.
+        :return: Model card ID if found, None otherwise.
         """
         base_mc_id = self.db.check_update_mc(model_card)
         if base_mc_id:
