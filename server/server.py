@@ -171,17 +171,26 @@ class UpdateModelLocation(Resource):
         mc_reconstructor.set_model_location(model_id, location)
         return {"message": "Model location updated successfully"}, 200
 
-
 @api.route('/get_hash_id')
 class GenerateHashId(Resource):
-    @api.param('combined_string', 'The combined string to be hashed')
+    @api.param('author', 'The author of the project')
+    @api.param('name', 'The name of the project')
+    @api.param('version', 'The version of the project')
     def get(self):
-        combined_string = request.args.get('combined_string')
-        if not combined_string:
-            return {"error": "Combined string is required"}, 400
+        """
+        Return a unique hash for the provided author, name, and version.
+        """
+        author = request.args.get('author')
+        name = request.args.get('name')
+        version = request.args.get('version')
 
-        return combined_string, 200
+        if not all([author, name, version]):
+            return {"error": "Author, name, and version are required"}, 400
 
+        unique_id = mc_ingester.get_unique_id(author, name, version)
+        if unique_id is None:
+            return {"error": "Unique ID has not been generated"}, 400
+        return unique_id, 200
 
 @api.route('/get_hf_credentials')
 class HFcredentials(Resource):
@@ -195,7 +204,6 @@ class HFcredentials(Resource):
         if not hf_username or not hf_token:
             return {"error": "Hugging Face credentials not set."}, 400
         return {"username": hf_username, "token": hf_token}, 200
-
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5002)
