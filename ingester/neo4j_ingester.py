@@ -107,7 +107,7 @@ class MCIngester:
 
         return base_mc_id
 
-    def get_hash_id(self, author, name, version):
+    def get_unique_id(self, author, name, version):
 
         author = author.lower().replace(" ", "_")
         name = name.lower().replace(" ", "_")

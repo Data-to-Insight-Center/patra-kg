@@ -178,10 +178,10 @@ class GenerateHashId(Resource):
         if not all([author, name, version]):
             return {"error": "Author, name, and version are required"}, 400
 
-        id_hash = mc_ingester.get_hash_id(author, name, version)
-        if id_hash is None:
+        unique_id = mc_ingester.get_unique_id(author, name, version)
+        if unique_id is None:
             return {"error": "Unique ID has not been generated"}, 400
-        return id_hash, 200
+        return unique_id, 200
 
 @api.route('/get_hf_credentials')
 class HFcredentials(Resource):
