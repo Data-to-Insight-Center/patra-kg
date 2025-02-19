@@ -164,16 +164,21 @@ class UpdateModelLocation(Resource):
 
 @api.route('/get_hash_id')
 class GenerateHashId(Resource):
-    @api.param('combined_string', 'The combined string to be hashed')
+    @api.param('author', 'The author of the project')
+    @api.param('name', 'The name of the project')
+    @api.param('version', 'The version of the project')
     def get(self):
         """
-        Return a unique hash for the provided combined_string.
+        Return a unique hash for the provided author, name, and version.
         """
-        combined_string = request.args.get('combined_string')
-        if not combined_string:
-            return {"error": "Combined string is required"}, 400
+        author = request.args.get('author')
+        name = request.args.get('name')
+        version = request.args.get('version')
 
-        id_hash = mc_ingester.get_hash_id(combined_string)
+        if not all([author, name, version]):
+            return {"error": "Author, name, and version are required"}, 400
+
+        id_hash = mc_ingester.get_hash_id(author, name, version)
         if id_hash is None:
             return {"error": "Hash ID has not been generated"}, 400
         return id_hash, 200

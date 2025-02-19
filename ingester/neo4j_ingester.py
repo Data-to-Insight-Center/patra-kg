@@ -107,9 +107,15 @@ class MCIngester:
 
         return base_mc_id
 
-    def get_hash_id(self, combined_string):
-        # Generate a unique ID using auther, name and version
+    def get_hash_id(self, author, name, version):
+
+        author = author.lower().replace(" ", "_")
+        name = name.lower().replace(" ", "_")
+        version = version.lower().replace(" ", "_")
+
+        combined_string = f"{author}_{name}_{version}"
         unq_id = combined_string
+
         return unq_id
 
     def add_datasheet(self, datasheet):
