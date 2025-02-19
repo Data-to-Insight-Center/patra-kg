@@ -180,7 +180,7 @@ class GenerateHashId(Resource):
 
         id_hash = mc_ingester.get_hash_id(author, name, version)
         if id_hash is None:
-            return {"error": "Hash ID has not been generated"}, 400
+            return {"error": "Unique ID has not been generated"}, 400
         return id_hash, 200
 
 @api.route('/get_hf_credentials')
