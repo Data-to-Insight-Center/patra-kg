@@ -1,7 +1,7 @@
 import os
 from urllib.parse import urlparse
 
-from flask import Flask, request, jsonify
+from flask import Flask, request
 from flask_restx import Api, Resource
 
 from ingester.neo4j_ingester import MCIngester
@@ -24,6 +24,7 @@ api = Api(app, version='1.0', title='Patra API',
 def home():
     return "Welcome to the Patra Knowledge Base", 200
 
+
 @api.route('/upload_mc')
 class UploadModelCard(Resource):
     def post(self):
@@ -36,6 +37,7 @@ class UploadModelCard(Resource):
         if exists:
             return {"message": "Model card already exists", "model_card_id": base_mc_id}, 200
         return {"message": "Successfully uploaded the model card", "model_card_id": base_mc_id}, 200
+
 
 @api.route('/update_mc')
 class UpdateModelCard(Resource):
@@ -50,6 +52,7 @@ class UpdateModelCard(Resource):
             return {"message": "Successfully updated the model card", "model_card_id": base_mc_id}, 200
         return {"message": "Model card not found", "model_card_id": base_mc_id}, 200
 
+
 @api.route('/upload_ds')
 class UploadDatasheet(Resource):
     def post(self):
@@ -60,6 +63,7 @@ class UploadDatasheet(Resource):
         datasheet_data = request.get_json()
         mc_ingester.add_datasheet(datasheet_data)
         return {"message": "Successfully uploaded the datasheet"}, 200
+
 
 @api.route('/search')
 class SearchKG(Resource):
@@ -74,6 +78,7 @@ class SearchKG(Resource):
 
         results = mc_reconstructor.search_kg(query)
         return results, 200
+
 
 @api.route('/download_mc')
 class DownloadModelCard(Resource):
@@ -92,6 +97,7 @@ class DownloadModelCard(Resource):
             return {"error": "Model card could not be found!"}, 400
 
         return model_card, 200
+
 
 @api.route('/download_url')
 class ModelDownloadURL(Resource):
@@ -112,6 +118,7 @@ class ModelDownloadURL(Resource):
 
         return model, 200
 
+
 @api.route('/list')
 class ListModels(Resource):
     def get(self):
@@ -120,6 +127,7 @@ class ListModels(Resource):
         """
         model_card_dict = mc_reconstructor.get_all_mcs()
         return model_card_dict, 200
+
 
 @api.route('/model_deployments')
 class DeploymentInfo(Resource):
@@ -138,6 +146,7 @@ class DeploymentInfo(Resource):
             return {"error": "Deployments not found!"}, 400
 
         return deployments, 200
+
 
 @api.route('/update_model_location')
 class UpdateModelLocation(Resource):
@@ -162,21 +171,17 @@ class UpdateModelLocation(Resource):
         mc_reconstructor.set_model_location(model_id, location)
         return {"message": "Model location updated successfully"}, 200
 
+
 @api.route('/get_hash_id')
 class GenerateHashId(Resource):
     @api.param('combined_string', 'The combined string to be hashed')
     def get(self):
-        """
-        Return a unique hash for the provided combined_string.
-        """
         combined_string = request.args.get('combined_string')
         if not combined_string:
             return {"error": "Combined string is required"}, 400
 
-        id_hash = mc_ingester.get_hash_id(combined_string)
-        if id_hash is None:
-            return {"error": "Hash ID has not been generated"}, 400
-        return id_hash, 200
+        return combined_string, 200
+
 
 @api.route('/get_hf_credentials')
 class HFcredentials(Resource):
@@ -190,6 +195,7 @@ class HFcredentials(Resource):
         if not hf_username or not hf_token:
             return {"error": "Hugging Face credentials not set."}, 400
         return {"username": hf_username, "token": hf_token}, 200
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5002)
