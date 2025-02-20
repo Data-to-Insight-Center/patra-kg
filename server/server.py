@@ -1,4 +1,5 @@
 import os
+import logging
 from urllib.parse import urlparse
 
 from flask import Flask, request
@@ -14,6 +15,7 @@ NEO4J_PWD = os.getenv("NEO4J_PWD")
 mc_ingester = MCIngester(NEO4J_URI, NEO4J_USERNAME, NEO4J_PWD)
 mc_reconstructor = MCReconstructor(NEO4J_URI, NEO4J_USERNAME, NEO4J_PWD)
 
+logging.basicConfig(level=logging.INFO)
 app = Flask(__name__)
 api = Api(app, version='1.0', title='Patra API',
           description='API to interact with Patra Knowledge Graph',
@@ -171,26 +173,30 @@ class UpdateModelLocation(Resource):
         mc_reconstructor.set_model_location(model_id, location)
         return {"message": "Model location updated successfully"}, 200
 
-@api.route('/get_hash_id')
-class GenerateHashId(Resource):
-    @api.param('author', 'The author of the project')
-    @api.param('name', 'The name of the project')
-    @api.param('version', 'The version of the project')
+@api.route('/get_pid')
+class GeneratePID(Resource):
+    @api.param('author','Model author')
+    @api.param('name', 'Model name')
+    @api.param('version', 'Model version')
     def get(self):
         """
-        Return a unique hash for the provided author, name, and version.
+        Generate a PID for a given author, name, and version.
         """
         author = request.args.get('author')
         name = request.args.get('name')
         version = request.args.get('version')
 
         if not all([author, name, version]):
+            logging.error("Missing one or more required parameters: author, name, version")
             return {"error": "Author, name, and version are required"}, 400
 
-        unique_id = mc_ingester.get_unique_id(author, name, version)
-        if unique_id is None:
-            return {"error": "Unique ID has not been generated"}, 400
-        return unique_id, 200
+        pid = mc_ingester.get_pid(author, name, version)
+        if pid is None:
+            logging.error("PID generation failed")
+            return {"error": "PID not generated"}, 400
+
+        logging.info(f"PID generated: {pid}")
+        return pid, 200
 
 @api.route('/get_hf_credentials')
 class HFcredentials(Resource):
