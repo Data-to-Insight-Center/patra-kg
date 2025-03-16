@@ -97,7 +97,7 @@ class GraphDB:
                CREATE (mc:ModelCard {external_id: $id, name: $name, version: $version, short_description: $short_description,
                                           full_description: $full_description, keywords: $keywords, author: $author,
                                           input_data: $input_data, output_data: $output_data, input_type: $input_type,
-                                          categories: $category, embedding: $embedding})
+                                          categories: $category, embedding: $embedding, citation: $citation})
                """
             session.run(query, metadata)
 
@@ -132,7 +132,7 @@ class GraphDB:
             query = """
                CREATE (model:Model {model_id: $id, name: $name, version: $version, description: $description,
                                    owner: $owner, location: $location, license: $license, framework: $framework, 
-                                   model_type: $model_type, test_accuracy: $test_accuracy})
+                                   model_type: $model_type, test_accuracy: $test_accuracy, inference_label: $inference_label})
             """
             session.run(query, ai_model_metadata, id=model_id)
 
