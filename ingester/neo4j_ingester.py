@@ -103,7 +103,7 @@ class MCIngester:
         author = author.lower().replace(" ", "_")
         name = name.lower().replace(" ", "_")
         version = version.lower().replace(" ", "_")
-        return f"{author}_{name}_{version}"
+        return f"{author}-{name}-{version}"
 
     def add_datasheet(self, datasheet):
         self.db.insert_datasheet(datasheet)
@@ -116,3 +116,6 @@ class MCIngester:
 
     def version_perf_test(self, model_card):
         return self.db.versioning_perf_test(model_card)
+
+    def check_id_exists(self, pid):
+        return self.db.check_id_exists(pid)

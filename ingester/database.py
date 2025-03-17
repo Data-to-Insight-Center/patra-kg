@@ -723,3 +723,12 @@ class GraphDB:
         """
         with self.driver.session() as session:
             session.run(query, model_id=model_id, location=location)
+
+    def check_id_exists(self, model_id):
+        query = """
+            MATCH (m:ModelCard {external_id: $model_id})
+            RETURN m
+        """
+        with self.driver.session() as session:
+            result = session.run(query, model_id=model_id)
+            return True if result.single() else False

@@ -173,14 +173,17 @@ class UpdateModelLocation(Resource):
         mc_reconstructor.set_model_location(model_id, location)
         return {"message": "Model location updated successfully"}, 200
 
-@api.route('/get_pid')
+
+@api.route('/get_model_id')
 class GeneratePID(Resource):
-    @api.param('author','Model author')
     @api.param('name', 'Model name')
     @api.param('version', 'Model version')
     def get(self):
         """
         Generate a PID for a given author, name, and version.
+
+        Returns:
+            A JSON response containing the generated PID or an error message.
         """
         author = request.args.get('author')
         name = request.args.get('name')
@@ -191,14 +194,19 @@ class GeneratePID(Resource):
             return {"error": "Author, name, and version are required"}, 400
 
         pid = mc_ingester.get_pid(author, name, version)
+
         if pid is None:
             logging.error("PID generation failed")
             return {"error": "PID not generated"}, 400
 
-        logging.info(f"PID generated: {pid}")
-        return pid, 200
+        if mc_ingester.check_id_exists(pid):
+            return {"pid": pid, "message": "PID already exists"}, 409
 
-@api.route('/get_hf_credentials')
+        logging.info(f"PID generated: {pid}")
+        return {"pid": pid}, 200
+
+
+@api.route('/get_huggingface_credentials')
 class HFcredentials(Resource):
     def get(self):
         """
@@ -210,6 +218,17 @@ class HFcredentials(Resource):
         if not hf_username or not hf_token:
             return {"error": "Hugging Face credentials not set."}, 400
         return {"username": hf_username, "token": hf_token}, 200
+
+
+@api.route('/get_github_credentials')
+class GHcredentials(Resource):
+    def get(self):
+        gh_username = os.getenv("GH_HUB_USERNAME")
+        gh_token = os.getenv("GH_HUB_TOKEN")
+        if not gh_username or not gh_token:
+            return {"error": "Github credentials not set."}, 400
+        return {"username": gh_username, "token": gh_token}, 200
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5002)
