@@ -177,6 +177,7 @@ class UpdateModelLocation(Resource):
 @api.route('/get_model_id')
 class GeneratePID(Resource):
     @api.param('name', 'Model name')
+    @api.param('author', 'Model author')
     @api.param('version', 'Model version')
     def get(self):
         """
@@ -223,6 +224,10 @@ class HFcredentials(Resource):
 @api.route('/get_github_credentials')
 class GHcredentials(Resource):
     def get(self):
+        """
+        Retrieves Github credentials.
+        Returns a JSON object with 'username' and 'token'.
+        """
         gh_username = os.getenv("GH_HUB_USERNAME")
         gh_token = os.getenv("GH_HUB_TOKEN")
         if not gh_username or not gh_token:
