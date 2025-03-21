@@ -1,24 +1,5 @@
-import multiprocessing
-
 from neo4j import GraphDatabase
 import time
-from scipy.spatial.distance import cosine
-from concurrent.futures import ProcessPoolExecutor
-import numpy as np
-from numpy.linalg import norm
-
-
-def calculate_cosine(zipped_input):
-    threshold = 0.90
-    new_embedding, model_id, model_embedding = zipped_input
-    # model_id = record['model_id']
-    # model_embedding = record['model_embedding']
-    # similarity = cosine(new_embedding, model_embedding)
-    similarity = np.dot(new_embedding, model_embedding) / (norm(new_embedding) * norm(model_embedding))
-
-    if similarity > threshold:
-        return similarity, model_id
-
 
 class GraphDB:
     _instance = None

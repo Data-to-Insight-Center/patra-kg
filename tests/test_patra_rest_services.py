@@ -4,10 +4,10 @@ import requests
 from neo4j import GraphDatabase
 
 class TestPatraAPI(unittest.TestCase):
-    BASE_URL = 'http://10.20.84.48:5002'
+    BASE_URL = 'http://'
 
     # Neo4j connection details
-    NEO4J_URI = "neo4j://149.165.170.250:7688"
+    NEO4J_URI = "neo4j://"
     NEO4J_USER = "neo4j"
     NEO4J_PASSWORD = "PWD_HERE"
 
