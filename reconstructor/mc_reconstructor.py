@@ -1,8 +1,6 @@
 from ingester.database import GraphDB
 import json
 
-from ingester.graph_embedder import embed_query
-
 
 class MCReconstructor:
     """
@@ -152,17 +150,3 @@ class MCReconstructor:
         Update the model location
         """
         self.db.set_model_location(model_id, location)
-
-# def main():
-#     uri = "bolt://localhost:7687"
-#     user = "neo4j"
-#     password = "root"
-#
-#     mc_reconstructor = MCReconstructor(uri, user, password)
-#     result = mc_reconstructor.reconstruct("UID_UCI_CNN_TF")
-#
-#
-
-
-# if __name__ == "__main__":
-# main()

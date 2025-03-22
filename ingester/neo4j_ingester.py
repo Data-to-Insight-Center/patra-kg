@@ -6,10 +6,11 @@ from ingester.graph_embedder import embed_model_versioning
 
 class MCIngester:
 
-    def __init__(self, uri, user, password):
+    def __init__(self, uri, user, password, similarity_support=False):
         self.uri = uri
         self.user = user
         self.password = password
+        self.similarity_enabled = similarity_support
         try:
             self.db = GraphDB(self.uri, self.user, self.password)
             print("Connected to the Neo4j database.")
@@ -30,15 +31,11 @@ class MCIngester:
         if 'id' not in model_card:
             model_card['id'] = f"{model_card['author']}_{model_card['name']}_{model_card['version']}"
 
-        embedding_start_time = time.time()
+        if self.similarity_enabled:
+            version_embedding = embed_model_versioning(model_card)
+            model_card['embedding'] = version_embedding
 
-        version_embedding = embed_model_versioning(model_card)
-
-        model_card['embedding'] = version_embedding
-
-        embedding_total_time = time.time() - embedding_start_time
-
-        self.db.insert_base_mc(model_card)
+        self.db.insert_base_mc(model_card, self.similarity_enabled)
 
         base_mc_id = model_card['id']
         datasheet_id = model_card['input_data']
@@ -65,9 +62,8 @@ class MCIngester:
             self.db.connect_foundational_model(base_mc_id, foundational_mc_id)
 
         # infer versioning
-        version_ingest_total_time, version_search_total_time = self.db.infer_versioning(model_card)
-        version_ingest_total_time, version_search_total_time = 0, 0
-
+        if self.similarity_enabled:
+            self.db.infer_versioning(model_card)
         return exists, base_mc_id
 
     def update_mc(self, model_card):
