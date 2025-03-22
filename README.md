@@ -55,9 +55,13 @@ The server is built using Flask and exposes a RESTful API for interaction with t
   - `5002` (REST Server)
 
 #### Dependencies
-- **OpenAI API Key**: Obtain and configure a valid key. Refer to the [OpenAI documentation](https://platform.openai.com) for instructions.
 - **Neo4j**: Version **5.21.0-community** is deployed via Docker (manual installation is not required).
 
+Optional:
+If the system needs to support Model Card similarities, you need to obtain a valid Open AI API key. 
+This is disabled by default. If you need to enable it:
+- **OpenAI API Key**: Obtain and configure a valid key. Refer to the [OpenAI documentation](https://platform.openai.com) for instructions.
+- **Enable Similarity**: Set the environment variable ENABLE_MC_SIMILARITY to True and set the OPENAPI_API_KEY environment variable with your obtained key. 
 ---
 
 ## Quickstart
