@@ -122,7 +122,7 @@ class GraphDB:
             query = """
                CREATE (model:Model {model_id: $id, name: $name, version: $version, description: $description,
                                    owner: $owner, location: $location, license: $license, framework: $framework, 
-                                   model_type: $model_type, test_accuracy: $test_accuracy, inference_label: $inference_label})
+                                   model_type: $model_type, test_accuracy: $test_accuracy, inference_labels: $inference_labels})
             """
             session.run(query, ai_model_metadata, id=model_id)
 

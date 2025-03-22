@@ -24,7 +24,7 @@ services:
       - patra-network
 
   patra-server:
-    image: iud2i/patra-server:latest
+    image: sha256:a6ab68a26769089f31183ddf20da17dc40fd32ca22b51c94be2b1dd72152ad5b
     container_name: patra_kg_server
     ports:
       - "5002:5002"

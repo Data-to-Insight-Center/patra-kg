@@ -10,6 +10,7 @@
     "input_data": "https://archive.ics.uci.edu/dataset/2/adult",
     "output_data": "https://github.iu.edu/swithana/mcwork/pytorch/adult_model",
     "foundational_model" : "None",
+    "citation": "test_citation",
     "ai_model": {
         "name": "UCI Adult pytorch model",
         "version": "0.2",
@@ -20,6 +21,7 @@
         "framework": "pytorch",
         "model_type": "dnn",
         "test_accuracy": 0.75589131355286,
+        "inference_labels": "",
         "model_structure": "",
         "metrics": {
             "learning_rate": 0.0001,
