@@ -12,4 +12,4 @@ jobs:
       - name: Run tests
         run: |
           pip install -r tests/requirements.txt
-          python3 -m unittest tests/test_patra_rest_services.py
+          pytest tests/test_patra_rest_services.py
