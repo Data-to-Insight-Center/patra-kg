@@ -5,3 +5,4 @@ neo4j==5.26.0
 pytz==2024.2
 requests==2.32.3
 urllib3==2.2.3
+pytest==8.3.5
