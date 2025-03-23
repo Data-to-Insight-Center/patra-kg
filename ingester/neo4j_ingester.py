@@ -6,10 +6,11 @@ from ingester.graph_embedder import embed_model_versioning
 
 class MCIngester:
 
-    def __init__(self, uri, user, password):
+    def __init__(self, uri, user, password, similarity_support=False):
         self.uri = uri
         self.user = user
         self.password = password
+        self.similarity_enabled = similarity_support
         try:
             self.db = GraphDB(self.uri, self.user, self.password)
             print("Connected to the Neo4j database.")
@@ -30,15 +31,11 @@ class MCIngester:
         if 'id' not in model_card:
             model_card['id'] = f"{model_card['author']}_{model_card['name']}_{model_card['version']}"
 
-        embedding_start_time = time.time()
+        if self.similarity_enabled:
+            version_embedding = embed_model_versioning(model_card)
+            model_card['embedding'] = version_embedding
 
-        version_embedding = embed_model_versioning(model_card)
-
-        model_card['embedding'] = version_embedding
-
-        embedding_total_time = time.time() - embedding_start_time
-
-        self.db.insert_base_mc(model_card)
+        self.db.insert_base_mc(model_card, self.similarity_enabled)
 
         base_mc_id = model_card['id']
         datasheet_id = model_card['input_data']
@@ -55,19 +52,19 @@ class MCIngester:
             xai_id = base_mc_id + "-xai"
             self.db.insert_xai_analysis_metadata(base_mc_id, xai_id, xai_analysis)
 
-        model_requirements = model_card["model_requirements"]
-        if model_requirements is not None:
-            requirements_id = base_mc_id + "-requirements"
-            self.db.insert_model_requirements_metadata(base_mc_id, requirements_id, model_requirements)
+        if "model_requirements" in model_card:
+            model_requirements = model_card["model_requirements"]
+            if model_requirements is not None:
+                requirements_id = base_mc_id + "-requirements"
+                self.db.insert_model_requirements_metadata(base_mc_id, requirements_id, model_requirements)
 
         foundational_mc_id = model_card['foundational_model']
         if foundational_mc_id:
             self.db.connect_foundational_model(base_mc_id, foundational_mc_id)
 
         # infer versioning
-        version_ingest_total_time, version_search_total_time = self.db.infer_versioning(model_card)
-        version_ingest_total_time, version_search_total_time = 0, 0
-
+        if self.similarity_enabled:
+            self.db.infer_versioning(model_card)
         return exists, base_mc_id
 
     def update_mc(self, model_card):

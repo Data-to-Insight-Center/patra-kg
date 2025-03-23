@@ -1,4 +1,4 @@
-FROM  --platform=linux/amd64 python:3.9-slim
+FROM  python:3.9-slim
 
 WORKDIR /app
 
@@ -16,5 +16,6 @@ ENV OPENAI_API_KEY=''
 ENV NEO4J_URI='bolt://locahost:7687'
 ENV NEO4J_USER=neo4j
 ENV NEO4J_PWD='pwd'
+ENV ENABLE_MC_SIMILARITY=False
 
 ENTRYPOINT [ "python", "-u", "/app/server/server.py"]

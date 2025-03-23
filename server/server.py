@@ -12,7 +12,9 @@ NEO4J_URI = os.getenv("NEO4J_URI")
 NEO4J_USERNAME = os.getenv("NEO4J_USER")
 NEO4J_PWD = os.getenv("NEO4J_PWD")
 
-mc_ingester = MCIngester(NEO4J_URI, NEO4J_USERNAME, NEO4J_PWD)
+ENABLE_MC_SIMILARITY = os.getenv("ENABLE_MC_SIMILARITY", "False").lower() == "true"
+
+mc_ingester = MCIngester(NEO4J_URI, NEO4J_USERNAME, NEO4J_PWD, ENABLE_MC_SIMILARITY)
 mc_reconstructor = MCReconstructor(NEO4J_URI, NEO4J_USERNAME, NEO4J_PWD)
 
 logging.basicConfig(level=logging.INFO)

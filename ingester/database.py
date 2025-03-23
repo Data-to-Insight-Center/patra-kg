@@ -1,24 +1,5 @@
-import multiprocessing
-
 from neo4j import GraphDatabase
 import time
-from scipy.spatial.distance import cosine
-from concurrent.futures import ProcessPoolExecutor
-import numpy as np
-from numpy.linalg import norm
-
-
-def calculate_cosine(zipped_input):
-    threshold = 0.90
-    new_embedding, model_id, model_embedding = zipped_input
-    # model_id = record['model_id']
-    # model_embedding = record['model_embedding']
-    # similarity = cosine(new_embedding, model_embedding)
-    similarity = np.dot(new_embedding, model_embedding) / (norm(new_embedding) * norm(model_embedding))
-
-    if similarity > threshold:
-        return similarity, model_id
-
 
 class GraphDB:
     _instance = None
@@ -91,14 +72,23 @@ class GraphDB:
             else:
                return None
 
-    def insert_base_mc(self, metadata):
+    def insert_base_mc(self, metadata, similarity_support=False):
         with self.driver.session() as session:
-            query = """
-               CREATE (mc:ModelCard {external_id: $id, name: $name, version: $version, short_description: $short_description,
-                                          full_description: $full_description, keywords: $keywords, author: $author,
-                                          input_data: $input_data, output_data: $output_data, input_type: $input_type,
-                                          categories: $category, embedding: $embedding, citation: $citation})
-               """
+            if similarity_support:
+                query = """
+                   CREATE (mc:ModelCard {external_id: $id, name: $name, version: $version, short_description: $short_description,
+                                              full_description: $full_description, keywords: $keywords, author: $author,
+                                              input_data: $input_data, output_data: $output_data, input_type: $input_type,
+                                              categories: $category, embedding: $embedding, citation: $citation})
+                   """
+                session.run(query, metadata)
+            else:
+                query = """
+                   CREATE (mc:ModelCard {external_id: $id, name: $name, version: $version, short_description: $short_description,
+                                              full_description: $full_description, keywords: $keywords, author: $author,
+                                              input_data: $input_data, output_data: $output_data, input_type: $input_type,
+                                              categories: $category, citation: $citation})
+                   """
             session.run(query, metadata)
 
     def update_base_mc(self, model_card_id, metadata):
@@ -132,7 +122,7 @@ class GraphDB:
             query = """
                CREATE (model:Model {model_id: $id, name: $name, version: $version, description: $description,
                                    owner: $owner, location: $location, license: $license, framework: $framework, 
-                                   model_type: $model_type, test_accuracy: $test_accuracy, inference_label: $inference_label})
+                                   model_type: $model_type, test_accuracy: $test_accuracy, inference_labels: $inference_labels})
             """
             session.run(query, ai_model_metadata, id=model_id)
 
@@ -510,16 +500,6 @@ class GraphDB:
         :param threshold: threshold for similarity for it to be a version
         :return:
         """
-        # query = """
-        #         MATCH (mc:ModelCard)
-        #         WITH mc.external_id AS model_id, mc.v_embedding AS model_embedding
-        #         WHERE NOT (mc.external_id = $mc_id)
-        #         MATCH (given_model:ModelCard{external_id: $mc_id})
-        #         WITH model_id, model_embedding, given_model.v_embedding AS given_embedding
-        #         WITH model_id, gds.similarity.cosine(model_embedding, given_embedding) AS similarity
-        #         WHERE similarity > $threshold
-        #         RETURN model_id, similarity
-        # """
         query = """        
                         MATCH (mc:ModelCard{external_id: $mc_id})
                         WITH mc.external_id AS model_id, mc.embedding AS given_embedding
@@ -535,20 +515,6 @@ class GraphDB:
 
         version_search_total_time = time.time() - version_search_start_time
 
-        # version_list = []
-        # model_embedding = model_card['v_embedding']
-        # for record in records:
-        #     rs = self.calculate_cosine(model_embedding, record)
-        #     if rs is not None:
-        #         version_list.append(rs)
-
-        # with ProcessPoolExecutor() as executor:
-        #     results = list(executor.map(calculate_cosine, [(model_embedding, record['model_id'], record['model_embedding']) for record in records]))
-
-        #     # Filter out None results
-        # version_list = [rs for rs in results if rs is not None]
-        #
-        #
         version_query = """
         MATCH (mc1:ModelCard {external_id: $mc1_id}), (mc2:ModelCard {external_id: $mc2_id})
         CREATE (mc1)-[r1:REVISION_OF {confidence: $similarity}]->(mc2)
