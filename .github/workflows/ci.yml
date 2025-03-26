@@ -11,5 +11,6 @@ jobs:
 
       - name: Run tests
         run: |
+          pip install -r server/requirements.txt
           pip install -r tests/requirements.txt
           pytest tests/test_patra_rest_services.py
