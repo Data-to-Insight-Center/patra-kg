@@ -183,10 +183,11 @@ class GeneratePID(Resource):
     @api.param('version', 'Model version')
     def get(self):
         """
-        Generate a PID for a given author, name, and version.
-
+        Generates a model_id for a given author, name, and version.
         Returns:
-            A JSON response containing the generated PID or an error message.
+            201: New PID for that combination
+            409: PID already exists; user must update version
+            400: Missing parameters
         """
         author = request.args.get('author')
         name = request.args.get('name')
@@ -197,16 +198,16 @@ class GeneratePID(Resource):
             return {"error": "Author, name, and version are required"}, 400
 
         pid = mc_ingester.get_pid(author, name, version)
-
         if pid is None:
-            logging.error("PID generation failed")
-            return {"error": "PID not generated"}, 400
+            logging.error("PID generation failed. Could not generate a unique identifier.")
+            return {"error": "PID could not be generated. Please try again."}, 500
 
         if mc_ingester.check_id_exists(pid):
-            return {"pid": pid, "message": "PID already exists"}, 409
+            logging.warning(f"Model ID '{pid}' already exists.")
+            return {"pid": pid}, 409
 
-        logging.info(f"PID generated: {pid}")
-        return {"pid": pid}, 200
+        logging.info(f"Model ID successfully generated: {pid}")
+        return {"pid": pid}, 201
 
 
 @api.route('/get_huggingface_credentials')
