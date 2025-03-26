@@ -183,7 +183,7 @@ class GeneratePID(Resource):
     @api.param('version', 'Model version')
     def get(self):
         """
-        Generate a PID for a given author, name, and version.
+        Generates a model_id for a given author, name, and version.
         Returns:
             201: New PID for that combination
             409: PID already exists; user must update version
