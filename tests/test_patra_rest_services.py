@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 from unittest.mock import MagicMock
 
 import pytest
@@ -29,6 +30,7 @@ def dummy_response(status_code, json_data):
 
 @pytest.fixture
 def client(monkeypatch):
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
     from server.server import app
     app.config['TESTING'] = True
     with app.test_client() as client:
