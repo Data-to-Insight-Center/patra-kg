@@ -118,6 +118,8 @@ class GraphDB:
 
     def insert_ai_model(self, model_card_id, ai_model_metadata):
         model_id = str(model_card_id + "-model")
+        ai_model_metadata.setdefault('inference_labels', [])
+
         with self.driver.session() as session:
             query = """
                CREATE (model:Model {model_id: $id, name: $name, version: $version, description: $description,

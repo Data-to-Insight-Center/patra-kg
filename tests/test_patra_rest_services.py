@@ -174,5 +174,14 @@ def test_get_github_credentials_failure(client, monkeypatch):
     assert "error" in data
 
 
+def test_upload_model_card_missing_inference_labels(monkeypatch):
+    data = load_json("tensorflow_titanic_MC.json")
+    dummy = dummy_response(200, {"message": "Successfully uploaded the model card", "model_card_id": "dummy_id"})
+    monkeypatch.setattr(requests, "post", lambda url, json: dummy)
+    response = requests.post(f"{BASE_URL}/upload_mc", json=data)
+    assert response.status_code == 200
+    assert "Successfully uploaded the model card" in response.json().get("message", "")
+
+
 if __name__ == "__main__":
     pytest.main()
