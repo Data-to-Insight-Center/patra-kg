@@ -38,6 +38,10 @@ services:
       - NEO4J_PWD=PWD_HERE
       - ENABLE_MC_SIMILARITY=False
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GH_HUB_USERNAME=
+      - GH_HUB_TOKEN=
+      - HF_HUB_USERNAME=
+      - HF_HUB_TOKEN=
     networks:
       - patra-network
 
