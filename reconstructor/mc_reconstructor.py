@@ -66,7 +66,7 @@ class MCReconstructor:
         if xai_analysis is not None:
             base_mc["xai_analysis"] = xai_analysis
 
-        return json.dumps(base_mc, indent=4)
+        return base_mc
 
     def get_result_dict(self, query, type, metadata):
         response = self.db.get_result_query(query, metadata)
