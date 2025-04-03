@@ -1,8 +1,9 @@
-import os
 import logging
+import os
 from urllib.parse import urlparse
 
-from flask import Flask, request
+import jwt
+from flask import Flask, request, jsonify
 from flask_restx import Api, Resource
 
 from ingester.neo4j_ingester import MCIngester
@@ -22,6 +23,8 @@ app = Flask(__name__)
 api = Api(app, version='1.0', title='Patra API',
           description='API to interact with Patra Knowledge Graph',
           doc='/swagger')
+
+PUBLIC_KEY = os.getenv("TAPIS_PUBLIC_KEY")
 
 
 @app.route('/')
@@ -208,6 +211,26 @@ class GeneratePID(Resource):
 
         logging.info(f"Model ID successfully generated: {pid}")
         return {"pid": pid}, 201
+
+
+@app.route('/verify_token', methods=['GET'])
+def verify_token():
+    # Extract and validate the access token from the Authorization header.
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Access token required."}), 401
+
+    token = auth_header.split(" ")[1]
+
+    # Attempt to decode the token; return error if any exception occurs.
+    try:
+        decoded = jwt.decode(token, PUBLIC_KEY, algorithms=["RS256"])
+    except Exception as e:
+        app.logger.error(f"Token verification error: {e}")
+        return jsonify({"error": "Invalid or expired access token."}), 401
+
+    # Token is valid; return decoded claims for debugging.
+    return jsonify({"message": "User verified successfully.", "claims": decoded}), 200
 
 
 @api.route('/get_huggingface_credentials')
