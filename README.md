@@ -28,22 +28,27 @@ For more information, please refer to the [Patra ModelCards paper](https://ieeex
 The server is built using Flask and exposes a RESTful API for interaction with the Patra Knowledge Graph (KG).
 
 
-| Endpoint                 | Method | Description                                                        |
-|--------------------------|--------|--------------------------------------------------------------------|
-| `/upload_mc`             | POST   | Upload a model card to the Patra Knowledge Graph.                  |
-| `/update_mc`             | POST   | Update an existing model card.                                     |
-| `/upload_ds`             | POST   | Upload a datasheet to the Patra Knowledge Graph.                   |
-| `/search`                | GET    | Full-text search for model cards.                                  |
-| `/download_mc`           | GET    | Download a reconstructed model card from the Patra Knowledge Graph. |
-| `/download_url`          | GET    | Retrieve the download URL for a given model ID.                    |
-| `/list`                  | GET    | List all models in the Patra Knowledge Graph.                      |
-| `/model_deployments`     | GET    | Get all deployments for a given model ID.                          |
-| `/update_model_location` | POST   | Update the model’s location in the graph.                          |
-| `/get_model_id`          | GET    | Generates a model_id for a given author, name, and version.        |
-| `/get_huggingface_credentials`        | GET   | Get Hugging Face credentials for a given model ID.                 |
-| `/get_model_card_by_name`| GET    | Get a model card by name.                                          |
+| Endpoint                       | Method | Description                                                                                                            |
+|--------------------------------|--------|------------------------------------------------------------------------------------------------------------------------|
+| `/upload_mc`                   | POST   | Upload a model card to the Patra Knowledge Graph.                                                                      |
+| `/update_mc`                   | POST   | Update an existing model card.                                                                                         |
+| `/upload_ds`                   | POST   | Upload a datasheet to the Patra Knowledge Graph.                                                                       |
+| `/search`                      | GET    | Full-text search for model cards.                                                                                      |
+| `/download_mc`                 | GET    | Download a reconstructed model card from the Patra Knowledge Graph.                                                    |
+| `/download_url`                | GET    | Retrieve the download URL for a given model ID.                                                                        |
+| `/list`                        | GET    | List all models in the Patra Knowledge Graph.                                                                          |
+| `/model_deployments`           | GET    | Get all deployments for a given model ID.                                                                              |
+| `/update_model_location`       | POST   | Update the model’s location in the graph.                                                                              |
+| `/get_model_id`                | GET    | Generates a model_id for a given author, name, and version.                                                            |
+| `/get_huggingface_credentials` | GET   | Get Hugging Face credentials for a given model ID.                                                                     |
+| `/get_model_card_by_name`      | GET    | Get a model card by name.                                                                                              |
+| `/modelcard_linkset`           | GET    | Returns the modelcard linkset in the header for a given modelcard id<br/>ex: <server_url>/modelcard_linkset?id=<mc_id> |
+
+For more information on the server endpoints, please refer to the [API documentation.](https://github.com/Data-to-Insight-Center/patra-kg/blob/main/patra_openapi.json)
 
 ---
+
+
 
 ## Getting Started
 
