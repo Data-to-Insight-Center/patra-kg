@@ -1,9 +1,8 @@
-import logging
 import os
+import logging
 from urllib.parse import urlparse
 
-import jwt
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 from flask_restx import Api, Resource
 
 from ingester.neo4j_ingester import MCIngester
@@ -23,8 +22,6 @@ app = Flask(__name__)
 api = Api(app, version='1.0', title='Patra API',
           description='API to interact with Patra Knowledge Graph',
           doc='/swagger')
-
-PUBLIC_KEY = os.getenv("TAPIS_PUBLIC_KEY")
 
 
 @app.route('/')
@@ -239,6 +236,37 @@ class GHcredentials(Resource):
         if not gh_username or not gh_token:
             return {"error": "Github credentials not set."}, 400
         return {"username": gh_username, "token": gh_token}, 200
+
+@api.route('/modelcard_linkset') # Or your preferred route
+class ModelCardLinkset(Resource):
+    @api.param('id', 'The model card ID')
+    def get(self):
+        """
+        Provides linkset relations for a model card in the HTTP Link header.
+        Returns an empty body with link information in the header.
+        """
+        mc_id = request.args.get('id')
+        if not mc_id:
+            return {"error": "ID is required"}, 400
+
+        model_card = mc_reconstructor.reconstruct(str(mc_id))
+
+        if not model_card:
+             error_payload = jsonify({"error": f"Model card with ID '{mc_id}' could not be found!"})
+             return Response(response=error_payload.get_data(as_text=True), status=404, mimetype='application/json')
+
+        generated_headers = mc_reconstructor.get_link_headers(model_card)
+
+        # Creating the response with an empty body
+        response = Response(
+            response=None,
+            status=200,
+            mimetype='text/plain'
+        )
+
+        # Add generated headers to the response
+        response.headers.update(generated_headers)
+        return response
 
 
 if __name__ == '__main__':

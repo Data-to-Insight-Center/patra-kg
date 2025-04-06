@@ -1,5 +1,6 @@
 from ingester.database import GraphDB
 import json
+from typing import Dict, Optional, Any
 
 
 class MCReconstructor:
@@ -150,3 +151,58 @@ class MCReconstructor:
         Update the model location
         """
         self.db.set_model_location(model_id, location)
+
+
+    def get_link_headers(self, model_card) -> Dict[str, str]:
+        """
+        Generates HTTP Link and Content-Length headers based on model card data,
+        targeting specific fields like author, input_data, model location, etc.
+
+        Args:
+            model_card_id: id of the model card
+        Returns:
+            A dictionary containing 'Link' and 'Content-Length' headers.
+            The 'Link' header will contain relations based on available data.
+            The 'Content-Length' will be '0'.
+        """
+        links = []
+
+        model_card_id: str = model_card.get('external_id')
+        author: str = model_card.get('author')
+        input_data_url: str = model_card.get('input_data')
+
+        ai_model_dict: Dict[str, Any] = model_card.get('ai_model', {})
+
+        model_location_url: Optional[str] = ai_model_dict.get('location')
+        inference_labels_url: Optional[str] = ai_model_dict.get('inference_labels')
+
+        # Assembling links
+        links.append(f'<{model_card_id}>; rel="cite-as"')
+
+        if author and isinstance(author, str) and author.startswith(('http://', 'https://')):
+            links.append(f'<{author}>; rel="author"')
+        else:
+            links.append(f'<http://tapis.com/{author}>; rel="author"')
+
+        if input_data_url and isinstance(input_data_url, str) and input_data_url.startswith(('http://', 'https://')):
+            links.append(f'<{input_data_url}>; rel="item"; title="input_data"')
+
+        if model_location_url and isinstance(model_location_url, str) and model_location_url.startswith(
+                ('http://', 'https://')):
+            links.append(f'<{model_location_url}>; rel="item"; title="model_location"')
+
+        if inference_labels_url and isinstance(inference_labels_url, str) and inference_labels_url.startswith(
+                ('http://', 'https://')):
+            links.append(f'<{inference_labels_url}>; rel="item"; title="inference_labels"')
+
+        # Assembling the header
+        headers = {}
+        link_header_value = ", ".join(links)
+
+        if link_header_value:
+            headers['Link'] = link_header_value
+
+        # Setting the Content-Length for an empty body response
+        headers['Content-Length'] = '0'
+
+        return headers

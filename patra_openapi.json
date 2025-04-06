@@ -46,20 +46,63 @@
                 ]
             }
         },
-        "/get_hash_id": {
+        "/get_github_credentials": {
             "get": {
                 "responses": {
                     "200": {
                         "description": "Success"
                     }
                 },
-                "summary": "Return a unique hash for the provided combined_string",
-                "operationId": "get_generate_hash_id",
+                "summary": "Retrieves Github credentials",
+                "description": "Returns a JSON object with 'username' and 'token'.",
+                "operationId": "get_g_hcredentials",
+                "tags": [
+                    "default"
+                ]
+            }
+        },
+        "/get_huggingface_credentials": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "Retrieves Hugging Face credentials",
+                "description": "Returns a JSON object with 'username' and 'token'.",
+                "operationId": "get_h_fcredentials",
+                "tags": [
+                    "default"
+                ]
+            }
+        },
+        "/get_model_id": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "Generates a model_id for a given author, name, and version",
+                "description": "Returns:\n    201: New PID for that combination\n    409: PID already exists; user must update version\n    400: Missing parameters",
+                "operationId": "get_generate_pid",
                 "parameters": [
                     {
                         "in": "query",
-                        "description": "The combined string to be hashed",
-                        "name": "combined_string",
+                        "description": "Model version",
+                        "name": "version",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "description": "Model author",
+                        "name": "author",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "description": "Model name",
+                        "name": "name",
                         "type": "string"
                     }
                 ],
@@ -96,6 +139,29 @@
                         "in": "query",
                         "description": "The model ID",
                         "name": "model_id",
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "default"
+                ]
+            }
+        },
+        "/modelcard_linkset": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "Provides linkset relations for a model card in the HTTP Link header",
+                "description": "Returns an empty body with link information in the header.",
+                "operationId": "get_model_card_linkset",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "description": "The model card ID",
+                        "name": "id",
                         "type": "string"
                     }
                 ],
