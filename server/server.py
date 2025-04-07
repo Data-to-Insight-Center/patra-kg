@@ -102,6 +102,35 @@ class DownloadModelCard(Resource):
 
         return model_card, 200
 
+    @api.param('id', 'The model card ID')
+    def head(self):
+        """
+        Provides linkset relations for a model card in the HTTP Link header.
+        Returns an empty body with link information in the header.
+        """
+        mc_id = request.args.get('id')
+        if not mc_id:
+            return {"error": "ID is required"}, 400
+
+        model_card = mc_reconstructor.reconstruct(str(mc_id))
+
+        if not model_card:
+            error_payload = jsonify({"error": f"Model card with ID '{mc_id}' could not be found!"})
+            return Response(response=error_payload.get_data(as_text=True), status=404, mimetype='application/json')
+
+        generated_headers = mc_reconstructor.get_link_headers(model_card)
+
+        # Creating the response with an empty body
+        response = Response(
+            response=None,
+            status=200,
+            mimetype='text/plain'
+        )
+
+        # Add generated headers to the response
+        response.headers.update(generated_headers)
+        return response
+
 
 @api.route('/download_url')
 class ModelDownloadURL(Resource):
