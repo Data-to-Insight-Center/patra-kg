@@ -266,7 +266,7 @@ class GHcredentials(Resource):
             return {"error": "Github credentials not set."}, 400
         return {"username": gh_username, "token": gh_token}, 200
 
-@api.route('/modelcard_linkset') # Or your preferred route
+@api.route('/modelcard_linkset')
 class ModelCardLinkset(Resource):
     @api.param('id', 'The model card ID')
     def get(self):
@@ -296,6 +296,27 @@ class ModelCardLinkset(Resource):
         # Add generated headers to the response
         response.headers.update(generated_headers)
         return response
+
+
+@api.route('/search_pids')
+class SearchPIDS(Resource):
+    @api.doc(
+        description="Search model card IDs by any properties from the schema. "
+                    "All parameters are optional. Simply supply them as query "
+                    "parameters (e.g., ?name=MyModel&version=1.0)."
+    )
+    def get(self):
+        """
+        Retrieve all model card IDs that match any (optional) query parameters.
+        If no parameters are provided, all model cards will be returned
+        (assuming 'search_pids' handles an empty params dict by returning all).
+        """
+        # Convert all query parameters to a dict
+        query_params = request.args.to_dict()
+
+        # Pass them to your search method
+        model_card_ids = mc_reconstructor.search_pids(query_params)
+        return model_card_ids, 200
 
 
 if __name__ == '__main__':
