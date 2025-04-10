@@ -206,3 +206,25 @@ class MCReconstructor:
         headers['Content-Length'] = '0'
 
         return headers
+
+    def get_serving_configs(self, model_id: str):
+        """
+        Retrieves serving configurations data, returning data or error message
+        and a suggested HTTP status code.
+
+        Args:
+            model_id: The unique ID of the Model.
+
+        Returns:
+            A tuple: (data_list, error_message, status_code)
+            - On success: (list_of_configs, None, 200)
+            - On not found: (None, error_message, 404)
+            - On other errors: (None, error_message, 500)
+        """
+        try:
+            serving_configs_list = self.db.get_serving_configurations(model_id)
+            return serving_configs_list, None, 200  # Success
+
+        except Exception as e:
+            print(f"Error retrieving serving configs for model_id '{model_id}': {e}")
+            return None, "An internal error occurred while fetching serving configurations.", 500

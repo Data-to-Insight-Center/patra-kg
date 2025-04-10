@@ -23,27 +23,27 @@ services:
     networks:
       - patra-network
 
-  patra-server:
-    image: iud2i/patra-server:latest
-    container_name: patra_kg_server
-    ports:
-      - "5002:5002"
-    depends_on:
-      - patra-neo4j
-    env_file:
-      - .env
-    environment:
-      - NEO4J_URI=bolt://patra-neo4j:7687
-      - NEO4J_USER=neo4j
-      - NEO4J_PWD=PWD_HERE
-      - ENABLE_MC_SIMILARITY=False
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - GH_HUB_USERNAME=
-      - GH_HUB_TOKEN=
-      - HF_HUB_USERNAME=
-      - HF_HUB_TOKEN=
-    networks:
-      - patra-network
+#  patra-server:
+#    image: iud2i/patra-server:latest
+#    container_name: patra_kg_server
+#    ports:
+#      - "5002:5002"
+#    depends_on:
+#      - patra-neo4j
+#    env_file:
+#      - .env
+#    environment:
+#      - NEO4J_URI=bolt://patra-neo4j:7687
+#      - NEO4J_USER=neo4j
+#      - NEO4J_PWD=PWD_HERE
+#      - ENABLE_MC_SIMILARITY=False
+#      - OPENAI_API_KEY=${OPENAI_API_KEY}
+#      - GH_HUB_USERNAME=
+#      - GH_HUB_TOKEN=
+#      - HF_HUB_USERNAME=
+#      - HF_HUB_TOKEN=
+#    networks:
+#      - patra-network
 
 networks:
   patra-network:

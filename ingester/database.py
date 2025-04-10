@@ -1,3 +1,5 @@
+import json
+
 from neo4j import GraphDatabase
 import time
 
@@ -683,6 +685,104 @@ class GraphDB:
                 deployment["user"] = record.get("user", "")
                 records.append(deployment)
             return records
+
+
+    def get_serving_configurations(self, model_id: str) -> list[dict]:
+        """
+        Retrieves all Serving Configurations directly associated with the given
+        model_id, reconstructing their nested structure based on the provided queries.
+        (Version without ModelVersion, Accelerators, or Artifacts).
+
+        Args:
+            model_id: The unique ID of the Model.
+
+        Returns:
+            A list of Python dictionaries, where each dictionary represents a
+            complete ServingConfiguration ready for JSON conversion.
+            Returns an empty list if the model or configurations are not found.
+        """
+        query = """
+        MATCH (m:Model {model_id: $model_id})-[:HAS_SERVING_CONFIG]->(sc:ServingConfiguration)
+        WITH sc
+
+        // Optional matches for related detailed nodes (Interface, Schemas, Server Config)
+        OPTIONAL MATCH (sc)-[:DEFINES_INTERFACE]->(idef:InterfaceDefinition)
+        OPTIONAL MATCH (idef)-[:HAS_INPUT_DEFINITION]->(inDef:IODefinition {type:'input'})
+        OPTIONAL MATCH (idef)-[:HAS_OUTPUT_DEFINITION]->(outDef:IODefinition {type:'output'})
+
+        // Collect and return properties
+        RETURN
+            properties(sc) AS config_base,
+            CASE idef WHEN NULL THEN null ELSE properties(idef) END AS interface_base,
+            CASE inDef WHEN NULL THEN null ELSE properties(inDef) END AS input_definition,
+            CASE outDef WHEN NULL THEN null ELSE properties(outDef) END AS output_definition
+        """
+        results = []
+
+        with self.driver.session() as session:
+            result_cursor = session.run(query, model_id=model_id)
+            for record in result_cursor:
+                config = dict(record["config_base"])
+
+                # Reconstruct Platform Requirements
+                platform_reqs = {}
+                if "platform_architecture" in config:
+                    platform_reqs["architecture"] = config.pop("platform_architecture")
+                if "platform_min_cpu" in config:
+                    platform_reqs["min_cpu"] = config.pop("platform_min_cpu")
+                if "platform_min_memory" in config:
+                    platform_reqs["min_memory"] = config.pop("platform_min_memory")
+                # Include min_gpu if needed, even if 0
+                if "platform_min_gpu" in config:
+                     platform_reqs["min_gpu"] = config.pop("platform_min_gpu")
+
+                # Add the nested platform_requirements dict if it has content
+                if platform_reqs:
+                     config["platform_requirements"] = platform_reqs
+
+                #Reconstruct Interface Definitions
+                interface_base = record.get("interface_base")
+                if interface_base:
+                    interface_def = dict(interface_base)
+                    input_def_props = record.get("input_definition")
+                    output_def_props = record.get("output_definition")
+
+                    # Add Input Schema if present
+                    if input_def_props:
+                        input_schema = dict(input_def_props)
+                        if "structure_json" in input_schema and isinstance(input_schema["structure_json"], str):
+                            try:
+                                parsed_structure = json.loads(input_schema["structure_json"])
+                                input_schema["structure_json"] = parsed_structure
+                            except json.JSONDecodeError as e:
+                                print(
+                                    f"Warning: Failed to parse input structure_json for io_id {input_schema.get('io_id', 'N/A')}: {e}")
+                                input_schema["structure_error"] = "Failed to parse JSON content"
+                        else:
+                            if "structure_json" not in input_schema:
+                                input_schema["structure"] = None
+                        interface_def["input_schema"] = input_schema
+
+                    # Add Output Schema if present
+                    if output_def_props:
+                        output_schema = dict(output_def_props)
+                        if "structure_json" in output_schema and isinstance(output_schema["structure_json"], str):
+                            try:
+                                parsed_structure = json.loads(output_schema["structure_json"])
+                                output_schema["structure_json"] = parsed_structure
+                            except json.JSONDecodeError as e:
+                                print(
+                                    f"Warning: Failed to parse output structure_json for io_id {output_schema.get('io_id', 'N/A')}: {e}")
+                                output_schema["structure_error"] = "Failed to parse JSON content"
+                        else:
+                            if "structure_json" not in output_schema:
+                                output_schema["structure"] = None
+                        interface_def["output_schema"] = output_schema
+
+                    config["interface_definition"] = interface_def
+                results.append(config)
+
+        return results
 
     def set_model_location(self, model_id, location):
         query = """

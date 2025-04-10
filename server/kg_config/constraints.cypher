@@ -19,6 +19,19 @@ FOR (ds:Datasheet) REQUIRE ds.external_id IS UNIQUE;
 CREATE CONSTRAINT deployment_id IF NOT EXISTS
 FOR (depl:Deployment) REQUIRE depl.deployment_id IS UNIQUE;
 
+CREATE CONSTRAINT deployment_id IF NOT EXISTS
+FOR (depl:Deployment) REQUIRE depl.deployment_id IS UNIQUE;
+
+CREATE CONSTRAINT serving_config_id IF NOT EXISTS
+FOR (sc:ServingConfiguration) REQUIRE sc.config_id IS UNIQUE;
+
+CREATE CONSTRAINT interface_id IF NOT EXISTS
+FOR (iface:InterfaceDefinition) REQUIRE iface.inteface_id IS UNIQUE;
+
+CREATE CONSTRAINT io_id IF NOT EXISTS
+FOR (io:IODefinition) REQUIRE io.io_id IS UNIQUE;
+
+
 CREATE VECTOR INDEX `modelEmbeddings` IF NOT EXISTS
 FOR (m:ModelCard)
 ON m.embedding

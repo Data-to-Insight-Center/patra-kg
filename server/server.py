@@ -1,3 +1,4 @@
+import json
 import os
 import logging
 from urllib.parse import urlparse
@@ -297,6 +298,37 @@ class ModelCardLinkset(Resource):
         response.headers.update(generated_headers)
         return response
 
+    @api.route('/serving_configurations')
+    class ServingConfigurations(Resource):
+
+        @api.doc(description="Retrieve all serving configurations for a given model ID.")
+        @api.param('model_id', 'The unique identifier for the Model', required=True, _in='query')
+        @api.response(200, 'Success')
+        @api.response(400, 'Validation Error: Model ID is required')
+        @api.response(404, 'Not Found: Model or configurations not found')
+        @api.response(500, 'Internal Server Error')
+        def get(self):
+            """
+            Get serving configurations for a given model ID
+            """
+            model_id = request.args.get('model_id')
+            if not model_id:
+                api.abort(400, "Model ID is required")
+
+            try:
+                serving_configs_data, error_msg, status_code = mc_reconstructor.get_serving_configs(str(model_id))
+                if status_code == 200:
+                    response_payload = {
+                        "model_id": model_id,
+                        "serving_configurations": serving_configs_data
+                    }
+                    json_string = json.dumps(response_payload, indent=2, default=str)
+                    return Response(json_string, mimetype='application/json', status=200)
+                else:
+                    api.abort(status_code, error_msg)
+
+            except Exception as e:
+                api.abort(500, "An unexpected internal server error occurred.")
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5002)
