@@ -298,7 +298,7 @@ class ModelCardLinkset(Resource):
         return response
 
 
-@api.route('/search_pids')
+@api.route('/search_mcs')
 class SearchPIDS(Resource):
     @api.doc(
         description="Search model card IDs by any properties from the schema. "
