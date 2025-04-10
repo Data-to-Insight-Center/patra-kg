@@ -206,3 +206,25 @@ class MCReconstructor:
         headers['Content-Length'] = '0'
 
         return headers
+
+    def search_pids(self, params: Dict[str, str]) -> list:
+        """
+        Retrieve all PIDs (mc.external_id) based on any combination of parameters
+        in 'params'. Each key in 'params' should map to a property in the ModelCard node.
+
+        :param params: e.g., {'author': 'some_author', 'name': 'some_name'}.
+        :return: A list of matching PIDs.
+        """
+        query = "MATCH (mc:ModelCard)"
+
+        if params:
+            filters = []
+            for key in params:
+                filters.append(f"mc.{key} = ${key}")
+
+            query += "\nWHERE " + " AND ".join(filters)
+        query += "\nRETURN mc.external_id AS pid"
+
+        results = self.db.get_result_query_list(query, params)
+        pids = [record["pid"] for record in results]
+        return pids
