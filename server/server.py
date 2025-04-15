@@ -2,7 +2,7 @@ import os
 import logging
 from urllib.parse import urlparse
 
-from flask import Flask, request, jsonify, Response
+from flask import Flask, request, jsonify, Response, make_response
 from flask_restx import Api, Resource
 
 from ingester.neo4j_ingester import MCIngester
@@ -130,7 +130,12 @@ class ListModels(Resource):
         Lists all the models in Patra KG.
         """
         model_card_dict = mc_reconstructor.get_all_mcs()
-        return model_card_dict, 200
+        response = make_response(model_card_dict, 200)
+
+        trusted_username = request.headers.get("TAPIS_TRUSTED_USERNAME_HEADER", None)
+        response.headers["TAPIS_TRUSTED_USERNAME_HEADER"] = trusted_username
+
+        return response
 
 
 @api.route('/model_deployments')
@@ -237,7 +242,8 @@ class GHcredentials(Resource):
             return {"error": "Github credentials not set."}, 400
         return {"username": gh_username, "token": gh_token}, 200
 
-@api.route('/modelcard_linkset') # Or your preferred route
+
+@api.route('/modelcard_linkset')
 class ModelCardLinkset(Resource):
     @api.param('id', 'The model card ID')
     def get(self):
@@ -252,8 +258,8 @@ class ModelCardLinkset(Resource):
         model_card = mc_reconstructor.reconstruct(str(mc_id))
 
         if not model_card:
-             error_payload = jsonify({"error": f"Model card with ID '{mc_id}' could not be found!"})
-             return Response(response=error_payload.get_data(as_text=True), status=404, mimetype='application/json')
+            error_payload = jsonify({"error": f"Model card with ID '{mc_id}' could not be found!"})
+            return Response(response=error_payload.get_data(as_text=True), status=404, mimetype='application/json')
 
         generated_headers = mc_reconstructor.get_link_headers(model_card)
 
