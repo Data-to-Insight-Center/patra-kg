@@ -132,8 +132,8 @@ class ListModels(Resource):
         model_card_dict = mc_reconstructor.get_all_mcs()
         response = make_response(model_card_dict, 200)
 
-        trusted_username = request.headers.get("TAPIS_TRUSTED_USERNAME_HEADER", None)
-        response.headers["TAPIS_TRUSTED_USERNAME_HEADER"] = trusted_username
+        trusted_username = request.headers.get("tapis_validated_username", None)
+        response.headers["tapis_validated_username"] = trusted_username
 
         return response
 
