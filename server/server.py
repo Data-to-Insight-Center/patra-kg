@@ -266,6 +266,7 @@ class GHcredentials(Resource):
             return {"error": "Github credentials not set."}, 400
         return {"username": gh_username, "token": gh_token}, 200
 
+
 @api.route('/modelcard_linkset')
 class ModelCardLinkset(Resource):
     @api.param('id', 'The model card ID')
@@ -281,8 +282,8 @@ class ModelCardLinkset(Resource):
         model_card = mc_reconstructor.reconstruct(str(mc_id))
 
         if not model_card:
-             error_payload = jsonify({"error": f"Model card with ID '{mc_id}' could not be found!"})
-             return Response(response=error_payload.get_data(as_text=True), status=404, mimetype='application/json')
+            error_payload = jsonify({"error": f"Model card with ID '{mc_id}' could not be found!"})
+            return Response(response=error_payload.get_data(as_text=True), status=404, mimetype='application/json')
 
         generated_headers = mc_reconstructor.get_link_headers(model_card)
 
@@ -301,20 +302,20 @@ class ModelCardLinkset(Resource):
 @api.route('/search_mcs')
 class SearchPIDS(Resource):
     @api.doc(
-        description="Search model card IDs by any properties from the schema. "
-                    "All parameters are optional. Simply supply them as query "
-                    "parameters (e.g., ?name=MyModel&version=1.0)."
+        description=(
+                "Search model card IDs by any properties from the schema. "
+                "All parameters are optional. Supply them in the JSON request body."
+        )
     )
-    def get(self):
+    def post(self):
         """
-        Retrieve all model card IDs that match any (optional) query parameters.
-        If no parameters are provided, all model cards will be returned
-        (assuming 'search_pids' handles an empty params dict by returning all).
+        Retrieve all model card IDs that match any (optional) JSON parameters.
+        If no parameters are provided, returns all model cards.
         """
-        # Convert all query parameters to a dict
-        query_params = request.args.to_dict()
+        # Read JSON body (default to empty dict if none provided)
+        query_params = request.get_json(force=True, silent=True) or {}
 
-        # Pass them to your search method
+        # Pass them to your enhanced search method
         model_card_ids = mc_reconstructor.search_mcs(query_params)
         return model_card_ids, 200
 

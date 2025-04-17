@@ -152,7 +152,6 @@ class MCReconstructor:
         """
         self.db.set_model_location(model_id, location)
 
-
     def get_link_headers(self, model_card) -> Dict[str, str]:
         """
         Generates HTTP Link and Content-Length headers based on model card data,
@@ -209,22 +208,33 @@ class MCReconstructor:
 
     def search_mcs(self, params: Dict[str, str]) -> list:
         """
-        Retrieve all PIDs (mc.external_id) based on any combination of parameters
-        in 'params'. Each key in 'params' should map to a property in the ModelCard node.
-
-        :param params: e.g., {'author': 'some_author', 'name': 'some_name'}.
-        :return: A list of matching PIDs.
+        Retrieve PIDs where any of the provided properties contains the given substring.
+        Matching is case-insensitive. Supports filtering both ModelCard and AI Model properties.
         """
         query = "MATCH (mc:ModelCard)"
 
         if params:
-            filters = []
-            for key in params:
-                filters.append(f"mc.{key} = ${key}")
+            mc_filters = []
+            ai_filters = []
 
-            query += "\nWHERE " + " AND ".join(filters)
+            for key, value in params.items():
+                if key.startswith("ai_model_"):
+                    ai_prop = key[len("ai_model_"):]
+                    ai_filters.append(f"toLower(mc.{ai_prop}) CONTAINS toLower(${key})")
+                else:
+                    mc_filters.append(f"toLower(mc.{key}) CONTAINS toLower(${key})")
+
+            if mc_filters or ai_filters:
+                query += "\nWHERE "
+                if mc_filters:
+                    query += " AND ".join(mc_filters)
+                if mc_filters and ai_filters:
+                    query += " AND "
+                if ai_filters:
+                    query += " AND ".join(ai_filters)
+
         query += "\nRETURN mc.external_id AS pid"
 
+        # Execute the query and fetch results
         results = self.db.fetch_query_results(query, params)
-        pids = [record["pid"] for record in results]
-        return pids
+        return [record["pid"] for record in results]

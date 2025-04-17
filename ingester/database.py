@@ -1,6 +1,7 @@
 from neo4j import GraphDatabase
 import time
 
+
 class GraphDB:
     _instance = None
 
@@ -44,7 +45,7 @@ class GraphDB:
             if matched_node and matched_node.get('mc'):
                 return True, matched_node.get('mc')['external_id']
             else:
-               return False, None
+                return False, None
 
     def check_update_mc(self, metadata):
         """
@@ -70,7 +71,7 @@ class GraphDB:
             if matched_node and matched_node.get('mc'):
                 return matched_node.get('mc')['external_id']
             else:
-               return None
+                return None
 
     def insert_base_mc(self, metadata, similarity_support=False):
         with self.driver.session() as session:
@@ -152,7 +153,6 @@ class GraphDB:
         """
         model_id = str(model_card_id + "-model")
         with self.driver.session() as session:
-
             query = """
                 MATCH (model:Model {model_id: $id})
                 SET model.name = $name,
@@ -363,7 +363,7 @@ class GraphDB:
                                 LIMIT 1
                       """
 
-            result =  session.run(query, data_id=datasheet_id, mc_id=mc_id)
+            result = session.run(query, data_id=datasheet_id, mc_id=mc_id)
             matched_node = result.single()
 
             if not matched_node or not matched_node.get('ds'):
@@ -385,14 +385,13 @@ class GraphDB:
         :return:
         """
         with self.driver.session() as session:
-
             model_card = self.check_model_card_exists(foundational_mc_id)
             if model_card:
                 query = """
                                MATCH (retrain_mc:ModelCard {external_id: $retrain_mc_id}) , (foundational_mc:ModelCard {external_id: $foundational_mc_id})
                                CREATE (retrain_mc)-[:TRANSFORMATIVE_USE_OF]->(foundational_mc)
                                """
-                session.run(query, retrain_mc_id = retrain_mc_id, foundational_mc_id = foundational_mc_id)
+                session.run(query, retrain_mc_id=retrain_mc_id, foundational_mc_id=foundational_mc_id)
 
     def check_model_card_exists(self, mc_id):
         """
@@ -407,7 +406,7 @@ class GraphDB:
                             RETURN model_card
                             LIMIT 1
                               """
-            result = session.run(check_query, mc_id = mc_id)
+            result = session.run(check_query, mc_id=mc_id)
             record = result.single()
             if record:
                 model_card_node = record["model_card"]
@@ -663,9 +662,7 @@ class GraphDB:
     def fetch_query_results(self, query, parameters):
         with self.driver.session() as session:
             result = session.run(query, parameters)
-            records = []
-            for record in result:
-                records.append(record)
+            records = [record for record in result]
             return records
 
     def get_deployments(self, model_id):
