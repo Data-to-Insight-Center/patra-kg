@@ -660,7 +660,7 @@ class GraphDB:
             result = session.run(query, parameters).single()
         return result
 
-    def get_result_query_list(self, query, parameters):
+    def fetch_query_results(self, query, parameters):
         with self.driver.session() as session:
             result = session.run(query, parameters)
             records = []

@@ -225,6 +225,6 @@ class MCReconstructor:
             query += "\nWHERE " + " AND ".join(filters)
         query += "\nRETURN mc.external_id AS pid"
 
-        results = self.db.get_result_query_list(query, params)
+        results = self.db.fetch_query_results(query, params)
         pids = [record["pid"] for record in results]
         return pids
