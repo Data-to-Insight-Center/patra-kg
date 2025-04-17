@@ -130,10 +130,9 @@ class ListModels(Resource):
         Lists all the models in Patra KG.
         """
         model_card_dict = mc_reconstructor.get_all_mcs()
-        response = make_response(model_card_dict, 200)
 
-        trusted_username = dict(request.headers).get("tapis_validated_username", None)
-        response.headers["tapis_validated_username"] = trusted_username
+        response = make_response(model_card_dict, 200)
+        response.headers["username"] = request.headers.get("Tapis-Trusted-Username-Header", None)
 
         return response
 
@@ -194,7 +193,7 @@ class GeneratePID(Resource):
             409: PID already exists; user must update version
             400: Missing parameters
         """
-        author = request.args.get('author')
+        author = request.headers.get("Tapis-Trusted-Username-Header", None)
         name = request.args.get('name')
         version = request.args.get('version')
 
@@ -226,7 +225,11 @@ class HFcredentials(Resource):
         hf_token = os.getenv("HF_HUB_TOKEN")
         if not hf_username or not hf_token:
             return {"error": "Hugging Face credentials not set."}, 400
-        return {"username": hf_username, "token": hf_token}, 200
+
+        response = make_response({"username": hf_username, "token": hf_token}, 200)
+        response.headers["username"] = request.headers.get("Tapis-Trusted-Username-Header", None)
+
+        return response
 
 
 @api.route('/get_github_credentials')
