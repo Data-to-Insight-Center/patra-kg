@@ -315,7 +315,7 @@ class SearchPIDS(Resource):
         query_params = request.args.to_dict()
 
         # Pass them to your search method
-        model_card_ids = mc_reconstructor.search_pids(query_params)
+        model_card_ids = mc_reconstructor.search_mcs(query_params)
         return model_card_ids, 200
 
 

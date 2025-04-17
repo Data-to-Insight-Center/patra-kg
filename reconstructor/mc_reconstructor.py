@@ -207,7 +207,7 @@ class MCReconstructor:
 
         return headers
 
-    def search_pids(self, params: Dict[str, str]) -> list:
+    def search_mcs(self, params: Dict[str, str]) -> list:
         """
         Retrieve all PIDs (mc.external_id) based on any combination of parameters
         in 'params'. Each key in 'params' should map to a property in the ModelCard node.
