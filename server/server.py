@@ -183,7 +183,6 @@ class UpdateModelLocation(Resource):
 @api.route('/get_model_id')
 class GeneratePID(Resource):
     @api.param('name', 'Model name')
-    @api.param('author', 'Model author')
     @api.param('version', 'Model version')
     def get(self):
         """
