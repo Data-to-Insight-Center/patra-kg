@@ -2,7 +2,7 @@ import os
 import logging
 from urllib.parse import urlparse
 
-from flask import Flask, request, jsonify, Response, make_response
+from flask import Flask, request, jsonify, Response
 from flask_restx import Api, Resource
 
 from ingester.neo4j_ingester import MCIngester
@@ -130,11 +130,7 @@ class ListModels(Resource):
         Lists all the models in Patra KG.
         """
         model_card_dict = mc_reconstructor.get_all_mcs()
-
-        response = make_response(model_card_dict, 200)
-        response.headers["username"] = request.headers.get("Tapis-Trusted-Username-Header", None)
-
-        return response
+        return model_card_dict, 200
 
 
 @api.route('/model_deployments')
@@ -224,11 +220,7 @@ class HFcredentials(Resource):
         hf_token = os.getenv("HF_HUB_TOKEN")
         if not hf_username or not hf_token:
             return {"error": "Hugging Face credentials not set."}, 400
-
-        response = make_response({"username": hf_username, "token": hf_token}, 200)
-        response.headers["username"] = request.headers.get("Tapis-Trusted-Username-Header", None)
-
-        return response
+        return {"username": hf_username, "token": hf_token}, 200
 
 
 @api.route('/get_github_credentials')
@@ -260,8 +252,8 @@ class ModelCardLinkset(Resource):
         model_card = mc_reconstructor.reconstruct(str(mc_id))
 
         if not model_card:
-            error_payload = jsonify({"error": f"Model card with ID '{mc_id}' could not be found!"})
-            return Response(response=error_payload.get_data(as_text=True), status=404, mimetype='application/json')
+             error_payload = jsonify({"error": f"Model card with ID '{mc_id}' could not be found!"})
+             return Response(response=error_payload.get_data(as_text=True), status=404, mimetype='application/json')
 
         generated_headers = mc_reconstructor.get_link_headers(model_card)
 
