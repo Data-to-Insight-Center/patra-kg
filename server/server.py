@@ -218,7 +218,9 @@ class GeneratePID(Resource):
             409: PID already exists; user must update version
             400: Missing parameters
         """
-        author = request.args.get('author')
+        author = request.headers.get("Tapis-Trusted-Username-Header", None)
+        if author is None:
+            author = request.args.get('author')
         name = request.args.get('name')
         version = request.args.get('version')
 
@@ -266,7 +268,8 @@ class GHcredentials(Resource):
             return {"error": "Github credentials not set."}, 400
         return {"username": gh_username, "token": gh_token}, 200
 
-@api.route('/modelcard_linkset') # Or your preferred route
+
+@api.route('/modelcard_linkset')
 class ModelCardLinkset(Resource):
     @api.param('id', 'The model card ID')
     def get(self):
