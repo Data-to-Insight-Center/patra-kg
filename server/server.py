@@ -218,7 +218,9 @@ class GeneratePID(Resource):
             409: PID already exists; user must update version
             400: Missing parameters
         """
-        author = request.args.get('author')
+        author = request.headers.get("Tapis-Trusted-Username-Header", None)
+        if author is None:
+            author = request.args.get('author')
         name = request.args.get('name')
         version = request.args.get('version')
 
