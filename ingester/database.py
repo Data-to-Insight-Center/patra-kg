@@ -29,7 +29,6 @@ class GraphDB:
                             mc.short_description = $short_description AND 
                             mc.full_description = $full_description AND 
                             mc.keywords = $keywords AND 
-                            mc.author = $author AND 
                             mc.input_data = $input_data AND 
                             mc.output_data = $output_data AND 
                             mc.input_type = $input_type AND 
@@ -57,7 +56,6 @@ class GraphDB:
                       MATCH (mc:ModelCard)
                       WHERE mc.name = $name AND 
                             mc.version = $version AND 
-                            mc.author = $author AND 
                             mc.input_data = $input_data AND 
                             mc.output_data = $output_data
                       RETURN mc
@@ -77,7 +75,7 @@ class GraphDB:
             if similarity_support:
                 query = """
                    CREATE (mc:ModelCard {external_id: $id, name: $name, version: $version, short_description: $short_description,
-                                              full_description: $full_description, keywords: $keywords, author: $author,
+                                              full_description: $full_description, keywords: $keywords,
                                               input_data: $input_data, output_data: $output_data, input_type: $input_type,
                                               categories: $category, embedding: $embedding, citation: $citation})
                    """
@@ -85,7 +83,7 @@ class GraphDB:
             else:
                 query = """
                    CREATE (mc:ModelCard {external_id: $id, name: $name, version: $version, short_description: $short_description,
-                                              full_description: $full_description, keywords: $keywords, author: $author,
+                                              full_description: $full_description, keywords: $keywords,
                                               input_data: $input_data, output_data: $output_data, input_type: $input_type,
                                               categories: $category, citation: $citation})
                    """
@@ -191,6 +189,47 @@ class GraphDB:
             #                     CREATE (mc)-[:USED_BY]->(foundational_model)
             #                     """
             #     session.run(query, fc_id=foundational_model, mc_id=model_card_id)
+
+    def connect_user_information(self, model_card_id, user_information):
+        """
+        Connects user information to a model card. Creates a new user only if one with the given user_id doesn't exist.
+
+        :param model_card_id: The external ID of the ModelCard.
+        :param user_information: A dictionary containing user information (must include 'user_id', and optionally 'orcid', 'name', 'institution', 'email').
+        :return: None
+        """
+        with self.driver.session() as session:
+            user_id = user_information.get('user_id')
+            orcid = user_information.get('orcid')
+            name = user_information.get('name')
+            institution = user_information.get('institution')
+            email = user_information.get('email')
+
+            # Check if a User node with the given user_id already exists
+            check_user_exists_query = """
+                MATCH (user:User {user_id: $user_id})
+                RETURN user
+                LIMIT 1
+            """
+            existing_user_result = session.run(check_user_exists_query, user_id=user_id)
+            existing_user = existing_user_result.single()
+
+            if existing_user:
+                # If the user exists, create the relationship to the ModelCard
+                create_relationship_query = """
+                    MATCH (user:User {user_id: $user_id}), (mc:ModelCard {external_id: $mc_id})
+                    CREATE (mc)-[:SUBMITTED_BY]->(user)
+                """
+                session.run(create_relationship_query, user_id=user_id, mc_id=model_card_id)
+            else:
+                # If the user doesn't exist, create the User node and the relationship
+                create_user_and_relationship_query = """
+                    MATCH (mc:ModelCard {external_id: $mc_id})
+                    CREATE (user:User {user_id: $user_id, orcid: $orcid, name: $name, institution: $institution, email: $email})
+                    CREATE (mc)-[:SUBMITTED_BY]->(user)
+                """
+                session.run(create_user_and_relationship_query, user_id=user_id, mc_id=model_card_id, orcid=orcid,
+                            name=name, institution=institution, email=email)
 
     def insert_bias_analysis_metadata(self, model_card_id, bias_id, bias_analysis_metadata):
         bias_name = model_card_id + "bias_analysis"
