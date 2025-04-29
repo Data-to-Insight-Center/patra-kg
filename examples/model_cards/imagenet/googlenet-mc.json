@@ -1,0 +1,37 @@
+{
+  "name": "googlenet",
+  "version": "1.0",
+  "short_description": "Image classification using GoogLeNet (Inception v1).",
+  "full_description": "GoogLeNet, also known as Inception v1, is a 22-layer deep convolutional neural network developed by Google researchers (Christian Szegedy et al.) that won the ImageNet Large Scale Visual Recognition Challenge (ILSVRC) in 2014. It introduced the 'Inception module,' which uses parallel convolutional filters of different sizes within the same block, allowing the network to capture features at multiple scales efficiently. This design significantly reduced the parameter count compared to previous networks while achieving state-of-the-art accuracy.",
+  "keywords": "image classification, deep learning, GoogLeNet, Inception, Inception v1, convolutional neural network, ILSVRC 2014",
+  "author": "neelk",
+  "input_type": "images",
+  "category": "classification",
+  "citation": "Szegedy, C., Liu, W., Jia, Y., Sermanet, P., Reed, S., Anguelov, D., Erhan, D., Vanhoucke, V., & Rabinovich, A. (2015). Going deeper with convolutions. In Proceedings of the IEEE conference on computer vision and pattern recognition (pp. 1-9). arXiv:1409.4842",
+  "input_data": "https://www.image-net.org/challenges/LSVRC/2014/index.php",
+  "output_data": "https://huggingface.co/patra-iu/neelk-googlenet-1.0",
+  "foundational_model": "None",
+  "ai_model": {
+    "name": "googlenet",
+    "version": "1.0",
+    "description": "A deep convolutional neural network (ILSVRC 2014 winner) using Inception modules for image classification.",
+    "owner": "Google",
+    "location": "https://huggingface.co/patra-iu/neelk-googlenet-1.0/blob/main/neelk-googlenet-1.0.pt",
+    "license": "Apache License 2.0",
+    "framework": "pytorch",
+    "model_type": "convolutional neural network",
+    "test_accuracy": 0.70,
+    "model_structure": "GoogLeNet / Inception v1",
+    "metrics": {
+      "Precision": 0.70,
+      "Recall": 0.70,
+      "Backbone": "GoogLeNet",
+      "Learning_Rate": 0.01,
+      "Batch_Size": 32,
+      "Input Shape": "(3, 224, 224)"
+    }
+  },
+  "bias_analysis": {},
+  "xai_analysis": {},
+  "model_requirements": []
+}

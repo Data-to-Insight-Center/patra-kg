@@ -1,0 +1,37 @@
+{
+  "name": "alexnet",
+  "version": "1.0",
+  "short_description": "Image classification using the classic AlexNet architecture.",
+  "full_description": "AlexNet, introduced in 2012, is a deep convolutional neural network that popularized large-scale image classification benchmarks. It comprises stacked convolution and pooling layers with ReLU activations and dropout for regularization, leading to groundbreaking performance on the ImageNet dataset.",
+  "keywords": "image classification, AlexNet, deep learning, convolutional neural network",
+  "author": "neelk",
+  "input_type": "images",
+  "category": "classification",
+  "citation": "Krizhevsky, A., Sutskever, I., & Hinton, G. E. (2012). ImageNet classification with deep convolutional neural networks. Advances in Neural Information Processing Systems (NIPS).",
+  "input_data": "https://www.image-net.org/challenges/LSVRC/2014/index.php",
+  "output_data": "https://huggingface.co/patra-iu/neelk-alexnet-1.0",
+  "foundational_model": "None",
+  "ai_model": {
+    "name": "alexnet",
+    "version": "1.0",
+    "description": "A deep CNN for large-scale image classification, featuring multiple convolutional and pooling layers, ReLU activations, and dropout.",
+    "owner": "Alex Krizhevsky",
+    "location": "https://huggingface.co/patra-iu/neelk-alexnet-1.0/blob/main/neelk-alexnet-1.0.pth",
+    "license": "Apache License 2.0",
+    "framework": "pytorch",
+    "model_type": "deep convolutional neural network",
+    "test_accuracy": 0.57,
+    "model_structure": "AlexNet",
+    "metrics": {
+      "Precision": 0.56,
+      "Recall": 0.55,
+      "Number_of_Conv_Layers": 5,
+      "Learning_Rate": 0.01,
+      "Batch_Size": 128,
+      "Input Shape": "(3, 224, 224)"
+    }
+  },
+  "bias_analysis": {},
+  "xai_analysis": {},
+  "model_requirements": []
+}
