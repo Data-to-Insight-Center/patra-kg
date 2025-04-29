@@ -284,8 +284,8 @@ class ModelCardLinkset(Resource):
         model_card = mc_reconstructor.reconstruct(str(mc_id))
 
         if not model_card:
-             error_payload = jsonify({"error": f"Model card with ID '{mc_id}' could not be found!"})
-             return Response(response=error_payload.get_data(as_text=True), status=404, mimetype='application/json')
+            error_payload = jsonify({"error": f"Model card with ID '{mc_id}' could not be found!"})
+            return Response(response=error_payload.get_data(as_text=True), status=404, mimetype='application/json')
 
         generated_headers = mc_reconstructor.get_link_headers(model_card)
 
@@ -299,6 +299,27 @@ class ModelCardLinkset(Resource):
         # Add generated headers to the response
         response.headers.update(generated_headers)
         return response
+
+
+@api.route('/search_mcs')
+class SearchPIDS(Resource):
+    @api.doc(
+        description=(
+                "Search model card IDs by any properties from the schema. "
+                "All parameters are optional. Supply them in the JSON request body."
+        )
+    )
+    def post(self):
+        """
+        Retrieve all model card IDs that match any (optional) JSON parameters.
+        If no parameters are provided, returns all model cards.
+        """
+        # Read JSON body (default to empty dict if none provided)
+        query_params = request.get_json(force=True, silent=True) or {}
+
+        # Pass them to your enhanced search method
+        model_card_ids = mc_reconstructor.search_mcs(query_params)
+        return model_card_ids, 200
 
 
 if __name__ == '__main__':
