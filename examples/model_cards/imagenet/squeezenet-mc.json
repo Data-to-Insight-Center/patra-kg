@@ -1,0 +1,37 @@
+{
+  "name": "squeezenet",
+  "version": "1.0",
+  "short_description": "Lightweight CNN for image classification using SqueezeNet 1.0.",
+  "full_description": "SqueezeNet 1.0 is a lightweight deep neural network architecture designed for efficient image classification. It achieves competitive accuracy with significantly fewer parameters by using 1×1 filters to reduce the number of input channels to 3×3 filters, combined with downsampling late in the network to maintain spatial resolution.",
+  "keywords": "image classification, squeezenet, lightweight CNN",
+  "author": "neelk",
+  "input_type": "images",
+  "category": "classification",
+  "citation": "Iandola, F. N., Han, S., Moskewicz, M. W., Ashraf, K., Dally, W. J., & Keutzer, K. (2017). SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and <0.5MB model size. arXiv preprint arXiv:1602.07360.",
+  "input_data": "https://www.image-net.org/challenges/LSVRC/2014/index.php",
+  "output_data": "https://huggingface.co/patra-iu/neelk-squeezenet-1.0",
+  "foundational_model": "None",
+  "ai_model": {
+    "name": "squeezenet",
+    "version": "1.0",
+    "description": "A small CNN model for image classification, leveraging the Fire module to reduce the model size while maintaining accuracy.",
+    "owner": "DeepScale",
+    "location": "https://huggingface.co/patra-iu/neelk-squeezenet-1.0/blob/main/neelk-squeezenet-1.0.pt",
+    "license": "Apache License 2.0",
+    "framework": "pytorch",
+    "model_type": "convolutional neural network",
+    "test_accuracy": 0.57,
+    "model_structure": "SqueezeNet",
+    "metrics": {
+      "Precision": 0.56,
+      "Recall": 0.55,
+      "Backbone": "SqueezeNet",
+      "Learning_Rate": 0.005,
+      "Batch_Size": 64,
+      "Input Shape": "(3, 224, 224)"
+    }
+  },
+  "bias_analysis": {},
+  "xai_analysis": {},
+  "model_requirements": []
+}
