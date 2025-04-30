@@ -29,7 +29,7 @@ class MCIngester:
             return exists, model_id
 
         if 'id' not in model_card:
-            model_card['id'] = f"{model_card['author']}_{model_card['name']}_{model_card['version']}"
+            raise ValueError("Model card must contain an 'id' field.")
 
         if self.similarity_enabled:
             version_embedding = embed_model_versioning(model_card)
@@ -41,6 +41,10 @@ class MCIngester:
         datasheet_id = model_card['input_data']
         self.db.connect_datasheet_mc(datasheet_id, base_mc_id)
         self.db.insert_ai_model(base_mc_id, model_card['ai_model'])
+
+        user_information = model_card['user']
+        if user_information is not None:
+            self.db.connect_user_information(base_mc_id, user_information)
 
         bias_analysis = model_card["bias_analysis"]
         if bias_analysis is not None:
