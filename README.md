@@ -81,7 +81,7 @@ This is disabled by default. If you need to enable it:
 - **Enable Similarity**: Set the environment variable ENABLE_MC_SIMILARITY to True and set the OPENAPI_API_KEY environment variable with your obtained key. 
 ---
 
-## Tutorial
+# Tutorial
 
 ### Set up Environment Variables
 
