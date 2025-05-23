@@ -9,7 +9,7 @@
 
 The Patra Knowledge Base is a system designed to manage and track AI/ML models, with the objective of making them more accountable and trustworthy. It's a key part of the Patra ModelCards framework, which aims to improve transparency and accountability in AI/ML models throughout their entire lifecycle. This includes the model's initial training phase, subsequent deployments, and ongoing usage, whether by the same or different individuals.
 
-**Tag**: Foundational-AI
+**Tag**: CI4AI, Software, PADI
 
 # Explanation
 
