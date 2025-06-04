@@ -13,7 +13,7 @@ The Patra Knowledge Base is a system designed to manage and track AI/ML models, 
 
 **Tag**: CI4AI, Software, PADI
 
-# Explanation
+## Explanation
 
 At the heart of the Patra Knowledge Base is the concept of Model Cards. These cards are essentially detailed records that provide essential information about each AI/ML model. This information includes technical details like the model's accuracy and latency, but it goes beyond that to include non-technical aspects such as fairness, explainability, and the model's behavior in various deployment environments. This holistic approach is intended to create a comprehensive understanding of the model's strengths and weaknesses, enabling more informed decisions about its use and deployment
 
@@ -35,7 +35,7 @@ By combining these capabilities, the Patra Knowledge Base provides a robust foun
 
 For more information, please refer to the [Patra ModelCards paper](https://ieeexplore.ieee.org/document/10678710).
 
-## Patra Knowledge Base Server
+### Patra Server
 The server is built using Flask and exposes a RESTful API for interaction with the Patra Knowledge Graph (KG).
 
 
@@ -62,7 +62,7 @@ For more information on the server endpoints, please refer to the [API documenta
 
 
 
-# How-To Guide
+## How-To Guide
 
 ### Prerequisites
 
@@ -75,59 +75,51 @@ For more information on the server endpoints, please refer to the [API documenta
 
 #### Dependencies
 - **Neo4j**: Version **5.21.0-community** is deployed via Docker (manual installation is not required).
+- [Optional] **OpenAI API Key**: If the system needs to support Model Card similarities, you need to obtain a valid Open AI API key. Refer to the [OpenAI documentation](https://platform.openai.com) for instructions. This is disabled by default.
 
-Optional:
-If the system needs to support Model Card similarities, you need to obtain a valid Open AI API key. 
-This is disabled by default. If you need to enable it:
-- **OpenAI API Key**: Obtain and configure a valid key. Refer to the [OpenAI documentation](https://platform.openai.com) for instructions.
-- **Enable Similarity**: Set the environment variable ENABLE_MC_SIMILARITY to True and set the OPENAPI_API_KEY environment variable with your obtained key. 
----
 
-# Tutorial
+### 1. Set up Environment Variables
 
-### Set up Environment Variables
-
-#### **Model Similarity (Optional)**  
-To enable automatic model similarity detection using OpenAI embeddings, set `ENABLE_MC_SIMILARITY` to `True` and provide your OpenAI API key:
-
+**Model Similarity (Optional)**  
+To enable model similarity detection using OpenAI embeddings, set `ENABLE_MC_SIMILARITY` to `True` and provide your OpenAI API key:
 ```bash
 export ENABLE_MC_SIMILARITY=True
 export OPENAI_API_KEY=<YOUR_OPENAI_API_KEY>
 ```
 
-#### **Hugging Face Integration (Optional)**  
-To upload models and artifacts (e.g., model weights, cards) to the Hugging Face Hub:
+**Hugging Face Integration (Optional)**  
+To upload models and artifacts to Hugging Face, create a repository and generate an access token. Then, set the following environment variables:
 ```bash
 export HF_HUB_USERNAME=<your-hf-username>
 export HF_HUB_TOKEN=<your-hf-access-token>
 ```
 Requires write access to the target Hugging Face repo.
 
-#### **GitHub Integration (Optional)**  
-To push models and artifacts (e.g., versioned cards, metadata) to a GitHub repository:
+**GitHub Integration (Optional)**  
+To upload models and artifacts to GitHub, create a repository and generate an access token. Then, set the following environment variables:
 ```bash
 export GH_HUB_USERNAME=<your-github-username>
 export GH_HUB_TOKEN=<your-github-personal-access-token>
 ```
 Requires `repo` scope enabled on the GitHub token.
 
-### Launch the Patra Knowledge Base
-- Start the Patra Knowledge Base using Docker Compose:
-    ```bash
-    make up
-    ```
+### 2. Clone the repository and start services
+```bash
+git clone https://github.com/Data-to-Insight-Center/patra-kg.git
+make up
+```
   
-   The server will be running at port `5002`. To view Swagger documentation, navigate to `http://localhost:5002/swagger`.
+The server will be running at port `5002`. To view Swagger documentation, navigate to `http://localhost:5002/swagger`.
 
-   Once the containers are up, you can view the ingested model cards in the [Neo4j Browser](http://localhost:7474/browser/).
-   - Login with the username `neo4j` and the password `PWD_HERE`.
-   - Run the following query to view the model data:
-     ```cypher
-     MATCH (n) RETURN n
-     ```
+Once the containers are up, you can view the ingested model cards in the [Neo4j Browser](http://localhost:7474/browser/).
+- Login with the username `neo4j` and the password `PWD_HERE`.
+- Run the following query to view the model data:
+```cypher
+  MATCH (n) RETURN n
+  ```
    
 
-- To stop and remove all running containers, use:
+- To shut down services, use:
     ```bash
     make down
     ```
