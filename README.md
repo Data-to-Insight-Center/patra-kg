@@ -56,7 +56,7 @@ The server is built using Flask and exposes a RESTful API for interaction with t
 | `/get_model_card_by_name`       | GET    | Get a model card by name.                                                                                              |
 | `/modelcard_linkset`            | GET    | Returns the modelcard linkset in the header for a given modelcard id<br/>ex: <server_url>/modelcard_linkset?id=<mc_id> |
 
-For more information on the server endpoints, please refer to the [API documentation.](https://github.com/Data-to-Insight-Center/patra-kg/blob/main/patra_openapi.json)
+For more information on the server endpoints, please refer to the [API documentation.](docs/patra_openapi.json)
 
 ---
 
