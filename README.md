@@ -53,7 +53,7 @@ The server is built using Flask and exposes a RESTful API for interaction with t
 | `/update_model_location`        | POST   | Update the model’s location in the graph.                                                                              |
 | `/get_model_id`                 | GET    | Generates a model_id for a given author, name, and version.                                                            |
 | `/get_huggingface_credentials`  | GET    | Get Hugging Face credentials for a given model ID.                                                                     |
-| `/get_model_card_by_name`       | GET    | Get a model card by name.                                                                                              |
+| `/get_github_credentials`       | GET    | Get GitHub credentials for a given model ID.                                                                           |
 | `/modelcard_linkset`            | GET    | Returns the modelcard linkset in the header for a given modelcard id<br/>ex: <server_url>/modelcard_linkset?id=<mc_id> |
 
 For more information on the server endpoints, please refer to the [API documentation.](docs/patra_openapi.json)
@@ -111,13 +111,7 @@ make up
   
 The server will be running at port `5002`. To view Swagger documentation, navigate to `http://localhost:5002/swagger`.
 
-Once the containers are up, you can view the ingested model cards in the [Neo4j Browser](http://localhost:7474/browser/).
-- Login with the username `neo4j` and the password `PWD_HERE`.
-- Run the following query to view the model data:
-```cypher
-  MATCH (n) RETURN n
-  ```
-   
+Open [neo4j browser](http://localhost:7474/browser/) and log in with the credentials mentioned in the docker-compose file to view the model card data.   
 
 - To shut down services, use:
     ```bash

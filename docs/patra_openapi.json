@@ -22,6 +22,27 @@
                 "tags": [
                     "default"
                 ]
+            },
+            "head": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "Provides linkset relations for a model card in the HTTP Link header",
+                "description": "Returns an empty body with link information in the header.",
+                "operationId": "head_download_model_card",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "description": "The model card ID",
+                        "name": "id",
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "default"
+                ]
             }
         },
         "/download_url": {
