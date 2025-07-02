@@ -1,0 +1,89 @@
+{
+  "serving_configurations": {
+    "model_id": "jstubbs_MegaDetector for Wildlife Detection_5a-model",
+    "id": "jstubbs_MegaDetector-for-Wildlife-Detection_5a-litserve",
+    "version": "0.1.0",
+    "name": "jstubbs_MegaDetector for Wildlife Detection_5a-litserve",
+    "description": "An inference server which, by default, runs the model",
+    "image": "iud2i/megadetector5a-litserve:0.1.0",
+    "server_type": "litserve",
+    "created_timestamp": "2025-04-10T16:33:00.875000000+00:00",
+    "last_modified": "2025-04-10T16:33:00.875000000+00:00",
+    "interface_metadata": {
+      "port": 8080,
+      "protocol": "HTTP",
+      "inference_endpoint": "/predict",
+      "interface_id": "jstubbs_MegaDetector for Wildlife Detection_5a-litserve-iface",
+      "health_endpoint": "/health",
+      "inference_hardware": {
+        "architecture": "x86_64",
+        "min_cpu": 4,
+        "min_memory": "8Gi",
+        "min_gpu": 1
+      },
+      "input_schema": {
+        "io_id": "jstubbs_MegaDetector for Wildlife Detection_5a-litserve-iface-input",
+        "format": "json",
+        "structure_json": [
+          {
+            "name": "image_data",
+            "datatype": "STRING",
+            "shape": [
+              1
+            ],
+            "description": "Base64 encoded string of the input image.",
+            "format": "base64"
+          },
+          {
+            "name": "draw_boxes",
+            "datatype": "BOOLEAN",
+            "shape": [
+              1
+            ],
+            "description": "Flag to control drawing boxes (if applicable)."
+          },
+          {
+            "name": "stride",
+            "datatype": "INT64",
+            "shape": [
+              1
+            ],
+            "description": "Inference stride value."
+          },
+          {
+            "name": "image_scale_size",
+            "datatype": "INT64",
+            "shape": [
+              2
+            ],
+            "description": "Target image size (width, height or height, width) as a two-element array."
+          }
+        ],
+        "type": "input"
+      },
+      "output_schema": {
+        "io_id": "jstubbs_MegaDetector for Wildlife Detection_5a-litserve-iface-output",
+        "format": "json",
+        "structure_json": [
+          {
+            "name": "label",
+            "datatype": "STRING",
+            "shape": [
+              1
+            ],
+            "description": "Predicted class label."
+          },
+          {
+            "name": "probability",
+            "datatype": "FP32",
+            "shape": [
+              1
+            ],
+            "description": "Confidence score for the predicted label (0.0-1.0)."
+          }
+        ],
+        "type": "output"
+      }
+    }
+  }
+}
