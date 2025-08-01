@@ -1,2 +1,11 @@
 .env
 patra_kg/neo4j
+.idea/
+__pycache__/
+.DS_Store
+.vscode/
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ruff_cache/
