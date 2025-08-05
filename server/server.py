@@ -322,5 +322,26 @@ class SearchPIDS(Resource):
         return model_card_ids, 200
 
 
+@api.route('/search_pids')
+class SearchPIDS(Resource):
+    @api.doc(
+        description="Search model card IDs by any properties from the schema. "
+                    "All parameters are optional. Simply supply them as query "
+                    "parameters (e.g., ?name=MyModel&version=1.0)."
+    )
+    def post(self):
+        """
+        Retrieve all model card IDs that match any (optional) query parameters.
+        If no parameters are provided, all model cards will be returned
+        (assuming 'search_pids' handles an empty params dict by returning all).
+        """
+        # Extract query parameters from the request
+        query_params = dict(request.args)
+        
+        # Pass them to the search method
+        model_card_ids = mc_reconstructor.search_mcs(query_params)
+        return model_card_ids, 200
+
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5002)

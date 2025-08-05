@@ -211,7 +211,14 @@ class MCReconstructor:
         Retrieve PIDs where any of the provided properties contains the given substring.
         Matching is case-insensitive. Supports filtering both ModelCard and AI Model properties.
         """
-        query = "MATCH (mc:ModelCard)"
+        # Check if we have any ai_model_ parameters
+        has_ai_model_params = any(key.startswith("ai_model_") for key in params.keys())
+        
+        if has_ai_model_params:
+            # Join with Model node when we have ai_model_ parameters
+            query = "MATCH (mc:ModelCard)-[:USED]->(ai:Model)"
+        else:
+            query = "MATCH (mc:ModelCard)"
 
         if params:
             mc_filters = []
@@ -220,7 +227,7 @@ class MCReconstructor:
             for key, value in params.items():
                 if key.startswith("ai_model_"):
                     ai_prop = key[len("ai_model_"):]
-                    ai_filters.append(f"toLower(mc.{ai_prop}) CONTAINS toLower(${key})")
+                    ai_filters.append(f"toLower(ai.{ai_prop}) CONTAINS toLower(${key})")
                 else:
                     mc_filters.append(f"toLower(mc.{key}) CONTAINS toLower(${key})")
 
