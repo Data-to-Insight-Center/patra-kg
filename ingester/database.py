@@ -124,7 +124,8 @@ class GraphDB:
             query = """
                CREATE (model:Model {model_id: $id, name: $name, version: $version, description: $description,
                                    owner: $owner, location: $location, license: $license, framework: $framework, 
-                                   model_type: $model_type, test_accuracy: $test_accuracy, inference_labels: $inference_labels})
+                                   model_type: $model_type, test_accuracy: $test_accuracy, inference_labels: $inference_labels,
+                                   deployment_strategy: $deployment_strategy, deployment_tested: $deployment_tested})
             """
             session.run(query, ai_model_metadata, id=model_id)
 
@@ -163,7 +164,9 @@ class GraphDB:
                     model.license = $license,
                     model.framework = $framework,
                     model.model_type = $model_type,
-                    model.test_accuracy = $test_accuracy
+                    model.test_accuracy = $test_accuracy,
+                    model.deployment_strategy = $deployment_strategy,
+                    model.deployment_tested = $deployment_tested
             """
 
             session.run(query, ai_model_metadata, id=model_id)
