@@ -55,6 +55,7 @@ The server is built using Flask and exposes a RESTful API for interaction with t
 | `/get_huggingface_credentials`  | GET    | Get Hugging Face credentials for a given model ID.                                                                     |
 | `/get_github_credentials`       | GET    | Get GitHub credentials for a given model ID.                                                                           |
 | `/register_device`              | POST   | Register a new edge device for deployment tracking.                                                                    |
+| `/register_user`                | POST   | Register a new user for experiment tracking and model submissions.                                                      |
 | `/modelcard_linkset`            | GET    | Returns the modelcard linkset in the header for a given modelcard id<br/>ex: <server_url>/modelcard_linkset?id=<mc_id> |
 
 For more information on the server endpoints, please refer to the [API documentation.](docs/patra_openapi.json)

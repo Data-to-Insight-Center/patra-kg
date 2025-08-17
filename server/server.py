@@ -334,5 +334,36 @@ class RegisterDevice(Resource):
             return {"error": f"Failed to register device: {str(e)}"}, 500
 
 
+@api.route('/register_user')
+class RegisterUser(Resource):
+    def post(self):
+        """
+        Register a new user for experiment tracking and model submissions.
+        Expects a JSON payload with user information.
+        Returns:
+            201: User registered successfully
+            400: Missing user_id or invalid data
+            409: User with this ID already exists
+        """
+        data = request.get_json()
+        
+        # Validate user_id is required
+        if not data or 'user_id' not in data:
+            logging.error("Missing user_id in request")
+            return {"error": "user_id is required"}, 400
+            
+        # Check if user already exists
+        if mc_ingester.check_user_exists(data['user_id']):
+            logging.warning(f"User with ID '{data['user_id']}' already exists")
+            return {"error": "User with this ID already exists"}, 409
+            
+        # Register user
+        try:
+            mc_ingester.add_user(data)
+            logging.info(f"User '{data['user_id']}' registered successfully")
+            return {"message": "User registered successfully"}, 201
+        except Exception as e:
+            logging.error(f"Failed to register user: {str(e)}")
+            return {"error": f"Failed to register user: {str(e)}"}, 500
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5002)

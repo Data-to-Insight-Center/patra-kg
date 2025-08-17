@@ -116,6 +116,20 @@ class MCIngester:
         """
         return self.db.check_device_exists(device_id)
 
+    def check_user_exists(self, user_id):
+        """
+        Check if a user with the given user_id already exists.
+        :param user_id: The user ID to check
+        :return: True if user exists, False otherwise
+        """
+        return self.db.check_user_exists(user_id)
+
+    def add_user(self, user):
+        """
+        Add a user to the knowledge graph.
+        :param user: User data dictionary
+        """
+        self.db.insert_user(user)
     def add_deployment(self, deployment):
         self.db.insert_deployment(deployment)
 
