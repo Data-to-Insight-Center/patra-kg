@@ -499,10 +499,17 @@ class GraphDB:
         :return:
         """
         with self.driver.session() as session:
+            # Set default values for name and description if not provided
+            device_data = device.copy()
+            if 'name' not in device_data:
+                device_data['name'] = device_data.get('device_id', 'Unknown Device')
+            if 'description' not in device_data:
+                device_data['description'] = f"Device {device_data.get('device_id', 'Unknown')}"
+            
             query = """
                        CREATE (d:EdgeDevice {device_id: $device_id, name: $name, description: $description})
                        """
-            session.run(query, device)
+            session.run(query, device_data)
 
             for key, value in device.items():
                 if key not in ["id", "name", "description"]:
