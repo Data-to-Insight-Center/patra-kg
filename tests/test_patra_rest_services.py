@@ -197,5 +197,53 @@ def test_upload_model_card_missing_inference_labels(monkeypatch):
     assert "Successfully uploaded the model card" in response.json().get("message", "")
 
 
+def test_register_device_success(client, monkeypatch):
+    """Test successful device registration"""
+    device_data = {
+        "device_id": "test-device-001",
+        "device_type": "jetson-nano",
+        "location": "test-lab",
+        "platform": "x86_64"
+    }
+    
+    # Mock the database operations
+    monkeypatch.setattr("ingester.neo4j_ingester.MCIngester.check_device_exists", lambda self, device_id: False)
+    monkeypatch.setattr("ingester.neo4j_ingester.MCIngester.add_device", lambda self, device: None)
+    
+    response = client.post("/register_device", json=device_data)
+    assert response.status_code == 201
+    data = response.get_json()
+    assert data.get("message") == "Device registered successfully"
+
+
+def test_register_device_missing_device_id(client):
+    """Test device registration with missing device_id"""
+    device_data = {
+        "device_type": "jetson-nano",
+        "location": "test-lab"
+    }
+    
+    response = client.post("/register_device", json=device_data)
+    assert response.status_code == 400
+    data = response.get_json()
+    assert "device_id is required" in data.get("error", "")
+
+
+def test_register_device_duplicate_id(client, monkeypatch):
+    """Test device registration with duplicate device_id"""
+    device_data = {
+        "device_id": "test-device-001",
+        "device_type": "jetson-nano"
+    }
+    
+    # Mock that device already exists
+    monkeypatch.setattr("ingester.neo4j_ingester.MCIngester.check_device_exists", lambda self, device_id: True)
+    
+    response = client.post("/register_device", json=device_data)
+    assert response.status_code == 409
+    data = response.get_json()
+    assert "Device with this ID already exists" in data.get("error", "")
+
+
 if __name__ == "__main__":
     pytest.main()

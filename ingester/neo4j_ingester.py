@@ -108,6 +108,14 @@ class MCIngester:
     def add_device(self, device):
         self.db.insert_device(device)
 
+    def check_device_exists(self, device_id):
+        """
+        Check if a device with the given device_id already exists.
+        :param device_id: The device ID to check
+        :return: True if device exists, False otherwise
+        """
+        return self.db.check_device_exists(device_id)
+
     def add_deployment(self, deployment):
         self.db.insert_deployment(deployment)
 

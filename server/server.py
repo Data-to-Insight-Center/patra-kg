@@ -301,5 +301,38 @@ class ModelCardLinkset(Resource):
         return response
 
 
+@api.route('/register_device')
+class RegisterDevice(Resource):
+    def post(self):
+        """
+        Register a new edge device for deployment tracking.
+        Expects a JSON payload with device information.
+        Returns:
+            201: Device registered successfully
+            400: Missing device_id or invalid data
+            409: Device with this ID already exists
+        """
+        data = request.get_json()
+        
+        # Validate device_id is required
+        if not data or 'device_id' not in data:
+            logging.error("Missing device_id in request")
+            return {"error": "device_id is required"}, 400
+            
+        # Check if device already exists
+        if mc_ingester.check_device_exists(data['device_id']):
+            logging.warning(f"Device with ID '{data['device_id']}' already exists")
+            return {"error": "Device with this ID already exists"}, 409
+            
+        # Register device
+        try:
+            mc_ingester.add_device(data)
+            logging.info(f"Device '{data['device_id']}' registered successfully")
+            return {"message": "Device registered successfully"}, 201
+        except Exception as e:
+            logging.error(f"Failed to register device: {str(e)}")
+            return {"error": f"Failed to register device: {str(e)}"}, 500
+
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5002)
