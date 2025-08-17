@@ -476,6 +476,22 @@ class GraphDB:
                                             """
                 session.run(query, data_id=datasheet["id"], value=value)
 
+    def check_device_exists(self, device_id):
+        """
+        Check if a device with the given device_id already exists.
+        :param device_id: The device ID to check
+        :return: True if device exists, False otherwise
+        """
+        with self.driver.session() as session:
+            query = """
+                MATCH (d:EdgeDevice {device_id: $device_id})
+                RETURN d.device_id as device_id
+                LIMIT 1
+            """
+            result = session.run(query, device_id=device_id)
+            record = result.single()
+            return record is not None
+
     def insert_device(self, device):
         """
         Adds the device information into the graph.
@@ -483,10 +499,17 @@ class GraphDB:
         :return:
         """
         with self.driver.session() as session:
+            # Set default values for name and description if not provided
+            device_data = device.copy()
+            if 'name' not in device_data:
+                device_data['name'] = device_data.get('device_id', 'Unknown Device')
+            if 'description' not in device_data:
+                device_data['description'] = f"Device {device_data.get('device_id', 'Unknown')}"
+            
             query = """
                        CREATE (d:EdgeDevice {device_id: $device_id, name: $name, description: $description})
                        """
-            session.run(query, device)
+            session.run(query, device_data)
 
             for key, value in device.items():
                 if key not in ["id", "name", "description"]:
