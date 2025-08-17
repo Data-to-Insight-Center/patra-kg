@@ -492,6 +492,49 @@ class GraphDB:
             record = result.single()
             return record is not None
 
+    def check_user_exists(self, user_id):
+        """
+        Check if a user with the given user_id already exists.
+        :param user_id: The user ID to check
+        :return: True if user exists, False otherwise
+        """
+        with self.driver.session() as session:
+            query = """
+                MATCH (u:User {user_id: $user_id})
+                RETURN u.user_id as user_id
+                LIMIT 1
+            """
+            result = session.run(query, user_id=user_id)
+            record = result.single()
+            return record is not None
+
+    def insert_user(self, user):
+        """
+        Adds the user information into the graph.
+        :param user: User data dictionary
+        :return:
+        """
+        with self.driver.session() as session:
+            # Set default values for required fields if not provided
+            user_data = user.copy()
+            if 'full_name' not in user_data:
+                user_data['full_name'] = user_data.get('user_id', 'Unknown User')
+            
+            query = """
+                CREATE (u:User {user_id: $user_id, full_name: $full_name})
+            """
+            session.run(query, user_data)
+
+            # Add optional fields
+            for key, value in user.items():
+                if key not in ["user_id", "full_name"] and value is not None:
+                    key = key.replace(" ", "_")
+                    query = f"""
+                        MATCH (u:User {{user_id: $user_id}})
+                        SET u.{key} = $value
+                    """
+                    session.run(query, user_id=user["user_id"], value=value)
+
     def insert_device(self, device):
         """
         Adds the device information into the graph.

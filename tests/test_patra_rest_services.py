@@ -245,5 +245,54 @@ def test_register_device_duplicate_id(client, monkeypatch):
     assert "Device with this ID already exists" in data.get("error", "")
 
 
+def test_register_user_success(client, monkeypatch):
+    """Test successful user registration"""
+    user_data = {
+        "user_id": "test-user-001",
+        "email": "test@example.com",
+        "full_name": "Test User",
+        "organization": "Test University",
+        "orcid": "0000-0000-0000-0000"
+    }
+    
+    # Mock the database operations
+    monkeypatch.setattr("ingester.neo4j_ingester.MCIngester.check_user_exists", lambda self, user_id: False)
+    monkeypatch.setattr("ingester.neo4j_ingester.MCIngester.add_user", lambda self, user: None)
+    
+    response = client.post("/register_user", json=user_data)
+    assert response.status_code == 201
+    data = response.get_json()
+    assert data.get("message") == "User registered successfully"
+
+
+def test_register_user_missing_user_id(client):
+    """Test user registration with missing user_id"""
+    user_data = {
+        "email": "test@example.com",
+        "full_name": "Test User"
+    }
+    
+    response = client.post("/register_user", json=user_data)
+    assert response.status_code == 400
+    data = response.get_json()
+    assert "user_id is required" in data.get("error", "")
+
+
+def test_register_user_duplicate_id(client, monkeypatch):
+    """Test user registration with duplicate user_id"""
+    user_data = {
+        "user_id": "test-user-001",
+        "email": "test@example.com"
+    }
+    
+    # Mock that user already exists
+    monkeypatch.setattr("ingester.neo4j_ingester.MCIngester.check_user_exists", lambda self, user_id: True)
+    
+    response = client.post("/register_user", json=user_data)
+    assert response.status_code == 409
+    data = response.get_json()
+    assert "User with this ID already exists" in data.get("error", "")
+
+
 if __name__ == "__main__":
     pytest.main()
