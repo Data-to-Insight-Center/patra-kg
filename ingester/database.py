@@ -534,7 +534,6 @@ class GraphDB:
                         SET u.{key} = $value
                     """
                     session.run(query, user_id=user["user_id"], value=value)
-
     def insert_device(self, device):
         """
         Adds the device information into the graph.

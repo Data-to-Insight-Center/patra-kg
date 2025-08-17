@@ -130,7 +130,6 @@ class MCIngester:
         :param user: User data dictionary
         """
         self.db.insert_user(user)
-
     def add_deployment(self, deployment):
         self.db.insert_deployment(deployment)
 

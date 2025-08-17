@@ -292,7 +292,5 @@ def test_register_user_duplicate_id(client, monkeypatch):
     assert response.status_code == 409
     data = response.get_json()
     assert "User with this ID already exists" in data.get("error", "")
-
-
 if __name__ == "__main__":
     pytest.main()
