@@ -115,31 +115,6 @@ The server will be running at port `5002`. To view Swagger documentation, naviga
 
 Open [neo4j browser](http://localhost:7474/browser/) and log in with the credentials mentioned in the docker-compose file to view the model card data.   
 
-### 3. URL Validation Script
-
-The URL validation script checks all model location URLs in the knowledge graph and marks invalid models as orphan:
-
-```bash
-# Set database credentials
-export NEO4J_URI="bolt://localhost:7687"
-export NEO4J_USER="neo4j"
-export NEO4J_PWD="your_password"
-
-# Run URL validation
-python scripts/validate_urls.py
-```
-
-The script will:
-- Retrieve all models with location URLs
-- Validate each URL for format and accessibility
-- Update the `is_orphan` boolean field on ModelCard nodes
-- Provide console output with validation results
-
-- To shut down services, use:
-    ```bash
-    make down
-    ```
-
 ---
 
 ## License
