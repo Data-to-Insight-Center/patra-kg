@@ -115,6 +115,11 @@ The server will be running at port `5002`. To view Swagger documentation, naviga
 
 Open [neo4j browser](http://localhost:7474/browser/) and log in with the credentials mentioned in the docker-compose file to view the model card data.   
 
+- To shut down services, use:
+    ```bash
+    make down
+    ```
+
 ---
 
 ## License
