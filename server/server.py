@@ -29,8 +29,8 @@ def home():
     return "Welcome to the Patra Knowledge Base", 200
 
 
-@api.route('/upload_mc')
-class UploadModelCard(Resource):
+@api.route('/modelcard')
+class ModelCard(Resource):
     def post(self):
         """
         Upload model card to the Patra Knowledge Graph.
@@ -43,13 +43,23 @@ class UploadModelCard(Resource):
         return {"message": "Successfully uploaded the model card", "model_card_id": base_mc_id}, 200
 
 
-@api.route('/update_mc')
-class UpdateModelCard(Resource):
-    def post(self):
-        """
-        Update the existing model card.
-        Expects a JSON payload.
-        """
+@api.route('/modelcard/<string:mc_id>')
+class ModelCardDetail(Resource):
+    def get(self, mc_id):
+        model_card = mc_reconstructor.reconstruct(str(mc_id))
+        if model_card is None:
+            return {"error": "Model card could not be found!"}, 400
+        return model_card, 200
+    def head(self, mc_id):
+        model_card = mc_reconstructor.reconstruct(str(mc_id))
+        if not model_card:
+            error_payload = jsonify({"error": f"Model card with ID '{mc_id}' could not be found!"})
+            return Response(response=error_payload.get_data(as_text=True), status=404, mimetype='application/json')
+        generated_headers = mc_reconstructor.get_link_headers(model_card)
+        response = Response(response=None,status=200,mimetype='text/plain')
+        response.headers.update(generated_headers)
+        return response
+    def put(self, mc_id):
         data = request.get_json()
         base_mc_id = mc_ingester.update_mc(data)
         if base_mc_id:
@@ -57,8 +67,8 @@ class UpdateModelCard(Resource):
         return {"message": "Model card not found", "model_card_id": base_mc_id}, 200
 
 
-@api.route('/upload_ds')
-class UploadDatasheet(Resource):
+@api.route('/datasheet')
+class Datasheet(Resource):
     def post(self):
         """
         Upload datasheet to the Patra Knowledge Graph.
@@ -69,9 +79,8 @@ class UploadDatasheet(Resource):
         return {"message": "Successfully uploaded the datasheet"}, 200
 
 
-@api.route('/search')
-class SearchKG(Resource):
-    @api.param('q', 'The search query')
+@api.route('/modelcards/search')
+class SearchModelCards(Resource):
     def get(self):
         """
         Full text search for model cards.
@@ -79,81 +88,26 @@ class SearchKG(Resource):
         query = request.args.get('q')
         if not query:
             return {"error": "Query (q) is required"}, 400
-
         results = mc_reconstructor.search_kg(query)
         return results, 200
 
 
-@api.route('/download_mc')
-class DownloadModelCard(Resource):
-    @api.param('id', 'The model card ID')
-    def get(self):
-        """
-        Download a reconstructed model card from the Patra Knowledge Graph.
-        """
-        mc_id = request.args.get('id')
-        if not mc_id:
-            return {"error": "ID is required"}, 400
-
-        model_card = mc_reconstructor.reconstruct(str(mc_id))
-
-        if model_card is None:
-            return {"error": "Model card could not be found!"}, 400
-
-        return model_card, 200
-
-    @api.param('id', 'The model card ID')
-    def head(self):
-        """
-        Provides linkset relations for a model card in the HTTP Link header.
-        Returns an empty body with link information in the header.
-        """
-        mc_id = request.args.get('id')
-        if not mc_id:
-            return {"error": "ID is required"}, 400
-
-        model_card = mc_reconstructor.reconstruct(str(mc_id))
-
-        if not model_card:
-            error_payload = jsonify({"error": f"Model card with ID '{mc_id}' could not be found!"})
-            return Response(response=error_payload.get_data(as_text=True), status=404, mimetype='application/json')
-
-        generated_headers = mc_reconstructor.get_link_headers(model_card)
-
-        # Creating the response with an empty body
-        response = Response(
-            response=None,
-            status=200,
-            mimetype='text/plain'
-        )
-
-        # Add generated headers to the response
-        response.headers.update(generated_headers)
-        return response
 
 
-@api.route('/download_url')
+@api.route('/modelcard/<string:mc_id>/download_url')
 class ModelDownloadURL(Resource):
-    @api.param('model_id', 'The model ID')
-    def get(self):
+    def get(self, mc_id):
         """
         Download url for a given model id.
         """
-        model_id = request.args.get('model_id')
-        if not model_id:
-            return {"error": "Model ID is required"}, 400
-
-        # get the model information
-        model = mc_reconstructor.get_model_location(str(model_id))
-
+        model = mc_reconstructor.get_model_location(str(mc_id))
         if model is None:
             return {"error": "Model could not be found!"}, 400
-
         return model, 200
 
 
-@api.route('/list')
-class ListModels(Resource):
+@api.route('/modelcards')
+class ListModelCards(Resource):
     def get(self):
         """
         Lists all the models in Patra KG.
@@ -162,28 +116,21 @@ class ListModels(Resource):
         return model_card_dict, 200
 
 
-@api.route('/model_deployments')
-class DeploymentInfo(Resource):
-    @api.param('model_id', 'The model ID')
-    def get(self):
+@api.route('/modelcard/<string:mc_id>/deployments')
+class ModelDeployments(Resource):
+    def get(self, mc_id):
         """
         Get all deployments for a given model ID.
         """
-        model_id = request.args.get('model_id')
-        if not model_id:
-            return {"error": "Model ID is required"}, 400
-
-        deployments = mc_reconstructor.get_deployments(model_id)
-
+        deployments = mc_reconstructor.get_deployments(mc_id)
         if deployments is None:
             return {"error": "Deployments not found!"}, 400
-
         return deployments, 200
 
 
-@api.route('/update_model_location')
+@api.route('/modelcard/<string:mc_id>/location')
 class UpdateModelLocation(Resource):
-    def post(self):
+    def put(self, mc_id):
         """
         Update the model location.
         Expects a JSON payload.
@@ -191,26 +138,19 @@ class UpdateModelLocation(Resource):
         data = request.get_json()
         if data is None:
             return {"error": "Invalid JSON payload"}, 400
-        model_id = data.get('model_id')
         location = data.get('location')
-
-        if not model_id or not location:
-            return {"error": "Model ID and Location are required"}, 400
-
+        if not location:
+            return {"error": "Location is required"}, 400
         parsed_url = urlparse(location)
         if not all([parsed_url.scheme, parsed_url.netloc]):
             return {"error": "Location must be a valid URL"}, 400
-
-        mc_reconstructor.set_model_location(model_id, location)
+        mc_reconstructor.set_model_location(mc_id, location)
         return {"message": "Model location updated successfully"}, 200
 
 
-@api.route('/get_model_id')
+@api.route('/modelcard/id')
 class GeneratePID(Resource):
-    @api.param('name', 'Model name')
-    @api.param('author', 'Model author')
-    @api.param('version', 'Model version')
-    def get(self):
+    def post(self):
         """
         Generates a model_id for a given author, name, and version.
         Returns:
@@ -218,32 +158,27 @@ class GeneratePID(Resource):
             409: PID already exists; user must update version
             400: Missing parameters
         """
-        author = request.headers.get("Tapis-Trusted-Username-Header", None)
-        if author is None:
-            author = request.args.get('author')
-        name = request.args.get('name')
-        version = request.args.get('version')
-
+        data = request.get_json()
+        author = data.get('author')
+        name = data.get('name')
+        version = data.get('version')
         if not all([author, name, version]):
             logging.error("Missing one or more required parameters: author, name, version")
             return {"error": "Author, name, and version are required"}, 400
-
         pid = mc_ingester.get_pid(author, name, version)
         if pid is None:
             logging.error("PID generation failed. Could not generate a unique identifier.")
             return {"error": "PID could not be generated. Please try again."}, 500
-
         if mc_ingester.check_id_exists(pid):
             logging.warning(f"Model ID '{pid}' already exists.")
             return {"pid": pid}, 409
-
         logging.info(f"Model ID successfully generated: {pid}")
         return {"pid": pid}, 201
 
 
-@api.route('/get_huggingface_credentials')
+@api.route('/modelcard/<string:mc_id>/huggingface_credentials')
 class HFcredentials(Resource):
-    def get(self):
+    def get(self, mc_id):
         """
         Retrieves Hugging Face credentials.
         Returns a JSON object with 'username' and 'token'.
@@ -255,9 +190,9 @@ class HFcredentials(Resource):
         return {"username": hf_username, "token": hf_token}, 200
 
 
-@api.route('/get_github_credentials')
+@api.route('/modelcard/<string:mc_id>/github_credentials')
 class GHcredentials(Resource):
-    def get(self):
+    def get(self, mc_id):
         """
         Retrieves Github credentials.
         Returns a JSON object with 'username' and 'token'.
@@ -269,40 +204,29 @@ class GHcredentials(Resource):
         return {"username": gh_username, "token": gh_token}, 200
 
 
-@api.route('/modelcard_linkset')
+@api.route('/modelcard/<string:mc_id>/linkset')
 class ModelCardLinkset(Resource):
-    @api.param('id', 'The model card ID')
-    def get(self):
+    def get(self, mc_id):
         """
         Provides linkset relations for a model card in the HTTP Link header.
         Returns an empty body with link information in the header.
         """
-        mc_id = request.args.get('id')
-        if not mc_id:
-            return {"error": "ID is required"}, 400
-
         model_card = mc_reconstructor.reconstruct(str(mc_id))
-
         if not model_card:
              error_payload = jsonify({"error": f"Model card with ID '{mc_id}' could not be found!"})
              return Response(response=error_payload.get_data(as_text=True), status=404, mimetype='application/json')
-
         generated_headers = mc_reconstructor.get_link_headers(model_card)
-
-        # Creating the response with an empty body
         response = Response(
             response=None,
             status=200,
             mimetype='text/plain'
         )
-
-        # Add generated headers to the response
         response.headers.update(generated_headers)
         return response
 
 
-@api.route('/register_device')
-class RegisterDevice(Resource):
+@api.route('/device')
+class Device(Resource):
     def post(self):
         """
         Register a new edge device for deployment tracking.
@@ -334,8 +258,8 @@ class RegisterDevice(Resource):
             return {"error": f"Failed to register device: {str(e)}"}, 500
 
 
-@api.route('/register_user')
-class RegisterUser(Resource):
+@api.route('/user')
+class User(Resource):
     def post(self):
         """
         Register a new user for experiment tracking and model submissions.

@@ -41,7 +41,7 @@ def test_upload_datasheet(monkeypatch):
     datasheet_data = load_datasheet_json("imagenet.json")
     dummy = dummy_response(200, {"message": "Successfully uploaded the datasheet"})
     monkeypatch.setattr(requests, "post", lambda url, json: dummy)
-    response = requests.post(f"{BASE_URL}/upload_ds", json=datasheet_data)
+    response = requests.post(f"{BASE_URL}/datasheet", json=datasheet_data)
     assert response.status_code == 200
     assert "Successfully uploaded the datasheet" in response.json().get("message", "")
 
@@ -50,7 +50,7 @@ def test_upload_new_model_card(monkeypatch):
     data = load_json("tensorflow_titanic_MC.json")
     dummy = dummy_response(200, {"message": "Successfully uploaded the model card", "model_card_id": "dummy_id"})
     monkeypatch.setattr(requests, "post", lambda url, json: dummy)
-    response = requests.post(f"{BASE_URL}/upload_mc", json=data)
+    response = requests.post(f"{BASE_URL}/modelcard", json=data)
     assert response.status_code == 200
     assert "Successfully uploaded the model card" in response.json().get("message", "")
 
@@ -70,8 +70,8 @@ def test_upload_duplicate_model_card(monkeypatch):
         return resp
 
     monkeypatch.setattr(requests, "post", fake_post)
-    resp1 = requests.post(f"{BASE_URL}/upload_mc", json=data)
-    resp2 = requests.post(f"{BASE_URL}/upload_mc", json=data)
+    resp1 = requests.post(f"{BASE_URL}/modelcard", json=data)
+    resp2 = requests.post(f"{BASE_URL}/modelcard", json=data)
     assert resp1.status_code == 200
     assert resp2.status_code == 200
     assert "Model card already exists" in resp2.json().get("message", "")
@@ -80,8 +80,8 @@ def test_upload_duplicate_model_card(monkeypatch):
 def test_update_model_card(monkeypatch):
     data = load_json("tesorflow_adult_nn_MC.json")
     dummy = dummy_response(200, {"message": "Successfully updated the model card", "model_card_id": "dummy_id"})
-    monkeypatch.setattr(requests, "post", lambda url, json: dummy)
-    response = requests.post(f"{BASE_URL}/update_mc", json=data)
+    monkeypatch.setattr(requests, "put", lambda url, json: dummy)
+    response = requests.put(f"{BASE_URL}/modelcard/dummy_id", json=data)
     assert response.status_code == 200
     assert "Successfully updated the model card" in response.json().get("message", "")
 
@@ -89,8 +89,8 @@ def test_update_model_card(monkeypatch):
 def test_download_model_card(monkeypatch):
     model_card_id = "dummy_model_card_id"
     dummy = dummy_response(200, {"external_id": "dummy_external_id"})
-    monkeypatch.setattr(requests, "get", lambda url, params: dummy)
-    response = requests.get(f"{BASE_URL}/download_mc", params={"id": model_card_id})
+    monkeypatch.setattr(requests, "get", lambda *args, **kwargs: dummy)
+    response = requests.get(f"{BASE_URL}/modelcard/{model_card_id}")
     assert response.status_code == 200
     assert "external_id" in response.json()
 
@@ -98,16 +98,16 @@ def test_download_model_card(monkeypatch):
 def test_download_url(monkeypatch):
     model_id = "dummy_model_id-model"
     dummy = dummy_response(200, {"download_url": "http://dummy-download-url"})
-    monkeypatch.setattr(requests, "get", lambda url, params: dummy)
-    response = requests.get(f"{BASE_URL}/download_url", params={"model_id": model_id})
+    monkeypatch.setattr(requests, "get", lambda *args, **kwargs: dummy)
+    response = requests.get(f"{BASE_URL}/modelcard/{model_id}/download_url")
     assert response.status_code == 200
     assert "download_url" in response.json()
 
 
 def test_list_models(monkeypatch):
     dummy = dummy_response(200, ["model1", "model2"])
-    monkeypatch.setattr(requests, "get", lambda url, **kwargs: dummy)
-    response = requests.get(f"{BASE_URL}/list")
+    monkeypatch.setattr(requests, "get", lambda *args, **kwargs: dummy)
+    response = requests.get(f"{BASE_URL}/modelcards")
     assert response.status_code == 200
     assert isinstance(response.json(), list)
 
@@ -115,31 +115,31 @@ def test_list_models(monkeypatch):
 def test_deployment_info(monkeypatch):
     model_id = "dummy_model_id-model"
     dummy = dummy_response(200, {"deployments": ["dep1", "dep2"]})
-    monkeypatch.setattr(requests, "get", lambda url, params: dummy)
-    response = requests.get(f"{BASE_URL}/model_deployments", params={"model_id": model_id})
+    monkeypatch.setattr(requests, "get", lambda *args, **kwargs: dummy)
+    response = requests.get(f"{BASE_URL}/modelcard/{model_id}/deployments")
     assert response.status_code == 200
 
 
 def test_update_model_location(monkeypatch):
     data = {"model_id": "dummy_model_id-model", "location": "http://new-location.com/model"}
     dummy = dummy_response(200, {"message": "Model location updated successfully"})
-    monkeypatch.setattr(requests, "post", lambda url, json: dummy)
-    response = requests.post(f"{BASE_URL}/update_model_location", json=data)
+    monkeypatch.setattr(requests, "put", lambda url, json: dummy)
+    response = requests.put(f"{BASE_URL}/modelcard/{data['model_id']}/location", json={"location": data['location']})
     assert response.status_code == 200
     assert "Model location updated successfully" in response.json().get("message", "")
 
 
 def test_get_model_id(monkeypatch):
     dummy = dummy_response(201, {"pid": "dummy_pid"})
-    monkeypatch.setattr(requests, "get", lambda url, params: dummy)
-    response = requests.get(f"{BASE_URL}/get_model_id", params={"name": "model", "author": "author", "version": "1.0"})
+    monkeypatch.setattr(requests, "post", lambda url, json: dummy)
+    response = requests.post(f"{BASE_URL}/modelcard/id", json={"name": "model", "author": "author", "version": "1.0"})
     assert response.status_code == 201
 
 
 def test_get_huggingface_credentials_success(client, monkeypatch):
     monkeypatch.setenv("HF_HUB_USERNAME", "hf_user")
     monkeypatch.setenv("HF_HUB_TOKEN", "hf_token")
-    response = client.get("/get_huggingface_credentials")
+    response = client.get("/modelcard/dummy/huggingface_credentials")
     assert response.status_code == 200
     data = response.get_json()
     assert data.get("username") == "hf_user"
@@ -149,7 +149,7 @@ def test_get_huggingface_credentials_success(client, monkeypatch):
 def test_get_huggingface_credentials_failure(client, monkeypatch):
     monkeypatch.delenv("HF_HUB_USERNAME", raising=False)
     monkeypatch.delenv("HF_HUB_TOKEN", raising=False)
-    response = client.get("/get_huggingface_credentials")
+    response = client.get("/modelcard/dummy/huggingface_credentials")
     assert response.status_code == 400
     data = response.get_json()
     assert "error" in data
@@ -158,7 +158,7 @@ def test_get_huggingface_credentials_failure(client, monkeypatch):
 def test_get_github_credentials_success(client, monkeypatch):
     monkeypatch.setenv("GH_HUB_USERNAME", "gh_user")
     monkeypatch.setenv("GH_HUB_TOKEN", "gh_token")
-    response = client.get("/get_github_credentials")
+    response = client.get("/modelcard/dummy/github_credentials")
     assert response.status_code == 200
     data = response.get_json()
     assert data.get("username") == "gh_user"
@@ -168,7 +168,7 @@ def test_get_github_credentials_success(client, monkeypatch):
 def test_get_github_credentials_failure(client, monkeypatch):
     monkeypatch.delenv("GH_HUB_USERNAME", raising=False)
     monkeypatch.delenv("GH_HUB_TOKEN", raising=False)
-    response = client.get("/get_github_credentials")
+    response = client.get("/modelcard/dummy/github_credentials")
     assert response.status_code == 400
     data = response.get_json()
     assert "error" in data
@@ -183,7 +183,7 @@ def test_upload_model_card_with_deployment_info(monkeypatch):
     
     dummy = dummy_response(200, {"message": "Successfully uploaded the model card", "model_card_id": "dummy_id"})
     monkeypatch.setattr(requests, "post", lambda url, json: dummy)
-    response = requests.post(f"{BASE_URL}/upload_mc", json=data)
+    response = requests.post(f"{BASE_URL}/modelcard", json=data)
     assert response.status_code == 200
     assert "Successfully uploaded the model card" in response.json().get("message", "")
 
@@ -192,7 +192,7 @@ def test_upload_model_card_missing_inference_labels(monkeypatch):
     data = load_json("tensorflow_titanic_MC.json")
     dummy = dummy_response(200, {"message": "Successfully uploaded the model card", "model_card_id": "dummy_id"})
     monkeypatch.setattr(requests, "post", lambda url, json: dummy)
-    response = requests.post(f"{BASE_URL}/upload_mc", json=data)
+    response = requests.post(f"{BASE_URL}/modelcard", json=data)
     assert response.status_code == 200
     assert "Successfully uploaded the model card" in response.json().get("message", "")
 
@@ -210,7 +210,7 @@ def test_register_device_success(client, monkeypatch):
     monkeypatch.setattr("ingester.neo4j_ingester.MCIngester.check_device_exists", lambda self, device_id: False)
     monkeypatch.setattr("ingester.neo4j_ingester.MCIngester.add_device", lambda self, device: None)
     
-    response = client.post("/register_device", json=device_data)
+    response = client.post("/device", json=device_data)
     assert response.status_code == 201
     data = response.get_json()
     assert data.get("message") == "Device registered successfully"
@@ -223,7 +223,7 @@ def test_register_device_missing_device_id(client):
         "location": "test-lab"
     }
     
-    response = client.post("/register_device", json=device_data)
+    response = client.post("/device", json=device_data)
     assert response.status_code == 400
     data = response.get_json()
     assert "device_id is required" in data.get("error", "")
@@ -239,7 +239,7 @@ def test_register_device_duplicate_id(client, monkeypatch):
     # Mock that device already exists
     monkeypatch.setattr("ingester.neo4j_ingester.MCIngester.check_device_exists", lambda self, device_id: True)
     
-    response = client.post("/register_device", json=device_data)
+    response = client.post("/device", json=device_data)
     assert response.status_code == 409
     data = response.get_json()
     assert "Device with this ID already exists" in data.get("error", "")
@@ -259,7 +259,7 @@ def test_register_user_success(client, monkeypatch):
     monkeypatch.setattr("ingester.neo4j_ingester.MCIngester.check_user_exists", lambda self, user_id: False)
     monkeypatch.setattr("ingester.neo4j_ingester.MCIngester.add_user", lambda self, user: None)
     
-    response = client.post("/register_user", json=user_data)
+    response = client.post("/user", json=user_data)
     assert response.status_code == 201
     data = response.get_json()
     assert data.get("message") == "User registered successfully"
@@ -272,7 +272,7 @@ def test_register_user_missing_user_id(client):
         "full_name": "Test User"
     }
     
-    response = client.post("/register_user", json=user_data)
+    response = client.post("/user", json=user_data)
     assert response.status_code == 400
     data = response.get_json()
     assert "user_id is required" in data.get("error", "")
@@ -288,7 +288,7 @@ def test_register_user_duplicate_id(client, monkeypatch):
     # Mock that user already exists
     monkeypatch.setattr("ingester.neo4j_ingester.MCIngester.check_user_exists", lambda self, user_id: True)
     
-    response = client.post("/register_user", json=user_data)
+    response = client.post("/user", json=user_data)
     assert response.status_code == 409
     data = response.get_json()
     assert "User with this ID already exists" in data.get("error", "")

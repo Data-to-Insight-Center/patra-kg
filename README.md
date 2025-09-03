@@ -39,24 +39,25 @@ For more information, please refer to the [Patra ModelCards paper](https://ieeex
 The server is built using Flask and exposes a RESTful API for interaction with the Patra Knowledge Graph (KG).
 
 
-| Endpoint                        | Method | Description                                                                                                            |
-|---------------------------------|--------|------------------------------------------------------------------------------------------------------------------------|
-| `/upload_mc`                    | POST   | Upload a model card to the Patra Knowledge Graph.                                                                      |
-| `/update_mc`                    | POST   | Update an existing model card.                                                                                         |
-| `/upload_ds`                    | POST   | Upload a datasheet to the Patra Knowledge Graph.                                                                       |
-| `/search`                       | GET    | Full-text search for model cards.                                                                                      |
-| `/download_mc`                  | GET    | Download a reconstructed model card from the Patra Knowledge Graph.                                                    |
-| `/download_mc`                  | HEAD   | Retrieve the model card linkset through the header for the given model ID                                              |
-| `/download_url`                 | GET    | Retrieve the download URL for a given model ID.                                                                        |
-| `/list`                         | GET    | List all models in the Patra Knowledge Graph.                                                                          |
-| `/model_deployments`            | GET    | Get all deployments for a given model ID.                                                                              |
-| `/update_model_location`        | POST   | Update the model’s location in the graph.                                                                              |
-| `/get_model_id`                 | GET    | Generates a model_id for a given author, name, and version.                                                            |
-| `/get_huggingface_credentials`  | GET    | Get Hugging Face credentials for a given model ID.                                                                     |
-| `/get_github_credentials`       | GET    | Get GitHub credentials for a given model ID.                                                                           |
-| `/register_device`              | POST   | Register a new edge device for deployment tracking.                                                                    |
-| `/register_user`                | POST   | Register a new user for experiment tracking and model submissions.                                                      |
-| `/modelcard_linkset`            | GET    | Returns the modelcard linkset in the header for a given modelcard id<br/>ex: <server_url>/modelcard_linkset?id=<mc_id> |
+| Endpoint                                               | Method | Description                                                                                                  |
+|--------------------------------------------------------|--------|--------------------------------------------------------------------------------------------------------------|
+| `/modelcard`                                           | POST   | Create (upload) a model card.                                                                                |
+| `/modelcard/{id}`                                      | GET    | Retrieve a model card.                                                                                       |
+| `/modelcard/{id}`                                      | HEAD   | Return linkset relations via HTTP Link headers.                                                              |
+| `/modelcard/{id}`                                      | PUT    | Update an existing model card.                                                                               |
+| `/datasheet`                                           | POST   | Upload a datasheet.                                                                                          |
+| `/modelcards/search?q=...`                             | GET    | Full-text search for model cards.                                                                            |
+| `/modelcard/{id}/download_url`                         | GET    | Retrieve the download URL for a model artifact.                                                              |
+| `/modelcards`                                          | GET    | List all model cards.                                                                                        |
+| `/modelcard/{id}/deployments`                          | GET    | Retrieve deployments for a model.                                                                            |
+| `/modelcard/{id}/location`                             | PUT    | Update the model’s location.                                                                                 |
+| `/modelcard/id`                                        | POST   | Generate a persistent model ID (PID) for author, name, version.                                             |
+| `/modelcard/{id}/huggingface_credentials`              | GET    | Get Hugging Face credentials (if configured).                                                                |
+| `/modelcard/{id}/github_credentials`                   | GET    | Get GitHub credentials (if configured).                                                                      |
+| `/modelcard/{id}/linkset`                              | GET    | Retrieve linkset relations (same output as HEAD but with empty body & Link headers).                         |
+| `/device`                                              | POST   | Register an edge device.                                                                                     |
+| `/user`                                                | POST   | Register a user.                                                                                              |
+
 
 For more information on the server endpoints, please refer to the [API documentation.](docs/patra_openapi.json)
 
