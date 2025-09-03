@@ -1,6 +1,10 @@
 name: CI
 
-on: [ push ]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   start:
@@ -28,6 +32,9 @@ jobs:
         run: |
           pip install -r tests/requirements.txt
 
-      - name: Run tests
+      - name: Run tests (all)
+        env:
+          ENABLE_MC_SIMILARITY: "False"
         run: |
-          pytest tests/test_patra_rest_services.py
+          # Run full test suite; rely on test neo4j stub in tests/neo4j.py
+          pytest -q
