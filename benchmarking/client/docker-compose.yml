@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  benchmark:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: patra-benchmark
+    environment:
+      - PATRA_BASE_URL=http://localhost:5002
+      - MCP_URL=http://localhost:8000/jsonrpc
+    volumes:
+      - ../results:/app/results
+    command: ["python", "main.py", "--base-url", "http://localhost:5002", "--mcp-url", "http://localhost:8000/jsonrpc", "--repeats", "10"]
+    network_mode: "host"
+
