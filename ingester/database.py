@@ -119,6 +119,9 @@ class GraphDB:
     def insert_ai_model(self, model_card_id, ai_model_metadata):
         model_id = str(model_card_id + "-model")
         ai_model_metadata.setdefault('inference_labels', [])
+        ai_model_metadata.setdefault('deployment_strategy', 'unknown')
+        ai_model_metadata.setdefault('deployment_tested', False)
+        ai_model_metadata.setdefault('metrics', {})
 
         with self.driver.session() as session:
             query = """
@@ -129,7 +132,7 @@ class GraphDB:
             """
             session.run(query, ai_model_metadata, id=model_id)
 
-            metrics = ai_model_metadata['metrics']
+            metrics = ai_model_metadata.get('metrics', {})
             for key, value in metrics.items():
                 key = key.replace(" ", "_")
                 query = f"""
@@ -152,6 +155,9 @@ class GraphDB:
         :return:
         """
         model_id = str(model_card_id + "-model")
+        ai_model_metadata.setdefault('deployment_strategy', 'unknown')
+        ai_model_metadata.setdefault('deployment_tested', False)
+        ai_model_metadata.setdefault('metrics', {})
         with self.driver.session() as session:
 
             query = """
@@ -172,7 +178,7 @@ class GraphDB:
             session.run(query, ai_model_metadata, id=model_id)
 
             # Update the metrics properties on the model node
-            metrics = ai_model_metadata['metrics']
+            metrics = ai_model_metadata.get('metrics', {})
             for key, value in metrics.items():
                 key = key.replace(" ", "_")
                 query = f"""
