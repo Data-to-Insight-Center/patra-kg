@@ -43,30 +43,6 @@ docker run -p 8000:8000 \
 docker run -it patra-mcp-server python server.py
 ```
 
-### Push to Docker Hub
-
-```bash
-# Use the provided script (replace with your Docker Hub username)
-./push-to-dockerhub.sh your-dockerhub-username
-
-# Or manually:
-docker build -t patra-mcp-server .
-docker tag patra-mcp-server:latest your-username/patra-mcp-server:latest
-docker push your-username/patra-mcp-server:latest
-```
-
-### Using from Docker Hub
-
-```bash
-# Pull and run from Docker Hub
-docker pull your-username/patra-mcp-server:latest
-docker run -p 8000:8000 \
-  -e NEO4J_URI=neo4j://host.docker.internal:7687 \
-  -e NEO4J_USER=neo4j \
-  -e NEO4J_PWD=your_password \
-  your-username/patra-mcp-server:latest
-```
-
 ## Local Development Setup
 
 ```bash

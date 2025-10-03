@@ -11,13 +11,13 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
-COPY requirements.txt .
+COPY mcp_server/requirements.txt .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the entire project (needed for imports)
-COPY ../ /app/
+# Copy the entire project structure (needed for imports)
+COPY . /app/
 
 # Create non-root user for security
 RUN useradd --create-home --shell /bin/bash mcp && \
@@ -36,7 +36,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD python -c "import requests; requests.get('http://localhost:8000/health')" || exit 1
 
 # Default command (stdio mode)
-CMD ["python", "server.py"]
+CMD ["python", "mcp_server/server.py"]
 
 # Alternative HTTP mode can be run with:
-# docker run -p 8000:8000 <image> python server.py --http --port 8000
+# docker run -p 8000:8000 <image> python mcp_server/server.py --http --port 8000

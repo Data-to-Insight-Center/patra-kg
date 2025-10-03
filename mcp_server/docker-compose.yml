@@ -37,7 +37,7 @@ services:
         condition: service_healthy
     networks:
       - patra-network
-    command: ["python", "server.py", "--http", "--port", "8000"]
+    command: ["python", "mcp_server/server.py", "--http", "--port", "8000"]
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
