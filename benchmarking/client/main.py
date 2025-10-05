@@ -170,6 +170,145 @@ class MCPClientOptimized:
         """MCP Strength: Combined workflow operation"""
         return self._rpc("workflow_list_and_get", {"limit": limit})
 
+def get_sample_ids(rest: PatraRESTOptimized, max_count: int = 1000) -> List[str]:
+    """Retrieve up to max_count model card IDs from the REST API.
+
+    Falls back to synthetic IDs if listing fails.
+    """
+    try:
+        all_cards = rest.list_modelcards()
+        if isinstance(all_cards, dict):
+            ids = list(all_cards.keys())[:max_count]
+        elif isinstance(all_cards, list):
+            ids = []
+            for item in all_cards:
+                mc_id = item.get("mc_id") or item.get("id")
+                if mc_id:
+                    ids.append(mc_id)
+                if len(ids) >= max_count:
+                    break
+        else:
+            ids = []
+        return ids
+    except Exception as e:
+        print(f"Could not get sample IDs: {e}")
+        return [f"model_{i}" for i in range(min(10, max_count))]
+
+def run_batch_and_workflow_benchmarks(
+    rest: PatraRESTOptimized,
+    mcp: Optional[MCPClientOptimized],
+    repeats: int,
+    batch_sizes: List[int],
+    workflow_limits: List[int],
+) -> Dict[str, List[Dict[str, Any]]]:
+    """Run only batch and workflow benchmarks and return structured results.
+
+    Returns a dict with two keys: "batch" and "workflow", each a list of rows.
+    """
+    results: Dict[str, List[Dict[str, Any]]] = {"batch": [], "workflow": []}
+
+    sample_ids = get_sample_ids(rest, max_count=max(batch_sizes + workflow_limits + [100]))
+
+    # Batch operations
+    for batch_size in batch_sizes:
+        if batch_size > len(sample_ids):
+            continue
+        batch_ids = sample_ids[:batch_size]
+
+        def rest_batch() -> Any:
+            return rest.batch_get_modelcards(batch_ids)
+
+        row: Dict[str, Any] = {
+            "operation": f"Batch Get {batch_size} cards",
+            "batch_size": batch_size,
+            "repeats": repeats,
+        }
+
+        try:
+            rest_timing = time_call(rest_batch, repeats=repeats)
+            row["rest_p50_ms"] = round(rest_timing.p50, 3)
+            row["rest_mean_ms"] = round(rest_timing.mean, 3)
+        except Exception as e:
+            print(f"REST batch {batch_size} failed: {e}")
+            row["rest_p50_ms"] = 0.0
+            row["rest_mean_ms"] = 0.0
+
+        if mcp:
+            def mcp_batch() -> Any:
+                return mcp.batch_get_modelcards(batch_ids)
+            try:
+                mcp_timing = time_call(mcp_batch, repeats=repeats)
+                row["mcp_p50_ms"] = round(mcp_timing.p50, 3)
+                row["mcp_mean_ms"] = round(mcp_timing.mean, 3)
+            except Exception as e:
+                print(f"MCP batch {batch_size} failed: {e}")
+                row["mcp_p50_ms"] = 0.0
+                row["mcp_mean_ms"] = 0.0
+        else:
+            row["mcp_p50_ms"] = 0.0
+            row["mcp_mean_ms"] = 0.0
+
+        if row["rest_p50_ms"] > 0 and row["mcp_p50_ms"] > 0:
+            row["mcp_advantage_pct"] = round(((row["rest_p50_ms"] - row["mcp_p50_ms"]) / row["rest_p50_ms"]) * 100.0, 1)
+        else:
+            row["mcp_advantage_pct"] = 0.0
+
+        results["batch"].append(row)
+
+    # Workflow operations
+    for limit in workflow_limits:
+        def rest_workflow() -> Any:
+            cards = rest.list_modelcards()
+            if isinstance(cards, dict):
+                card_ids = list(cards.keys())[:limit]
+            else:
+                card_ids = [c.get("mc_id") or c.get("id") for c in cards[:limit]]
+            card_ids = [i for i in card_ids if i]
+            for cid in card_ids:
+                try:
+                    rest.get_modelcard(cid)
+                except Exception:
+                    pass
+
+        row_wf: Dict[str, Any] = {
+            "operation": f"Workflow: List+Get {limit}",
+            "limit": limit,
+            "repeats": repeats,
+        }
+
+        try:
+            rest_timing = time_call(rest_workflow, repeats=repeats)
+            row_wf["rest_p50_ms"] = round(rest_timing.p50, 3)
+            row_wf["rest_mean_ms"] = round(rest_timing.mean, 3)
+        except Exception as e:
+            print(f"REST workflow {limit} failed: {e}")
+            row_wf["rest_p50_ms"] = 0.0
+            row_wf["rest_mean_ms"] = 0.0
+
+        if mcp:
+            def mcp_workflow() -> Any:
+                return mcp.workflow_list_and_get(limit=limit)
+            try:
+                mcp_timing = time_call(mcp_workflow, repeats=repeats)
+                row_wf["mcp_p50_ms"] = round(mcp_timing.p50, 3)
+                row_wf["mcp_mean_ms"] = round(mcp_timing.mean, 3)
+            except Exception as e:
+                print(f"MCP workflow {limit} failed: {e}")
+                row_wf["mcp_p50_ms"] = 0.0
+                row_wf["mcp_mean_ms"] = 0.0
+        else:
+            row_wf["mcp_p50_ms"] = 0.0
+            row_wf["mcp_mean_ms"] = 0.0
+
+        if row_wf["rest_p50_ms"] > 0 and row_wf["mcp_p50_ms"] > 0:
+            row_wf["mcp_advantage_pct"] = round(((row_wf["rest_p50_ms"] - row_wf["mcp_p50_ms"]) / row_wf["rest_p50_ms"]) * 100.0, 1)
+        else:
+            row_wf["mcp_advantage_pct"] = 0.0
+
+        results["workflow"].append(row_wf)
+
+    return results
+
 def benchmark_mcp_strengths(rest: PatraRESTOptimized, mcp: Optional[MCPClientOptimized], repeats: int) -> Dict[str, Dict[str, float]]:
     """Test scenarios where MCP should legitimately excel"""
     results: Dict[str, Dict[str, float]] = {}
@@ -189,7 +328,7 @@ def benchmark_mcp_strengths(rest: PatraRESTOptimized, mcp: Optional[MCPClientOpt
         sample_ids = [f"model_{i}" for i in range(10)]
     
     # Scenario 1: Batch Operations (MCP's Native Strength)
-    batch_sizes = [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]
+    batch_sizes = [5, 10, 25, 50, 100, 200]
     for batch_size in batch_sizes:
         if batch_size <= len(sample_ids):
             batch_ids = sample_ids[:batch_size]
@@ -218,7 +357,7 @@ def benchmark_mcp_strengths(rest: PatraRESTOptimized, mcp: Optional[MCPClientOpt
                     results[f"Batch Get {batch_size} cards"]["MCP"] = 0.0
     
     # Scenario 2: Workflow Operations (varying limits)
-    workflow_limits = [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]
+    workflow_limits = [5, 10, 25, 50, 100, 200]
     for limit in workflow_limits:
         def rest_workflow():
             cards = rest.list_modelcards()
@@ -424,61 +563,75 @@ def main() -> None:
     if mcp_client:
         mcp_client.warmup()
     
-    base_dir = Path(__file__).parent
+    base_dir = Path("/app/results")
     
-    # Test 1: MCP Strength Scenarios
-    print("\n🎯 Testing MCP Strength Scenarios...")
-    mcp_strengths = benchmark_mcp_strengths(rest_client, mcp_client, args.repeats)
-    
-    with open(base_dir / "mcp_strengths.csv", "w", newline="") as f:
+    # Only Batch and Workflow results
+    batch_sizes = [5, 10, 25, 50, 100, 200]
+    workflow_limits = [5, 10, 25, 50, 100, 200]
+
+    print("\n🎯 Running Batch and Workflow benchmarks...")
+    results = run_batch_and_workflow_benchmarks(
+        rest_client,
+        mcp_client,
+        repeats=args.repeats,
+        batch_sizes=batch_sizes,
+        workflow_limits=workflow_limits,
+    )
+
+    # Write batch results
+    with open(base_dir / "batch_operations.csv", "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["Operation", "REST_ms", "MCP_ms", "MCP_Advantage_%"])
-        for op, values in mcp_strengths.items():
-            rest_val = values.get("REST", 0)
-            mcp_val = values.get("MCP", 0)
-            if rest_val > 0 and mcp_val > 0:
-                advantage = ((rest_val - mcp_val) / rest_val) * 100
-            else:
-                advantage = 0
-            writer.writerow([op, rest_val, mcp_val, f"{advantage:.1f}"])
-    
-    # Test 2: Fair Single Operations Comparison
-    print("\n⚖️  Testing Fair Single Operations Comparison...")
-    single_ops = benchmark_single_operations(rest_client, mcp_client, args.repeats)
-    
-    with open(base_dir / "fair_comparison.csv", "w", newline="") as f:
+        writer.writerow([
+            "operation",
+            "batch_size",
+            "repeats",
+            "rest_p50_ms",
+            "rest_mean_ms",
+            "mcp_p50_ms",
+            "mcp_mean_ms",
+            "mcp_advantage_pct",
+        ])
+        for row in results["batch"]:
+            writer.writerow([
+                row.get("operation"),
+                row.get("batch_size"),
+                row.get("repeats"),
+                row.get("rest_p50_ms"),
+                row.get("rest_mean_ms"),
+                row.get("mcp_p50_ms"),
+                row.get("mcp_mean_ms"),
+                row.get("mcp_advantage_pct"),
+            ])
+
+    # Write workflow results
+    with open(base_dir / "workflow_operations.csv", "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["Operation", "REST_ms", "MCP_ms", "Difference_%"])
-        for op, values in single_ops.items():
-            rest_val = values.get("REST", 0)
-            mcp_val = values.get("MCP", 0)
-            if rest_val > 0 and mcp_val > 0:
-                diff = ((mcp_val - rest_val) / rest_val) * 100
-            else:
-                diff = 0
-            writer.writerow([op, rest_val, mcp_val, f"{diff:.1f}"])
-    
+        writer.writerow([
+            "operation",
+            "limit",
+            "repeats",
+            "rest_p50_ms",
+            "rest_mean_ms",
+            "mcp_p50_ms",
+            "mcp_mean_ms",
+            "mcp_advantage_pct",
+        ])
+        for row in results["workflow"]:
+            writer.writerow([
+                row.get("operation"),
+                row.get("limit"),
+                row.get("repeats"),
+                row.get("rest_p50_ms"),
+                row.get("rest_mean_ms"),
+                row.get("mcp_p50_ms"),
+                row.get("mcp_mean_ms"),
+                row.get("mcp_advantage_pct"),
+            ])
+
     print("\n✅ Benchmark complete!")
-    print(f"📊 Results saved to:")
-    print(f"   - mcp_strengths.csv (where MCP should excel)")
-    print(f"   - fair_comparison.csv (balanced comparison)")
-    
-    # Print summary
-    print(f"\n📈 MCP Strength Summary:")
-    mcp_wins = 0
-    total_tests = 0
-    for op, values in mcp_strengths.items():
-        rest_val = values.get("REST", 0)
-        mcp_val = values.get("MCP", 0)
-        if rest_val > 0 and mcp_val > 0:
-            total_tests += 1
-            if mcp_val < rest_val:
-                mcp_wins += 1
-                advantage = ((rest_val - mcp_val) / rest_val) * 100
-                print(f"   ✅ {op}: MCP {advantage:.1f}% faster")
-    
-    if total_tests > 0:
-        print(f"\n🎯 MCP won {mcp_wins}/{total_tests} strength-based tests ({mcp_wins/total_tests*100:.1f}%)")
+    print("📊 Results saved to:")
+    print("   - batch_operations.csv")
+    print("   - workflow_operations.csv")
 
 if __name__ == "__main__":
     sys.exit(main())

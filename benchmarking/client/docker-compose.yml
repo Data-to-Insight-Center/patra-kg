@@ -1,9 +1,7 @@
-version: '3.8'
-
 services:
   benchmark:
     build:
-      context: ..
+      context: .
       dockerfile: Dockerfile
     container_name: patra-benchmark
     environment:

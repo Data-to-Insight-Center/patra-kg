@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   neo4j:
     image: neo4j:5.11-community
@@ -22,7 +20,7 @@ services:
       retries: 5
 
   patra-server:
-    image: iud2i/patra-server:latest
+    image: iud2i/patra-server:dev
     container_name: patra-backend-server
     ports:
       - "5002:5002"

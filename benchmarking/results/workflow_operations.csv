@@ -1,0 +1,7 @@
+operation,limit,repeats,rest_p50_ms,rest_mean_ms,mcp_p50_ms,mcp_mean_ms,mcp_advantage_pct
+Workflow: List+Get 5,5,10,674.592,698.057,86.845,105.294,87.1
+Workflow: List+Get 10,10,10,724.533,779.617,100.706,104.207,86.1
+Workflow: List+Get 25,25,10,1408.755,1448.552,99.45,115.175,92.9
+Workflow: List+Get 50,50,10,998.083,1656.199,41.381,52.414,95.9
+Workflow: List+Get 100,100,10,1949.246,2113.913,60.365,68.949,96.9
+Workflow: List+Get 200,200,10,4576.943,4944.351,50.58,55.187,98.9
