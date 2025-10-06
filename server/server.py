@@ -291,5 +291,6 @@ class User(Resource):
         except Exception as e:
             logging.error(f"Failed to register user: {str(e)}")
             return {"error": f"Failed to register user: {str(e)}"}, 500
+            
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5002)

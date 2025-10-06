@@ -1,4 +1,4 @@
-import time
+import uuid
 
 from ingester.database import GraphDB
 from ingester.graph_embedder import embed_model_versioning
@@ -29,7 +29,7 @@ class MCIngester:
             return exists, model_id
 
         if 'id' not in model_card:
-            model_card['id'] = f"{model_card['author']}_{model_card['name']}_{model_card['version']}"
+            model_card['id'] = str(uuid.uuid4())
 
         if self.similarity_enabled:
             version_embedding = embed_model_versioning(model_card)
