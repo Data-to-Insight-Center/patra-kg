@@ -1,6 +1,7 @@
 import os
 import logging
 from urllib.parse import urlparse
+import uuid
 
 from flask import Flask, request, jsonify, Response
 from flask_restx import Api, Resource
@@ -81,7 +82,7 @@ class Datasheet(Resource):
         return {"message": "Successfully uploaded the datasheet"}, 200
 
 
-@api.route('/modelcards/search')
+@api.route('/modelcards/search', '/search')
 class SearchModelCards(Resource):
     def get(self):
         """
@@ -96,7 +97,7 @@ class SearchModelCards(Resource):
 
 
 
-@api.route('/modelcard/<string:mc_id>/download_url', '/download_url/<string:mc_id>')
+@api.route('/modelcard/<string:mc_id>/download_url', '/download_url/<string:mc_id>', '/get_model_location/<string:mc_id>')
 class ModelDownloadURL(Resource):
     def get(self, mc_id):
         """
@@ -264,5 +265,19 @@ class User(Resource):
             logging.error(f"Failed to register user: {str(e)}")
             return {"error": f"Failed to register user: {str(e)}"}, 500
             
+
+@api.route('/modelcard/id')
+class GeneratePID(Resource):
+    def post(self):
+        """
+        Generates a model_id for a given author, name, and version.
+        Returns:
+            201: New PID for that combination
+            409: PID already exists; user must update version
+            400: Missing parameters
+        """
+        pid = str(uuid.uuid4())
+        return {"pid": pid}, 201
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5002)

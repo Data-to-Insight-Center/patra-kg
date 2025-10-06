@@ -96,12 +96,6 @@ class MCIngester:
 
         return base_mc_id
 
-    def get_pid(self, author, name, version):
-        author = author.lower().replace(" ", "_")
-        name = name.lower().replace(" ", "_")
-        version = version.lower().replace(" ", "_")
-        return f"{author}-{name}-{version}"
-
     def add_datasheet(self, datasheet):
         self.db.insert_datasheet(datasheet)
 
