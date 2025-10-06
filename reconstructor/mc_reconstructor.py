@@ -1,7 +1,7 @@
 from ingester.database import GraphDB
 import json
 from typing import Dict, Optional, Any
-
+import logging
 
 class MCReconstructor:
     """
@@ -15,9 +15,9 @@ class MCReconstructor:
 
         try:
             self.db = GraphDB(self.uri, self.user, self.password)
-            print("Connected to the Neo4j database.")
+            logging.info("Connected to the Neo4j database.")
         except Exception as e:
-            print("Error connecting to the Neo4j database:", str(e))
+            logging.error("Error connecting to the Neo4j database:", str(e))
 
     def reconstruct(self, model_card_id):
         metadata = {

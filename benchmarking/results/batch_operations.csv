@@ -1,7 +1,0 @@
-operation,batch_size,repeats,rest_p50_ms,rest_mean_ms,mcp_p50_ms,mcp_mean_ms,mcp_advantage_pct
-Batch Get 5 cards,5,10,122.579,140.623,3.384,12.294,97.2
-Batch Get 10 cards,10,10,415.616,438.547,4.605,14.978,98.9
-Batch Get 25 cards,25,10,1302.6,1409.079,4.854,45.0,99.6
-Batch Get 50 cards,50,10,2271.744,2441.386,8.284,64.079,99.6
-Batch Get 100 cards,100,10,4884.301,4873.154,4.065,56.336,99.9
-Batch Get 200 cards,200,10,6672.475,6854.205,13.007,260.59,99.8

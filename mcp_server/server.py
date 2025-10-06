@@ -12,7 +12,7 @@ if PROJECT_ROOT not in sys.path:
 
 from reconstructor.mc_reconstructor import MCReconstructor
 
-mcp = FastMCP("patra-mcp-optimized")
+mcp = FastMCP("patra-mcp")
 NEO4J_URI = os.getenv("NEO4J_URI", "neo4j://localhost:7687")
 NEO4J_USERNAME = os.getenv("NEO4J_USER", "neo4j")
 NEO4J_PWD = os.getenv("NEO4J_PWD", "password")

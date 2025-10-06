@@ -50,6 +50,7 @@ class ModelCardDetail(Resource):
         if model_card is None:
             return {"error": "Model card could not be found!"}, 400
         return model_card, 200
+
     def head(self, mc_id):
         model_card = mc_reconstructor.reconstruct(str(mc_id))
         if not model_card:
@@ -59,6 +60,7 @@ class ModelCardDetail(Resource):
         response = Response(response=None,status=200,mimetype='text/plain')
         response.headers.update(generated_headers)
         return response
+        
     def put(self, mc_id):
         data = request.get_json()
         base_mc_id = mc_ingester.update_mc(data)
