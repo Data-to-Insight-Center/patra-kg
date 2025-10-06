@@ -29,7 +29,7 @@ def home():
     return "Welcome to the Patra Knowledge Base", 200
 
 
-@api.route('/modelcard')
+@api.route('/modelcard', '/upload_mc')
 class ModelCard(Resource):
     def post(self):
         """
@@ -43,7 +43,7 @@ class ModelCard(Resource):
         return {"message": "Successfully uploaded the model card", "model_card_id": base_mc_id}, 200
 
 
-@api.route('/modelcard/<string:mc_id>')
+@api.route('/modelcard/<string:mc_id>', '/download_mc/<string:mc_id>')
 class ModelCardDetail(Resource):
     def get(self, mc_id):
         model_card = mc_reconstructor.reconstruct(str(mc_id))
@@ -69,7 +69,7 @@ class ModelCardDetail(Resource):
         return {"message": "Model card not found", "model_card_id": base_mc_id}, 200
 
 
-@api.route('/datasheet')
+@api.route('/datasheet', '/upload_datasheet')
 class Datasheet(Resource):
     def post(self):
         """
@@ -96,7 +96,7 @@ class SearchModelCards(Resource):
 
 
 
-@api.route('/modelcard/<string:mc_id>/download_url')
+@api.route('/modelcard/<string:mc_id>/download_url', '/download_url/<string:mc_id>')
 class ModelDownloadURL(Resource):
     def get(self, mc_id):
         """
@@ -108,7 +108,7 @@ class ModelDownloadURL(Resource):
         return model, 200
 
 
-@api.route('/modelcards')
+@api.route('/modelcards', '/list')
 class ListModelCards(Resource):
     def get(self):
         """
@@ -118,7 +118,7 @@ class ListModelCards(Resource):
         return model_card_dict, 200
 
 
-@api.route('/modelcard/<string:mc_id>/deployments')
+@api.route('/modelcard/<string:mc_id>/deployments', '/model_deployments/<string:mc_id>')
 class ModelDeployments(Resource):
     def get(self, mc_id):
         """
@@ -130,7 +130,7 @@ class ModelDeployments(Resource):
         return deployments, 200
 
 
-@api.route('/modelcard/<string:mc_id>/location')
+@api.route('/modelcard/<string:mc_id>/location', '/update_model_location/<string:mc_id>')
 class UpdateModelLocation(Resource):
     def put(self, mc_id):
         """
@@ -148,34 +148,6 @@ class UpdateModelLocation(Resource):
             return {"error": "Location must be a valid URL"}, 400
         mc_reconstructor.set_model_location(mc_id, location)
         return {"message": "Model location updated successfully"}, 200
-
-
-@api.route('/modelcard/id')
-class GeneratePID(Resource):
-    def post(self):
-        """
-        Generates a model_id for a given author, name, and version.
-        Returns:
-            201: New PID for that combination
-            409: PID already exists; user must update version
-            400: Missing parameters
-        """
-        data = request.get_json()
-        author = data.get('author')
-        name = data.get('name')
-        version = data.get('version')
-        if not all([author, name, version]):
-            logging.error("Missing one or more required parameters: author, name, version")
-            return {"error": "Author, name, and version are required"}, 400
-        pid = mc_ingester.get_pid(author, name, version)
-        if pid is None:
-            logging.error("PID generation failed. Could not generate a unique identifier.")
-            return {"error": "PID could not be generated. Please try again."}, 500
-        if mc_ingester.check_id_exists(pid):
-            logging.warning(f"Model ID '{pid}' already exists.")
-            return {"pid": pid}, 409
-        logging.info(f"Model ID successfully generated: {pid}")
-        return {"pid": pid}, 201
 
 
 @api.route('/modelcard/<string:mc_id>/huggingface_credentials')

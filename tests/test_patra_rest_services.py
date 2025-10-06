@@ -129,13 +129,6 @@ def test_update_model_location(monkeypatch):
     assert "Model location updated successfully" in response.json().get("message", "")
 
 
-def test_get_model_id(monkeypatch):
-    dummy = dummy_response(201, {"pid": "dummy_pid"})
-    monkeypatch.setattr(requests, "post", lambda url, json: dummy)
-    response = requests.post(f"{BASE_URL}/modelcard/id", json={"name": "model", "author": "author", "version": "1.0"})
-    assert response.status_code == 201
-
-
 def test_get_huggingface_credentials_success(client, monkeypatch):
     monkeypatch.setenv("HF_HUB_USERNAME", "hf_user")
     monkeypatch.setenv("HF_HUB_TOKEN", "hf_token")
