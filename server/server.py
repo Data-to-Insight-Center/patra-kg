@@ -44,7 +44,7 @@ class ModelCard(Resource):
         return {"message": "Successfully uploaded the model card", "model_card_id": base_mc_id}, 200
 
 
-@api.route('/modelcard/<string:mc_id>', '/download_mc/<string:mc_id>')
+@api.route('/modelcard/<string:mc_id>')
 class ModelCardDetail(Resource):
     def get(self, mc_id):
         model_card = mc_reconstructor.reconstruct(str(mc_id))
@@ -80,6 +80,25 @@ class Datasheet(Resource):
         datasheet_data = request.get_json()
         mc_ingester.add_datasheet(datasheet_data)
         return {"message": "Successfully uploaded the datasheet"}, 200
+
+
+@api.route('/download_mc')
+class DownloadModelCard(Resource):
+    @api.param('id', 'The model card ID')
+    def get(self):
+        """
+        Download a reconstructed model card from the Patra Knowledge Graph.
+        """
+        mc_id = request.args.get('id')
+        if not mc_id:
+            return {"error": "ID is required"}, 400
+
+        model_card = mc_reconstructor.reconstruct(str(mc_id))
+
+        if model_card is None:
+            return {"error": "Model card could not be found!"}, 400
+
+        return model_card, 200
 
 
 @api.route('/modelcards/search', '/search')
