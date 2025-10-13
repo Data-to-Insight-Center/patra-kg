@@ -56,6 +56,18 @@ Thumbs.db
 *.log
 logs/
 
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.env/
+benchmarking/neo4j/venv/
+*venv*/
+*env*/
+.conda/
+conda-meta/
+
 # Temporary files
 *.tmp
 *.temp

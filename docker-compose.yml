@@ -1,9 +1,7 @@
-version: '3.8'
-
 services:
-  patra-neo4j:
+  neo4j-db:
     image: neo4j:5.21.0-community
-    container_name: patra_neo4j_server
+    container_name: neo4j_db
     ports:
       - "7474:7474"
       - "7687:7687"
@@ -22,28 +20,43 @@ services:
       retries: 5
     networks:
       - patra-network
-
-  patra-server:
-    image: iud2i/patra-server:latest
-    container_name: patra_kg_server
+    volumes:
+      - neo4j_data:/data
+  rest-server:
+    build:
+      context: .
+      dockerfile: server_rest/Dockerfile
+    container_name: rest_server
     ports:
       - "5002:5002"
     depends_on:
-      - patra-neo4j
-    env_file:
-      - .env
+      - neo4j-db
     environment:
-      - NEO4J_URI=bolt://patra-neo4j:7687
+      - NEO4J_URI=bolt://neo4j-db:7687
       - NEO4J_USER=neo4j
       - NEO4J_PWD=PWD_HERE
-      - ENABLE_MC_SIMILARITY=False
-      - OPENAI_API_KEY=
-      - GH_HUB_USERNAME=
-      - GH_HUB_TOKEN=
-      - HF_HUB_USERNAME=
-      - HF_HUB_TOKEN=
     networks:
       - patra-network
 
+  mcp-server:
+    build:
+      context: .
+      dockerfile: server_mcp/Dockerfile
+    container_name: mcp_server
+    ports:
+      - "8050:8050"
+    environment:
+      - NEO4J_URI=bolt://neo4j-db:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PWD=PWD_HERE
+    networks:
+      - patra-network
+
+
 networks:
   patra-network:
+    driver: bridge
+
+volumes:
+  neo4j_data:
+    driver: local
