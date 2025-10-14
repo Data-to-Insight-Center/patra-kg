@@ -73,3 +73,4 @@ conda-meta/
 *.temp
 .tmp/
 .temp/
+scripts/
