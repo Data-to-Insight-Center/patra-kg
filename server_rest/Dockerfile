@@ -19,9 +19,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the entire project structure (needed for imports from ingester and reconstructor)
 COPY . /app/
 
+# Create timings directory for CSV files
+RUN mkdir -p /app/timings
+
 # Create non-root user for security
 RUN useradd --create-home --shell /bin/bash rest && \
-    chown -R rest:rest /app
+    chown -R rest:rest /app && \
+    chmod 777 /app/timings
 USER rest
 
 # Set environment variables

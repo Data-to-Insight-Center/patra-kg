@@ -10,6 +10,9 @@ RUN pip install uv
 # Copy the whole repo to ensure shared modules like reconstructor are available
 COPY .. /app/
 
+# Create timings directory for CSV files
+RUN mkdir -p /app/timings && chmod 777 /app/timings
+
 RUN uv venv
 RUN uv pip install -r /app/server_mcp/requirements.txt
 

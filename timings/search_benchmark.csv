@@ -1,0 +1,3 @@
+timestamp,query,num_results,latency_ms
+2025-10-21T19:03:51.255483,resnet,10,1707.02
+2025-10-21T19:04:14.258471,resnet,10,18.45

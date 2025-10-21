@@ -23,8 +23,11 @@ NEO4J_URI = os.getenv("NEO4J_URI", "neo4j://localhost:7687")
 NEO4J_USERNAME = os.getenv("NEO4J_USER", "neo4j")
 NEO4J_PWD = os.getenv("NEO4J_PWD", "password")
 
+# CSV timing file path (mounted volume in Docker)
+CSV_TIMINGS_PATH = os.getenv("CSV_TIMINGS_PATH", "/app/timings/reconstruct_timings.csv")
+
 # Initialize reconstructor
-mc_reconstructor = MCReconstructor(NEO4J_URI, NEO4J_USERNAME, NEO4J_PWD)
+mc_reconstructor = MCReconstructor(NEO4J_URI, NEO4J_USERNAME, NEO4J_PWD, csv_output_file=CSV_TIMINGS_PATH)
 
 @mcp.tool()
 def get_modelcard(mc_id: str) -> Dict[str, Any]:
@@ -42,22 +45,9 @@ def get_modelcard(mc_id: str) -> Dict[str, Any]:
         raise ValueError(f"Model card '{mc_id}' not found")
     return model_card
 
-@mcp.tool()
-def list_modelcards() -> List[Dict[str, Any]]:
-    """
-    List all model cards in the knowledge graph.
-    
-    Args:
-        limit: Maximum number of model cards to return (default: 100)
-        
-    Returns:
-        List of model card summaries
-    """
-    cards = mc_reconstructor.get_all_mcs()
-    return cards
 
 @mcp.tool()
-def search_modelcards(query: str, limit: int = 50) -> List[Dict[str, Any]]:
+def search_modelcards(query: str) -> List[Dict[str, Any]]:
     """
     Search for model cards using a text query.
     
@@ -69,7 +59,7 @@ def search_modelcards(query: str, limit: int = 50) -> List[Dict[str, Any]]:
         List of matching model cards
     """
     results = mc_reconstructor.search_kg(query)
-    return results[:limit]
+    return results
 
 if __name__ == "__main__":
     mcp.run(transport="sse")
