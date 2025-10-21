@@ -35,9 +35,12 @@ By combining these capabilities, the Patra Knowledge Base provides a robust foun
 
 For more information, please refer to the [Patra ModelCards paper](https://ieeexplore.ieee.org/document/10678710).
 
-### Patra Server
-The server is built using Flask and exposes a RESTful API for interaction with the Patra Knowledge Graph (KG).
+### Patra Servers
 
+Patra provides two server implementations for different use cases:
+
+#### 1. REST Server
+The REST server is built using Flask and exposes a RESTful API for interaction with the Patra Knowledge Graph (KG).
 
 | Endpoint                                               | Method | Description                                                                                                  |
 |--------------------------------------------------------|--------|--------------------------------------------------------------------------------------------------------------|
@@ -50,7 +53,7 @@ The server is built using Flask and exposes a RESTful API for interaction with t
 | `/modelcard/{id}/download_url`                         | GET    | Retrieve the download URL for a model artifact.                                                              |
 | `/modelcards`                                          | GET    | List all model cards.                                                                                        |
 | `/modelcard/{id}/deployments`                          | GET    | Retrieve deployments for a model.                                                                            |
-| `/modelcard/{id}/location`                             | PUT    | Update the model’s location.                                                                                 |
+| `/modelcard/{id}/location`                             | PUT    | Update the model's location.                                                                                 |
 | `/modelcard/id`                                        | POST   | Generate a persistent model ID (PID) for author, name, version.                                             |
 | `/modelcard/{id}/huggingface_credentials`              | GET    | Get Hugging Face credentials (if configured).                                                                |
 | `/modelcard/{id}/github_credentials`                   | GET    | Get GitHub credentials (if configured).                                                                      |
@@ -58,8 +61,16 @@ The server is built using Flask and exposes a RESTful API for interaction with t
 | `/device`                                              | POST   | Register an edge device.                                                                                     |
 | `/user`                                                | POST   | Register a user.                                                                                              |
 
+For more information on the REST endpoints, please refer to the [API documentation.](docs/patra_openapi.json)
 
-For more information on the server endpoints, please refer to the [API documentation.](docs/patra_openapi.json)
+#### 2. MCP Server (Model Context Protocol)
+The MCP server provides an AI-native interface using the [Model Context Protocol](https://modelcontextprotocol.io/), enabling AI assistants and agents to interact with the Patra Knowledge Graph through tool-based interactions.
+
+**Available Tools:**
+- `get_modelcard(mc_id)` - Retrieve a model card by its ID
+- `search_modelcards(query)` - Search for model cards using semantic queries
+
+The MCP server enables AI assistants (like Claude, ChatGPT, or custom agents) to directly query the Patra Knowledge Graph, retrieve model cards, and perform semantic searches - making model card information accessible to conversational AI systems.
 
 ---
 
@@ -75,6 +86,7 @@ For more information on the server endpoints, please refer to the [API documenta
   - `7474` (Neo4j Web UI)
   - `7687` (Neo4j Bolt)
   - `5002` (REST Server)
+  - `8050` (MCP Server - optional)
 
 #### Dependencies
 - **Neo4j**: Version **5.21.0-community** is deployed via Docker (manual installation is not required).
@@ -112,7 +124,10 @@ git clone https://github.com/Data-to-Insight-Center/patra-kg.git
 make up
 ```
   
-The server will be running at port `5002`. To view Swagger documentation, navigate to `http://localhost:5002/swagger`.
+The services will be running at:
+- **REST Server**: `http://localhost:5002` - View Swagger documentation at `http://localhost:5002/swagger`
+- **MCP Server**: `http://localhost:8050` - SSE endpoint for AI agent integration
+- **Neo4j Browser**: `http://localhost:7474/browser/` - View and query the knowledge graph
 
 Open [neo4j browser](http://localhost:7474/browser/) and log in with the credentials mentioned in the docker-compose file to view the model card data.   
 
@@ -120,6 +135,36 @@ Open [neo4j browser](http://localhost:7474/browser/) and log in with the credent
     ```bash
     make down
     ```
+
+### 3. Using the MCP Server (Optional)
+
+The MCP server enables AI assistants to interact with the Patra Knowledge Graph. To connect an AI assistant:
+
+**For Claude Desktop:**
+1. Add to your Claude Desktop configuration (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
+```json
+{
+  "mcpServers": {
+    "patra-kg": {
+      "url": "http://localhost:8050/sse"
+    }
+  }
+}
+```
+
+**For Custom AI Agents:**
+Use the MCP SDK to connect to `http://localhost:8050/sse` and access the available tools:
+- `get_modelcard(mc_id: str)` - Retrieve specific model cards
+- `search_modelcards(query: str)` - Search using natural language queries
+
+**Example Usage:**
+```
+User: "Find model cards for image classification models"
+AI Assistant: [Uses search_modelcards tool]
+Result: Returns relevant model cards from the knowledge graph
+```
+
+This enables conversational AI systems to access and reason about model card information, enhancing transparency and accountability in AI model selection and deployment.
 
 ---
 
