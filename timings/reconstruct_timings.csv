@@ -1,2 +1,0 @@
-timestamp,model_card_id,base_query_ms,ai_model_query_ms,bias_analysis_query_ms,xai_analysis_query_ms,total_ms
-2025-10-21T19:04:46.138168,958a317c-a6b6-4f6e-9881-d9aa92154e8e,319.37,87.43,57.29,51.99,516.09

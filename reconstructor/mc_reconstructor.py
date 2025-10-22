@@ -1,9 +1,5 @@
 from ingester.database import GraphDB
-import time
-import csv
-import os
-from datetime import datetime
-from typing import Dict, Optional, Any, List, Tuple
+from typing import Dict, Optional, Any, List
 import logging
 
 
@@ -16,8 +12,7 @@ class MCReconstructor:
     and explainability analysis.
     """
 
-    def __init__(self, uri: str, user: str, password: str, 
-                 csv_output_file: str = "reconstruct_timings.csv") -> None:
+    def __init__(self, uri: str, user: str, password: str) -> None:
         """
         Initialize the MCReconstructor with Neo4j connection parameters.
         
@@ -25,18 +20,13 @@ class MCReconstructor:
             uri: Neo4j database URI
             user: Database username
             password: Database password
-            csv_output_file: Path to CSV file for timing data
         """
-        self.csv_output_file = csv_output_file
-
         try:
             self.db = GraphDB(uri, user, password)
             logging.info("Successfully connected to the Neo4j database.")
         except Exception as e:
             logging.error(f"Error connecting to the Neo4j database: {str(e)}")
             raise
-        
-        self._initialize_csv()
 
     def reconstruct(self, model_card_id: str) -> Optional[Dict[str, Any]]:
         """
@@ -48,95 +38,35 @@ class MCReconstructor:
         Returns:
             A dictionary containing the complete model card data, or None if not found
         """
-        base_mc, time_base = self._retrieve_base_model_card(model_card_id)
+        base_mc = self._retrieve_base_model_card(model_card_id)
         if base_mc is None:
             return None
 
         self._clean_model_card(base_mc)
-        time_ai = self._attach_ai_model(base_mc, model_card_id)
-        time_bias = self._attach_bias_analysis(base_mc, model_card_id)
-        time_xai = self._attach_xai_analysis(base_mc, model_card_id)
-
-        total_time = time_base + time_ai + time_bias + time_xai
-        self._write_timing_to_csv(model_card_id, time_base, time_ai, time_bias, time_xai, total_time)
-        
-        logging.debug(f"Reconstruct time: {total_time:.2f}ms "
-                     f"[base:{time_base:.2f} ai:{time_ai:.2f} bias:{time_bias:.2f} xai:{time_xai:.2f}]")
-
+        self._attach_ai_model(base_mc, model_card_id)
+        self._attach_bias_analysis(base_mc, model_card_id)
+        self._attach_xai_analysis(base_mc, model_card_id)
+                
         return base_mc
     
-    def _initialize_csv(self) -> None:
-        """Initialize the CSV file with headers if it doesn't exist."""
-        try:
-            csv_dir = os.path.dirname(self.csv_output_file)
-            if csv_dir and not os.path.exists(csv_dir):
-                os.makedirs(csv_dir, exist_ok=True)
-            
-            if not os.path.exists(self.csv_output_file):
-                with open(self.csv_output_file, 'w', newline='') as csvfile:
-                    writer = csv.writer(csvfile)
-                    writer.writerow([
-                        'timestamp', 'model_card_id', 'base_query_ms',
-                        'ai_model_query_ms', 'bias_analysis_query_ms',
-                        'xai_analysis_query_ms', 'total_ms'
-                    ])
-        except (PermissionError, OSError) as e:
-            logging.warning(f"Cannot initialize CSV file {self.csv_output_file}: {e}")
-            self.csv_output_file = None
     
-    def _write_timing_to_csv(self, model_card_id: str, time_base: float, time_ai: float,
-                             time_bias: float, time_xai: float, total_time: float) -> None:
-        """
-        Write timing data to CSV file.
-        
-        Args:
-            model_card_id: The model card ID
-            time_base: Base query execution time in ms
-            time_ai: AI model query execution time in ms
-            time_bias: Bias analysis query execution time in ms
-            time_xai: XAI analysis query execution time in ms
-            total_time: Total execution time in ms
-        """
-        self._write_csv_row(self.csv_output_file, [
-            datetime.now().isoformat(),
-            model_card_id,
-            time_base, time_ai, time_bias, time_xai, total_time
-        ])
     
-    def _write_csv_row(self, csv_file: str, values: List[Any]) -> None:
-        """Write a row to CSV file with float formatting."""
-        if csv_file is None:
-            return
-            
-        try:
-            with open(csv_file, 'a', newline='') as csvfile:
-                writer = csv.writer(csvfile)
-                formatted_values = [f"{v:.2f}" if isinstance(v, float) else v for v in values]
-                writer.writerow(formatted_values)
-        except (PermissionError, OSError) as e:
-            logging.warning(f"Cannot write to CSV file {csv_file}: {e}")
 
-    def _query_and_time(self, query: str, result_key: str, metadata: Dict[str, str], 
-                        log_message: str) -> Tuple[Optional[Dict[str, Any]], float]:
+    def _execute_query(self, query: str, result_key: str, metadata: Dict[str, str]) -> Optional[Dict[str, Any]]:
         """
-        Execute a timed query and return result with execution time.
+        Execute a query and return result.
         
         Args:
             query: Cypher query to execute
             result_key: Key to extract from query result
             metadata: Query parameters
-            log_message: Debug log message for timing
             
         Returns:
-            Tuple of (result_dict, execution_time_ms)
+            Result dictionary or None
         """
-        start_time = time.perf_counter()
-        result = self.get_result_dict(query, result_key, metadata)
-        elapsed_time = (time.perf_counter() - start_time) * 1000
-        logging.debug(f"{log_message}: {elapsed_time:.2f} ms")
-        return result, elapsed_time
+        return self.get_result_dict(query, result_key, metadata)
 
-    def _retrieve_base_model_card(self, model_card_id: str) -> Tuple[Optional[Dict[str, Any]], float]:
+    def _retrieve_base_model_card(self, model_card_id: str) -> Optional[Dict[str, Any]]:
         """
         Retrieve the base model card from the knowledge graph.
         
@@ -144,17 +74,15 @@ class MCReconstructor:
             model_card_id: The external ID of the model card
             
         Returns:
-            Tuple of (model_card_dict, execution_time_ms)
+            Model card dictionary or None
         """
         query = 'MATCH (mc:ModelCard {external_id: $mc_id}) RETURN mc'
-        base_mc, elapsed_time = self._query_and_time(
-            query, "mc", {"mc_id": model_card_id}, "Base model card query"
-        )
+        base_mc = self._execute_query(query, "mc", {"mc_id": model_card_id})
 
         if base_mc is None:
             logging.warning(f"Model card '{model_card_id}' not found in knowledge graph")
         
-        return base_mc, elapsed_time
+        return base_mc
 
     def _clean_model_card(self, model_card: Dict[str, Any]) -> None:
         """
@@ -166,61 +94,49 @@ class MCReconstructor:
         if 'embedding' in model_card:
             del model_card["embedding"]
 
-    def _attach_ai_model(self, model_card: Dict[str, Any], model_card_id: str) -> float:
+    def _attach_ai_model(self, model_card: Dict[str, Any], model_card_id: str) -> None:
         """
         Retrieve and attach AI model information to the model card.
         
         Args:
             model_card: The model card dictionary to update
             model_card_id: The model card ID for constructing the AI model ID
-            
-        Returns:
-            Execution time in milliseconds
         """
         query = 'MATCH (ai:Model {model_id: $ai_model_id}) RETURN ai'
-        ai_model, elapsed_time = self._query_and_time(
-            query, "ai", {"ai_model_id": f"{model_card_id}-model"}, "AI model query"
+        ai_model = self._execute_query(
+            query, "ai", {"ai_model_id": f"{model_card_id}-model"}
         )
         model_card["ai_model"] = ai_model
-        return elapsed_time
 
-    def _attach_bias_analysis(self, model_card: Dict[str, Any], model_card_id: str) -> float:
+    def _attach_bias_analysis(self, model_card: Dict[str, Any], model_card_id: str) -> None:
         """
         Retrieve and attach bias analysis information to the model card if available.
         
         Args:
             model_card: The model card dictionary to update
             model_card_id: The model card ID for constructing the bias analysis ID
-            
-        Returns:
-            Execution time in milliseconds
         """
         query = 'MATCH (ba:BiasAnalysis {external_id: $bias_id}) RETURN ba'
-        bias_analysis, elapsed_time = self._query_and_time(
-            query, "ba", {"bias_id": f"{model_card_id}-bias"}, "Bias analysis query"
+        bias_analysis = self._execute_query(
+            query, "ba", {"bias_id": f"{model_card_id}-bias"}
         )
         if bias_analysis is not None:
             model_card["bias_analysis"] = bias_analysis
-        return elapsed_time
 
-    def _attach_xai_analysis(self, model_card: Dict[str, Any], model_card_id: str) -> float:
+    def _attach_xai_analysis(self, model_card: Dict[str, Any], model_card_id: str) -> None:
         """
         Retrieve and attach explainability analysis information to the model card if available.
         
         Args:
             model_card: The model card dictionary to update
             model_card_id: The model card ID for constructing the XAI analysis ID
-            
-        Returns:
-            Execution time in milliseconds
         """
         query = 'MATCH (xai:ExplainabilityAnalysis {external_id: $xai_id}) RETURN xai'
-        xai_analysis, elapsed_time = self._query_and_time(
-            query, "xai", {"xai_id": f"{model_card_id}-xai"}, "Explainability analysis query"
+        xai_analysis = self._execute_query(
+            query, "xai", {"xai_id": f"{model_card_id}-xai"}
         )
         if xai_analysis is not None:
             model_card["xai_analysis"] = xai_analysis
-        return elapsed_time
 
     def get_result_dict(self, query: str, result_type: str, metadata: Dict[str, str]) -> Optional[Dict[str, Any]]:
         """Execute a Cypher query and extract the result as a dictionary."""

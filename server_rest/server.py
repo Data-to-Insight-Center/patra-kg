@@ -20,13 +20,12 @@ ENABLE_MC_SIMILARITY = os.getenv("ENABLE_MC_SIMILARITY", "False").lower() == "tr
 BENCHMARK = os.getenv("BENCHMARK", "False").lower() == "true"
 
 # Benchmark CSV files
-GET_MC_BENCHMARK_CSV = "/app/timings/get_modelcard_benchmark.csv"
-SEARCH_BENCHMARK_CSV = "/app/timings/search_benchmark.csv"
+GET_MC_BENCHMARK_CSV = "/app/timings/rest/get_modelcard_benchmark.csv"
+SEARCH_BENCHMARK_CSV = "/app/timings/rest/search_benchmark.csv"
 
 mc_ingester = MCIngester(NEO4J_URI, NEO4J_USERNAME, NEO4J_PWD, ENABLE_MC_SIMILARITY)
 mc_reconstructor = MCReconstructor(
-    NEO4J_URI, NEO4J_USERNAME, NEO4J_PWD,
-    csv_output_file=os.getenv("CSV_TIMINGS_PATH", "/app/timings/reconstruct_timings.csv")
+    NEO4J_URI, NEO4J_USERNAME, NEO4J_PWD
 )
 
 def init_benchmark_csv(csv_file, headers):
@@ -54,8 +53,8 @@ def write_benchmark_csv(csv_file, values):
         logging.warning(f"Cannot write to benchmark CSV {csv_file}: {e}")
 
 # Initialize benchmark CSV files
-init_benchmark_csv(GET_MC_BENCHMARK_CSV, ['timestamp', 'model_card_id', 'latency_ms'])
-init_benchmark_csv(SEARCH_BENCHMARK_CSV, ['timestamp', 'query', 'num_results', 'latency_ms'])
+init_benchmark_csv(GET_MC_BENCHMARK_CSV, ['latency_ms'])
+init_benchmark_csv(SEARCH_BENCHMARK_CSV, ['latency_ms'])
 
 logging.basicConfig(level=logging.INFO)
 app = Flask(__name__)
@@ -94,20 +93,19 @@ class ModelCardDetail(Resource):
         
         if BENCHMARK:
             elapsed_time = (time.perf_counter() - start_time) * 1000
-            write_benchmark_csv(GET_MC_BENCHMARK_CSV, [datetime.now().isoformat(), mc_id, elapsed_time])
-            logging.info(f"GET /modelcard/{mc_id} took {elapsed_time:.2f}ms")
+            write_benchmark_csv(GET_MC_BENCHMARK_CSV, [elapsed_time])
         
         return model_card, 200
 
-    def head(self, mc_id):
-        model_card = mc_reconstructor.reconstruct(mc_id)
-        if not model_card:
-            return {"error": f"Model card with ID '{mc_id}' could not be found!"}, 404
+    # def head(self, mc_id):
+    #     model_card = mc_reconstructor.reconstruct(mc_id)
+    #     if not model_card:
+    #         return {"error": f"Model card with ID '{mc_id}' could not be found!"}, 404
         
-        headers = mc_reconstructor.get_link_headers(model_card)
-        response = Response(response=None, status=200, mimetype='text/plain')
-        response.headers.update(headers)
-        return response
+    #     headers = mc_reconstructor.get_link_headers(model_card)
+    #     response = Response(response=None, status=200, mimetype='text/plain')
+    #     response.headers.update(headers)
+    #     return response
         
     def put(self, mc_id):
         data = request.get_json()
@@ -134,19 +132,17 @@ class DownloadModelCard(Resource):
     def get(self):
         """
         Download a reconstructed model card from the Patra Knowledge Graph.
+        Redirects to /modelcard/<mc_id> endpoint.
         """
         mc_id = request.args.get('id')
         if not mc_id:
             return {"error": "ID is required"}, 400
 
-        model_card = mc_reconstructor.reconstruct(mc_id)
-        if model_card is None:
-            return {"error": "Model card could not be found!"}, 400
-
-        return model_card, 200
+        # Redirect to the main endpoint to avoid duplicate reconstruction
+        return {"message": f"Use GET /modelcard/{mc_id} instead"}, 301
 
 
-@api.route('/modelcards/search', '/search')
+@api.route('/modelcards/search')
 class SearchModelCards(Resource):
     def get(self):
         """
@@ -163,8 +159,7 @@ class SearchModelCards(Resource):
         
         if BENCHMARK:
             elapsed_time = (time.perf_counter() - start_time) * 1000
-            write_benchmark_csv(SEARCH_BENCHMARK_CSV, [datetime.now().isoformat(), query, len(results), elapsed_time])
-            logging.info(f"Search query '{query}' took {elapsed_time:.2f}ms, returned {len(results)} results")
+            write_benchmark_csv(SEARCH_BENCHMARK_CSV, [elapsed_time])
         
         return results, 200
 

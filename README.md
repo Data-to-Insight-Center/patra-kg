@@ -64,13 +64,17 @@ The REST server is built using Flask and exposes a RESTful API for interaction w
 For more information on the REST endpoints, please refer to the [API documentation.](docs/patra_openapi.json)
 
 #### 2. MCP Server (Model Context Protocol)
-The MCP server provides an AI-native interface using the [Model Context Protocol](https://modelcontextprotocol.io/), enabling AI assistants and agents to interact with the Patra Knowledge Graph through tool-based interactions.
+Patra provides two MCP server implementations:
+
+##### a. Direct MCP Server
+The direct MCP server connects directly to Neo4j and provides an AI-native interface using the [Model Context Protocol](https://modelcontextprotocol.io/).
 
 **Available Tools:**
 - `get_modelcard(mc_id)` - Retrieve a model card by its ID
 - `search_modelcards(query)` - Search for model cards using semantic queries
 
-The MCP server enables AI assistants (like Claude, ChatGPT, or custom agents) to directly query the Patra Knowledge Graph, retrieve model cards, and perform semantic searches - making model card information accessible to conversational AI systems.
+##### b. Layered MCP Server
+The Layered MCP server wraps all Patra REST API endpoints as MCP tools, providing a complete set of capabilities for AI assistants.
 
 ---
 
@@ -86,7 +90,8 @@ The MCP server enables AI assistants (like Claude, ChatGPT, or custom agents) to
   - `7474` (Neo4j Web UI)
   - `7687` (Neo4j Bolt)
   - `5002` (REST Server)
-  - `8050` (MCP Server - optional)
+  - `8050` (Direct MCP Server - optional)
+  - `8051` (Layered MCP Server - optional)
 
 #### Dependencies
 - **Neo4j**: Version **5.21.0-community** is deployed via Docker (manual installation is not required).
@@ -126,7 +131,8 @@ make up
   
 The services will be running at:
 - **REST Server**: `http://localhost:5002` - View Swagger documentation at `http://localhost:5002/swagger`
-- **MCP Server**: `http://localhost:8050` - SSE endpoint for AI agent integration
+- **Direct MCP Server**: `http://localhost:8050` - SSE endpoint for AI agent integration (direct Neo4j access)
+- **Layered MCP Server**: `http://localhost:8051` - SSE endpoint for AI agent integration (via REST API)
 - **Neo4j Browser**: `http://localhost:7474/browser/` - View and query the knowledge graph
 
 Open [neo4j browser](http://localhost:7474/browser/) and log in with the credentials mentioned in the docker-compose file to view the model card data.   
@@ -136,32 +142,70 @@ Open [neo4j browser](http://localhost:7474/browser/) and log in with the credent
     make down
     ```
 
-### 3. Using the MCP Server (Optional)
+### 3. Using the MCP Servers (Optional)
 
-The MCP server enables AI assistants to interact with the Patra Knowledge Graph. To connect an AI assistant:
+The MCP servers enable AI assistants to interact with the Patra Knowledge Graph. Choose based on your needs:
+- **Direct MCP Server** (`8050`): Fast, read-only access (2 tools)
+- **Layered MCP Server** (`8051`): Full CRUD operations (17 tools)
 
 **For Claude Desktop:**
 1. Add to your Claude Desktop configuration (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
+
+For Direct MCP Server (faster, read-only):
 ```json
 {
   "mcpServers": {
-    "patra-kg": {
+    "patra-kg-direct": {
       "url": "http://localhost:8050/sse"
     }
   }
 }
 ```
 
+For Layered MCP Server (full operations):
+```json
+{
+  "mcpServers": {
+    "patra-kg-rest": {
+      "url": "http://localhost:8051/sse"
+    }
+  }
+}
+```
+
+Or use both:
+```json
+{
+  "mcpServers": {
+    "patra-kg-direct": {
+      "url": "http://localhost:8050/sse"
+    },
+    "patra-kg-rest": {
+      "url": "http://localhost:8051/sse"
+    }
+  }
+}
+```
+
 **For Custom AI Agents:**
-Use the MCP SDK to connect to `http://localhost:8050/sse` and access the available tools:
-- `get_modelcard(mc_id: str)` - Retrieve specific model cards
-- `search_modelcards(query: str)` - Search using natural language queries
+Connect to your preferred endpoint:
+- Direct MCP: `http://localhost:8050/sse` (2 read tools)
+- Layered MCP: `http://localhost:8051/sse` (17 full CRUD tools)
 
 **Example Usage:**
+
+*With Direct MCP Server:*
 ```
 User: "Find model cards for image classification models"
 AI Assistant: [Uses search_modelcards tool]
 Result: Returns relevant model cards from the knowledge graph
+```
+
+*With Layered MCP Server:*
+```
+User: "Upload this model card and then find similar models"
+AI Assistant: [Uses upload_modelcard, then search_modelcards]
+Result: Model card uploaded and similar models found
 ```
 
 This enables conversational AI systems to access and reason about model card information, enhancing transparency and accountability in AI model selection and deployment.
