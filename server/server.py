@@ -33,6 +33,10 @@ def init_benchmark_csv(csv_file, headers):
     if not BENCHMARK:
         return
     try:
+        csv_dir = os.path.dirname(csv_file)
+        if csv_dir and not os.path.exists(csv_dir):
+            os.makedirs(csv_dir, exist_ok=True)
+        
         if not os.path.exists(csv_file):
             with open(csv_file, 'w', newline='') as f:
                 writer = csv.writer(f)
@@ -45,10 +49,13 @@ def write_benchmark_csv(csv_file, values):
     if not BENCHMARK:
         return
     try:
+        csv_dir = os.path.dirname(csv_file)
+        if csv_dir and not os.path.exists(csv_dir):
+            os.makedirs(csv_dir, exist_ok=True)
+        
         with open(csv_file, 'a', newline='') as f:
             writer = csv.writer(f)
-            formatted_values = [f"{v:.2f}" if isinstance(v, float) else v for v in values]
-            writer.writerow(formatted_values)
+            writer.writerow(values)
     except (PermissionError, OSError) as e:
         logging.warning(f"Cannot write to benchmark CSV {csv_file}: {e}")
 
@@ -84,28 +91,25 @@ class ModelCard(Resource):
 @api.route('/modelcard/<string:mc_id>')
 class ModelCardDetail(Resource):
     def get(self, mc_id):
-        if BENCHMARK:
-            start_time = time.perf_counter()
-        
+        start_time = time.perf_counter()        
         model_card = mc_reconstructor.reconstruct(mc_id)
+        end_time = time.perf_counter()
+        elapsed_time = end_time - start_time
+        write_benchmark_csv(GET_MC_BENCHMARK_CSV, [elapsed_time])        
+        
         if model_card is None:
             return {"error": "Model card could not be found!"}, 400
-        
-        if BENCHMARK:
-            elapsed_time = (time.perf_counter() - start_time) * 1000
-            write_benchmark_csv(GET_MC_BENCHMARK_CSV, [elapsed_time])
-        
         return model_card, 200
 
-    # def head(self, mc_id):
-    #     model_card = mc_reconstructor.reconstruct(mc_id)
-    #     if not model_card:
-    #         return {"error": f"Model card with ID '{mc_id}' could not be found!"}, 404
+    def head(self, mc_id):
+        model_card = mc_reconstructor.reconstruct(mc_id)
+        if not model_card:
+            return {"error": f"Model card with ID '{mc_id}' could not be found!"}, 404
         
-    #     headers = mc_reconstructor.get_link_headers(model_card)
-    #     response = Response(response=None, status=200, mimetype='text/plain')
-    #     response.headers.update(headers)
-    #     return response
+        headers = mc_reconstructor.get_link_headers(model_card)
+        response = Response(response=None, status=200, mimetype='text/plain')
+        response.headers.update(headers)
+        return response
         
     def put(self, mc_id):
         data = request.get_json()
@@ -152,14 +156,11 @@ class SearchModelCards(Resource):
         if not query:
             return {"error": "Query (q) is required"}, 400
         
-        if BENCHMARK:
-            start_time = time.perf_counter()
-        
+        start_time = time.perf_counter()        
         results = mc_reconstructor.search_kg(query)
-        
-        if BENCHMARK:
-            elapsed_time = (time.perf_counter() - start_time) * 1000
-            write_benchmark_csv(SEARCH_BENCHMARK_CSV, [elapsed_time])
+        end_time = time.perf_counter()
+        elapsed_time = end_time - start_time
+        write_benchmark_csv(SEARCH_BENCHMARK_CSV, [elapsed_time])
         
         return results, 200
 
