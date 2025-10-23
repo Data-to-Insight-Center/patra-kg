@@ -1,9 +1,9 @@
 from mcp.server.fastmcp import FastMCP
 import os
-import httpx
+import requests
 import time
 import csv
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -26,7 +26,7 @@ GET_MC_REST_BENCHMARK_CSV = "/app/timings/layered_mcp/get_modelcard_benchmark.cs
 SEARCH_REST_BENCHMARK_CSV = "/app/timings/layered_mcp/search_benchmark.csv"
 
 # HTTP client with timeout
-http_client = httpx.Client(timeout=30.0)
+REQUESTS_TIMEOUT = 30.0
 
 def init_benchmark_csv(csv_file, headers):
     """Initialize benchmark CSV file with headers if it doesn't exist."""
@@ -49,10 +49,13 @@ def write_benchmark_csv(csv_file, values):
     if not BENCHMARK:
         return
     try:
+        csv_dir = os.path.dirname(csv_file)
+        if csv_dir and not os.path.exists(csv_dir):
+            os.makedirs(csv_dir, exist_ok=True)
+        
         with open(csv_file, 'a', newline='') as f:
             writer = csv.writer(f)
-            formatted_values = [f"{v:.2f}" if isinstance(v, float) else v for v in values]
-            writer.writerow(formatted_values)
+            writer.writerow(values)
     except (PermissionError, OSError) as e:
         logging.warning(f"Cannot write to benchmark CSV {csv_file}: {e}")
 
@@ -73,17 +76,15 @@ def get_modelcard(mc_id: str) -> Dict[str, Any]:
         The model card data as a dictionary
     """
     try:
-        if BENCHMARK:
-            start_time = time.perf_counter()
-        
-        response = http_client.get(f"{REST_API_BASE_URL}/modelcard/{mc_id}")
-        if BENCHMARK:
-            elapsed_time = (time.perf_counter() - start_time) * 1000
-            write_benchmark_csv(GET_MC_REST_BENCHMARK_CSV, [elapsed_time])
+        start_time = time.perf_counter()        
+        response = requests.get(f"{REST_API_BASE_URL}/modelcard/{mc_id}", timeout=REQUESTS_TIMEOUT)
+        end_time = time.perf_counter()
+        elapsed_time = end_time - start_time
+        write_benchmark_csv(GET_MC_REST_BENCHMARK_CSV, [elapsed_time])
         
         return response.json()
-    except httpx.HTTPStatusError as e:
-        raise ValueError(f"Error retrieving model card: {e.response.json().get('error', str(e))}")
+    except requests.exceptions.RequestException as e:
+        raise ValueError(f"Error retrieving model card: {e.text}")
     except Exception as e:
         raise ValueError(f"Error retrieving model card: {str(e)}")
 
@@ -100,17 +101,15 @@ def search_modelcards(query: str) -> List[Dict[str, Any]]:
         List of matching model cards
     """
     try:
-        if BENCHMARK:
-            start_time = time.perf_counter()
-        
-        response = http_client.get(f"{REST_API_BASE_URL}/modelcards/search", params={"q": query})        
-        if BENCHMARK:
-            elapsed_time = (time.perf_counter() - start_time) * 1000
-            write_benchmark_csv(SEARCH_REST_BENCHMARK_CSV, [elapsed_time])
+        start_time = time.perf_counter()
+        response = requests.get(f"{REST_API_BASE_URL}/modelcards/search", params={"q": query}, timeout=REQUESTS_TIMEOUT)        
+        end_time = time.perf_counter()
+        elapsed_time = end_time - start_time
+        write_benchmark_csv(SEARCH_REST_BENCHMARK_CSV, [elapsed_time])
         
         return response.json()
-    except httpx.HTTPStatusError as e:
-        raise ValueError(f"Error searching model cards: {e.response.json().get('error', str(e))}")
+    except requests.exceptions.RequestException as e:
+        raise ValueError(f"Error searching model cards: {e.text}")
     except Exception as e:
         raise ValueError(f"Error searching model cards: {str(e)}")
 
