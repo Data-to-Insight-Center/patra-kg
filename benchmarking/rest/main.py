@@ -1,6 +1,8 @@
 import sys
 import logging
 import os
+import time
+import atexit
 from fastapi import FastAPI, HTTPException, Query
 sys.path.append('/app')
 from utils import get_model_card, search_model_cards, close_driver
@@ -9,6 +11,21 @@ from utils import get_model_card, search_model_cards, close_driver
 PROJECT_ROOT = "/app"
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
+
+# In-memory latency tracking
+latency_data = []
+
+def write_latency_to_csv():
+    """Write accumulated latency data to CSV file on shutdown."""
+    if latency_data:
+        filename = 'timings/rest/rest_db_latency.csv'
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        with open(filename, 'a') as f:
+            for latency in latency_data:
+                f.write(f"{latency}\n")
+
+# Register cleanup function
+atexit.register(write_latency_to_csv)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -36,7 +53,14 @@ async def get_modelcard(mc_id: str):
     Returns:
         Complete model card data or error if not found
     """    
+    start_time = time.perf_counter()
     model_card = get_model_card(mc_id)
+    end_time = time.perf_counter()
+    db_latency = (end_time - start_time) * 1000
+    
+    # Store latency in memory
+    latency_data.append(db_latency)
+    
     if model_card is None:
         raise HTTPException(status_code=404, detail="Model card not found")
     return model_card
@@ -67,6 +91,7 @@ async def startup_event():
 @app.on_event("shutdown")
 async def shutdown_event():
     """Clean up resources on shutdown."""
+    write_latency_to_csv()
     close_driver()
     logging.info("Shutting down Patra Knowledge Graph API")
 

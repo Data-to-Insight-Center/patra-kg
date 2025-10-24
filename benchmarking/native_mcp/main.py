@@ -1,13 +1,30 @@
 from mcp.server.fastmcp import FastMCP
 import os
 import sys
+import atexit
 from typing import Any, Dict, List
 from utils import get_model_card, search_model_cards
+import time
 
 # Add project root to Python path for module imports
 PROJECT_ROOT = "/app"
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
+
+# In-memory latency tracking
+latency_data = []
+
+def write_latency_to_csv():
+    """Write accumulated latency data to CSV file on shutdown."""
+    if latency_data:
+        filename = 'timings/native_mcp/mcp_db_latency.csv'
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        with open(filename, 'a') as f:
+            for latency in latency_data:
+                f.write(f"{latency}\n")
+
+# Register cleanup function
+atexit.register(write_latency_to_csv)
 
 # Create an MCP server
 mcp = FastMCP(
@@ -27,7 +44,14 @@ def get_modelcard(mc_id: str) -> Dict[str, Any]:
     Returns:
         The model card data as a dictionary
     """
+    start_time = time.perf_counter()
     model_card = get_model_card(mc_id)
+    end_time = time.perf_counter()
+    db_latency = (end_time - start_time) * 1000
+
+    # Store latency in memory
+    latency_data.append(db_latency)
+
     if model_card is None:
         raise ValueError(f"Model card with ID '{mc_id}' not found")
     return model_card

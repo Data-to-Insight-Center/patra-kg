@@ -3,6 +3,7 @@ import os
 import sys
 from typing import Any, Dict, List
 import requests
+import time
 
 # Add project root to Python path for module imports
 PROJECT_ROOT = "/app"
@@ -29,7 +30,16 @@ def get_modelcard(mc_id: str) -> Dict[str, Any]:
     Returns:
         The model card data as a dictionary
     """
+    start_time = time.perf_counter()
     response = requests.get(f"{REST_API_BASE_URL}/modelcard/{mc_id}")
+    end_time = time.perf_counter()
+    rest_latency = (end_time - start_time) * 1000
+
+    # write just the latency to a csv file
+    filename = f'timings/layered_mcp/mcp_rest_latency.csv'
+    with open(filename, 'a') as f:
+        f.write(f"{rest_latency}\n")
+
     return response.json()
 
 
