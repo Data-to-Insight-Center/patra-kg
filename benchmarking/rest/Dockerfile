@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY benchmarking/rest/requirements.txt /app/rest/requirements.txt
 COPY benchmarking/rest/main.py /app/rest/main.py
-COPY benchmarking/shared_utils.py /app/shared_utils.py
+COPY benchmarking/utils.py /app/utils.py
 
 RUN pip install --no-cache-dir -r /app/rest/requirements.txt
 

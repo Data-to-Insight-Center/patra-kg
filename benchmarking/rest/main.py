@@ -3,7 +3,7 @@ import logging
 import os
 from fastapi import FastAPI, HTTPException, Query
 sys.path.append('/app')
-from shared_utils import get_model_card, search_model_cards, close_driver
+from utils import get_model_card, search_model_cards, close_driver
 
 # Add project root to Python path for module imports
 PROJECT_ROOT = "/app"
