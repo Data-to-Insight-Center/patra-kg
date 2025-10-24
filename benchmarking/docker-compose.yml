@@ -59,8 +59,8 @@ services:
   
   layered-mcp-server:
     build:
-      context: .
-      dockerfile: layered_mcp/Dockerfile
+      context: ..
+      dockerfile: benchmarking/layered_mcp/Dockerfile
     container_name: layered_mcp_server
     ports:
       - "8051:8051"
