@@ -1,6 +1,7 @@
 from mcp.server.fastmcp import FastMCP
 import os
 import sys
+import atexit
 from typing import Any, Dict, List
 import requests
 import time
@@ -9,6 +10,21 @@ import time
 PROJECT_ROOT = "/app"
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
+
+# In-memory latency tracking
+latency_data = []
+
+def write_latency_to_csv():
+    """Write accumulated latency data to CSV file on shutdown."""
+    if latency_data:
+        filename = 'timings/layered_mcp/mcp_rest_latency.csv'
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        with open(filename, 'a') as f:
+            for latency in latency_data:
+                f.write(f"{latency}\n")
+
+# Register cleanup function
+atexit.register(write_latency_to_csv)
 
 # Create an MCP server
 mcp = FastMCP(
@@ -35,10 +51,8 @@ def get_modelcard(mc_id: str) -> Dict[str, Any]:
     end_time = time.perf_counter()
     rest_latency = (end_time - start_time) * 1000
 
-    # write just the latency to a csv file
-    filename = f'timings/layered_mcp/mcp_rest_latency.csv'
-    with open(filename, 'a') as f:
-        f.write(f"{rest_latency}\n")
+    # Store latency in memory
+    latency_data.append(rest_latency)
 
     return response.json()
 
