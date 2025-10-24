@@ -1,23 +1,11 @@
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 
-ENV PYTHONPATH=/app
-ENV PYTHONUNBUFFERED=1
+COPY benchmarking/native_mcp/requirements.txt /app/requirements.txt
+COPY benchmarking/native_mcp/main.py /app/main.py
+COPY benchmarking/native_mcp/utils.py /app/utils.py
 
-RUN pip install uv
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
-# Copy the whole repo to ensure shared modules like reconstructor are available
-COPY .. /app/
-
-# Create timings directory for CSV files
-RUN mkdir -p /app/timings && chmod 777 /app/timings
-
-RUN uv venv
-RUN uv pip install -r /app/server_mcp/requirements.txt
-
-EXPOSE 8050
-
-CMD ["uv", "run", "server_mcp/main.py"]
-
-
+CMD ["python", "main.py"]
