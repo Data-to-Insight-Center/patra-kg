@@ -2,7 +2,7 @@ from mcp.server.fastmcp import FastMCP
 import os
 import sys
 from typing import Any, Dict, List
-from utils import get_model_card, search_model_cards
+from shared_utils import get_model_card, search_model_cards
 
 # Add project root to Python path for module imports
 PROJECT_ROOT = "/app"
