@@ -153,6 +153,8 @@ def get_model_card(model_card_id: str) -> Optional[Dict[str, Any]]:
             if deployments:
                 model_card["deployments"] = deployments
             
+            # Serialize all DateTime objects to strings for JSON compatibility
+            model_card = serialize_datetime_objects(model_card)            
             return model_card
             
     except Exception as e:

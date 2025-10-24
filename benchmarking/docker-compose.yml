@@ -55,7 +55,7 @@ services:
     networks:
       - patra-network
     volumes:
-      - ./timings:/app/timings/mcp
+      - ./timings:/app/timings/native_mcp
   
   layered-mcp-server:
     build:
