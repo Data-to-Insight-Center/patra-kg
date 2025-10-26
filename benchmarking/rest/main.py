@@ -91,7 +91,6 @@ async def startup_event():
 @app.on_event("shutdown")
 async def shutdown_event():
     """Clean up resources on shutdown."""
-    write_latency_to_csv()
     close_driver()
     logging.info("Shutting down Patra Knowledge Graph API")
 
