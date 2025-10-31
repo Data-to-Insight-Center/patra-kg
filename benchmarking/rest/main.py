@@ -46,21 +46,21 @@ async def home():
 async def get_modelcard(mc_id: str):
     """
     Get a model card by its ID.
-    
+
     Args:
         mc_id: The model card ID to retrieve
-        
+
     Returns:
         Complete model card data or error if not found
-    """    
+    """
     start_time = time.perf_counter()
-    model_card = get_model_card(mc_id)
+    model_card = await get_model_card(mc_id)
     end_time = time.perf_counter()
     db_latency = (end_time - start_time) * 1000
-    
+
     # Store latency in memory
     latency_data.append(db_latency)
-    
+
     if model_card is None:
         raise HTTPException(status_code=404, detail="Model card not found")
     return model_card
@@ -69,17 +69,17 @@ async def get_modelcard(mc_id: str):
 async def search_modelcards(q: str = Query(..., description="Search query")):
     """
     Search for model cards using a text query.
-    
+
     Args:
         q: Search query string
-        
+
     Returns:
         List of matching model cards
     """
     if not q:
         raise HTTPException(status_code=400, detail="Query parameter 'q' is required")
-    
-    results = search_model_cards(q)
+
+    results = await search_model_cards(q)
     return results
 
 # Startup and shutdown events
@@ -91,7 +91,7 @@ async def startup_event():
 @app.on_event("shutdown")
 async def shutdown_event():
     """Clean up resources on shutdown."""
-    close_driver()
+    await close_driver()
     logging.info("Shutting down Patra Knowledge Graph API")
 
 if __name__ == "__main__":

@@ -3,7 +3,8 @@ import os
 import sys
 import atexit
 from typing import Any, Dict, List
-import requests
+import httpx
+import asyncio
 import time
 
 # Add project root to Python path for module imports
@@ -35,30 +36,35 @@ mcp = FastMCP(
 
 REST_API_BASE_URL = os.getenv("REST_API_BASE_URL", "http://rest-server:5002")
 
-@mcp.tool()
-def get_modelcard(mc_id: str) -> Dict[str, Any]:
+@mcp.resource("modelcard://{mc_id}")
+async def get_modelcard(mc_id: str) -> str:
     """
-    Get a model card by its ID.
-    
+    Get a model card by its ID as an MCP resource (via REST layer).
+
+    Resources are for reading existing entities by identifier.
+    This MCP server wraps the REST API, demonstrating layered architecture.
+
     Args:
         mc_id: The model card ID to retrieve
-        
+
     Returns:
-        The model card data as a dictionary
+        The model card data as JSON string
     """
     start_time = time.perf_counter()
-    response = requests.get(f"{REST_API_BASE_URL}/modelcard/{mc_id}")
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"{REST_API_BASE_URL}/modelcard/{mc_id}")
     end_time = time.perf_counter()
     rest_latency = (end_time - start_time) * 1000
 
     # Store latency in memory
     latency_data.append(rest_latency)
 
-    return response.json()
+    # Resources should return string content
+    return response.text
 
 
 @mcp.tool()
-def search_modelcards(q: str) -> List[Dict[str, Any]]:
+async def search_modelcards(q: str) -> List[Dict[str, Any]]:
     """
     Search for model cards using a text query.
     
@@ -68,7 +74,8 @@ def search_modelcards(q: str) -> List[Dict[str, Any]]:
     Returns:
         List of matching model cards
     """
-    response = requests.get(f"{REST_API_BASE_URL}/search?q={q}")
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"{REST_API_BASE_URL}/search", params={"q": q})
     return response.json()
 
 

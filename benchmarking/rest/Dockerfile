@@ -8,4 +8,5 @@ COPY benchmarking/utils.py /app/utils.py
 
 RUN pip install --no-cache-dir -r /app/rest/requirements.txt
 
-CMD ["python", "rest/main.py"]
+WORKDIR /app/rest
+CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5002"]

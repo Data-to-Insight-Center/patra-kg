@@ -1,10 +1,12 @@
 from mcp.server.fastmcp import FastMCP
 import os
+import json
 import sys
 import atexit
 from typing import Any, Dict, List
 from utils import get_model_card, search_model_cards
 import time
+import asyncio
 
 # Add project root to Python path for module imports
 PROJECT_ROOT = "/app"
@@ -33,19 +35,22 @@ mcp = FastMCP(
     port=8050,  # only used for SSE transport (set this to any port)
 )
 
-@mcp.tool()
-def get_modelcard(mc_id: str) -> Dict[str, Any]:
+@mcp.resource("modelcard://{mc_id}")
+async def get_modelcard(mc_id: str) -> str:
     """
-    Get a model card by its ID.
-    
+    Get a model card by its ID as an MCP resource.
+
+    Resources are for reading existing entities by identifier.
+    This follows proper MCP semantics for data retrieval.
+
     Args:
         mc_id: The model card ID to retrieve
-        
+
     Returns:
-        The model card data as a dictionary
+        The model card data as JSON string
     """
     start_time = time.perf_counter()
-    model_card = get_model_card(mc_id)
+    model_card = await get_model_card(mc_id)
     end_time = time.perf_counter()
     db_latency = (end_time - start_time) * 1000
 
@@ -54,11 +59,12 @@ def get_modelcard(mc_id: str) -> Dict[str, Any]:
 
     if model_card is None:
         raise ValueError(f"Model card with ID '{mc_id}' not found")
-    return model_card
+
+    return json.dumps(model_card)
 
 
 @mcp.tool()
-def search_modelcards(q: str) -> List[Dict[str, Any]]:
+async def search_modelcards(q: str) -> List[Dict[str, Any]]:
     """
     Search for model cards using a text query.
     
@@ -68,7 +74,7 @@ def search_modelcards(q: str) -> List[Dict[str, Any]]:
     Returns:
         List of matching model cards
     """
-    results = search_model_cards(q)
+    results = await search_model_cards(q)
     return results
 
 

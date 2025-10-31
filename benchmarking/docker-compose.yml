@@ -22,6 +22,14 @@ services:
       - patra-network
     volumes:
       - neo4j_data:/data
+    deploy:
+      resources:
+        limits:
+          cpus: '6'
+          memory: 12G
+        reservations:
+          cpus: '3'
+          memory: 6G
   rest-server:
     build:
       context: ..
@@ -40,6 +48,14 @@ services:
       - patra-network
     volumes:
       - ./timings:/app/timings/rest
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
+        reservations:
+          cpus: '2'
+          memory: 2G
 
   mcp-server:
     build:
@@ -56,6 +72,14 @@ services:
       - patra-network
     volumes:
       - ./timings:/app/timings/native_mcp
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
+        reservations:
+          cpus: '2'
+          memory: 2G
   
   layered-mcp-server:
     build:
@@ -72,6 +96,14 @@ services:
       - patra-network
     volumes:
       - ./timings:/app/timings/layered_mcp
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
+        reservations:
+          cpus: '2'
+          memory: 2G
 
 networks:
   patra-network:
