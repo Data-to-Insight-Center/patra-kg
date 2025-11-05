@@ -18,7 +18,7 @@ latency_data = []
 def write_latency_to_csv():
     """Write accumulated latency data to CSV file on shutdown."""
     if latency_data:
-        filename = 'timings/rest/rest_db_latency.csv'
+        filename = '/app/timings/rest/rest_db_latency.csv'
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         with open(filename, 'a') as f:
             for latency in latency_data:
