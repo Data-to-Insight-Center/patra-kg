@@ -87,7 +87,7 @@ class CreateEdgeRequest(BaseModel):
     source_node_id: str
     target_node_id: str
 
-@app.post("/create_edge")
+@app.post("/edge")
 async def create_edge_endpoint(request: CreateEdgeRequest):
     """
     Create an edge/relationship between two nodes in the Neo4j graph.
