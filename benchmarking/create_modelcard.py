@@ -55,8 +55,11 @@ def generate_random_date(start_date: datetime, end_date: datetime) -> str:
 
 def create_base_model_card(session) -> Dict[str, Any]:
     """Create the base model card (using the provided MegaDetector data)."""
-    
-    # Use the provided MegaDetector data as the base model card
+
+    # Generate unique ID for this run
+    unique_id = str(uuid.uuid4())[:8]
+
+    # Use the provided MegaDetector data as the base model card with unique IDs
     model_card_data = {
         "input_data": "https://github.com/microsoft/CameraTraps/tree/main/data/sample_images",
         "short_description": "Wildlife detection using MegaDetector from Microsoft.",
@@ -64,27 +67,15 @@ def create_base_model_card(session) -> Dict[str, Any]:
         "keywords": "wildlife, camera traps, object detection, microsoft, conservation",
         "author": "jstubbs",
         "foundational_model": "None",
-        "name": "MegaDetector for Wildlife Detection",
+        "name": f"MegaDetector for Wildlife Detection {unique_id}",
         "input_type": "images",
-        "external_id": "megadetector-mc",
+        "external_id": f"megadetector-mc-{unique_id}",
         "category": "classification",
         "output_data": "https://github.com/ICICLE-ai/camera_traps/blob/main/models",
         "version": "5a",
     }
-    
-    # Check if ModelCard already exists
-    check_query = """
-    MATCH (mc:ModelCard {external_id: $external_id})
-    RETURN mc.external_id as existing_id
-    """
-    
-    result = session.run(check_query, external_id=model_card_data["external_id"])
-    existing_card = result.single()
-    
-    if existing_card:
-        logger.info(f"ModelCard with external_id '{model_card_data['external_id']}' already exists. Skipping creation of node and continuing to ensure related nodes and relationships exist.")
-    
-    # Create ModelCard node only if it doesn't exist
+
+    # Create ModelCard node (always create new one)
     model_card_query = """
     CREATE (mc:ModelCard {
         external_id: $external_id,
@@ -104,8 +95,8 @@ def create_base_model_card(session) -> Dict[str, Any]:
     
     session.run(model_card_query, **model_card_data)
     logger.info(f"Created ModelCard with external_id: {model_card_data['external_id']}")
-    
-    # Create AI Model node
+
+    # Create AI Model node with unique ID
     ai_model_data = {
         "owner": "Microsoft AI for Earth",
         "batch_size": 8,
@@ -115,68 +106,56 @@ def create_base_model_card(session) -> Dict[str, Any]:
         "model_structure": "Faster R-CNN",
         "test_accuracy": 0.85,
         "description": "A convolutional neural network model for detecting animals in camera trap images.",
-        "model_id": "megadetector-mc-model",
+        "model_id": f"megadetector-mc-model-{unique_id}",
         "version": "5a",
         "license": "MIT License",
         "framework": "PyTorch",
         "recall": 0.8,
-        "name": "MegaDetector",
+        "name": f"MegaDetector {unique_id}",
         "backbone": "ResNet-50",
         "location": "https://github.com/ICICLE-ai/camera_traps/raw/main/models/md_v5a.0.0.pt",
         "learning_rate": 0.001
     }
-    
-    # Check if Model already exists
-    model_check_query = """
-    MATCH (m:Model {model_id: $model_id})
-    RETURN m.model_id as existing_model_id
+
+    # Create Model node (always create new one)
+    model_query = """
+    CREATE (m:Model {
+        model_id: $model_id,
+        name: $name,
+        version: $version,
+        owner: $owner,
+        batch_size: $batch_size,
+        input_shape: $input_shape,
+        precision: $precision,
+        model_type: $model_type,
+        model_structure: $model_structure,
+        test_accuracy: $test_accuracy,
+        description: $description,
+        license: $license,
+        framework: $framework,
+        recall: $recall,
+        backbone: $backbone,
+        location: $location,
+        learning_rate: $learning_rate
+    })
     """
+
+    session.run(model_query, **ai_model_data)
+    logger.info(f"Created Model with model_id: {ai_model_data['model_id']}")
     
-    model_result = session.run(model_check_query, model_id=ai_model_data["model_id"])
-    existing_model = model_result.single()
-    
-    if not existing_model:
-        model_query = """
-        CREATE (m:Model {
-            model_id: $model_id,
-            name: $name,
-            version: $version,
-            owner: $owner,
-            batch_size: $batch_size,
-            input_shape: $input_shape,
-            precision: $precision,
-            model_type: $model_type,
-            model_structure: $model_structure,
-            test_accuracy: $test_accuracy,
-            description: $description,
-            license: $license,
-            framework: $framework,
-            recall: $recall,
-            backbone: $backbone,
-            location: $location,
-            learning_rate: $learning_rate
-        })
-        """
-        
-        session.run(model_query, **ai_model_data)
-        logger.info(f"Created Model with model_id: {ai_model_data['model_id']}")
-    else:
-        logger.info(f"Model with model_id '{ai_model_data['model_id']}' already exists. Skipping creation.")
-    
-    # Create relationship between ModelCard and Model (only if both exist)
+    # Create relationship between ModelCard and Model
     relationship_query = """
     MATCH (mc:ModelCard {external_id: $external_id})
     MATCH (m:Model {model_id: $model_id})
-    WHERE NOT EXISTS((mc)-[:aiModel]->(m))
     CREATE (mc)-[:aiModel]->(m)
     """
-    
+
     session.run(relationship_query, external_id=model_card_data["external_id"], model_id=ai_model_data["model_id"])
     
-    # Create Bias Analysis node
+    # Create Bias Analysis node with unique ID
     bias_analysis_data = {
-        "name": "megadetector-mc-bias_analysis",
-        "external_id": "megadetector-mc-bias",
+        "name": f"megadetector-mc-bias_analysis-{unique_id}",
+        "external_id": f"megadetector-mc-bias-{unique_id}",
         "description": "Comprehensive bias analysis for MegaDetector model across different species and environments",
         "methodology": "Statistical parity analysis and equalized odds testing",
         "bias_metrics": "demographic_parity, equal_opportunity, disparate_impact",
@@ -188,43 +167,32 @@ def create_base_model_card(session) -> Dict[str, Any]:
         "analyzed_groups": "species_type, environment_type, lighting_conditions",
         "mitigation_strategies": "Balanced dataset augmentation, threshold adjustment"
     }
-    
-    # Check if Bias Analysis already exists
-    bias_check_query = """
-    MATCH (ba:`Bias Analysis` {external_id: $external_id})
-    RETURN ba.external_id as existing_bias_id
+
+    # Create Bias Analysis node (always create new one)
+    bias_query = """
+    CREATE (ba:`Bias Analysis` {
+        external_id: $external_id,
+        name: $name,
+        description: $description,
+        methodology: $methodology,
+        bias_metrics: $bias_metrics,
+        fairness_score: $fairness_score,
+        demographic_parity: $demographic_parity,
+        equal_opportunity: $equal_opportunity,
+        disparate_impact_ratio: $disparate_impact_ratio,
+        analysis_date: datetime($analysis_date),
+        analyzed_groups: $analyzed_groups,
+        mitigation_strategies: $mitigation_strategies
+    })
     """
+
+    session.run(bias_query, **bias_analysis_data)
+    logger.info(f"Created Bias Analysis with external_id: {bias_analysis_data['external_id']}")
     
-    bias_result = session.run(bias_check_query, external_id=bias_analysis_data["external_id"])
-    existing_bias = bias_result.single()
-    
-    if not existing_bias:
-        bias_query = """
-        CREATE (ba:`Bias Analysis` {
-            external_id: $external_id,
-            name: $name,
-            description: $description,
-            methodology: $methodology,
-            bias_metrics: $bias_metrics,
-            fairness_score: $fairness_score,
-            demographic_parity: $demographic_parity,
-            equal_opportunity: $equal_opportunity,
-            disparate_impact_ratio: $disparate_impact_ratio,
-            analysis_date: datetime($analysis_date),
-            analyzed_groups: $analyzed_groups,
-            mitigation_strategies: $mitigation_strategies
-        })
-        """
-        
-        session.run(bias_query, **bias_analysis_data)
-        logger.info(f"Created Bias Analysis with external_id: {bias_analysis_data['external_id']}")
-    else:
-        logger.info(f"Bias Analysis with external_id '{bias_analysis_data['external_id']}' already exists. Skipping creation.")
-    
-    # Create XAI Analysis node
+    # Create XAI Analysis node with unique ID
     xai_analysis_data = {
-        "name": "megadetector-mc-xai_analysis",
-        "external_id": "megadetector-mc-xai",
+        "name": f"megadetector-mc-xai_analysis-{unique_id}",
+        "external_id": f"megadetector-mc-xai-{unique_id}",
         "description": "Explainability analysis using gradient-based attribution methods",
         "methodology": "GradCAM, SHAP values, and feature importance analysis",
         "explanation_type": "visual_attribution, feature_attribution",
@@ -235,91 +203,70 @@ def create_base_model_card(session) -> Dict[str, Any]:
         "confidence_threshold": 0.75,
         "tools_used": "GradCAM, SHAP, LIME"
     }
-    
-    # Check if XAI Analysis already exists
-    xai_check_query = """
-    MATCH (xai:`Explainability Analysis` {external_id: $external_id})
-    RETURN xai.external_id as existing_xai_id
+
+    # Create XAI Analysis node (always create new one)
+    xai_query = """
+    CREATE (xai:`Explainability Analysis` {
+        external_id: $external_id,
+        name: $name,
+        description: $description,
+        methodology: $methodology,
+        explanation_type: $explanation_type,
+        interpretability_score: $interpretability_score,
+        analysis_date: datetime($analysis_date),
+        key_features: $key_features,
+        visualization_methods: $visualization_methods,
+        confidence_threshold: $confidence_threshold,
+        tools_used: $tools_used
+    })
     """
-    
-    xai_result = session.run(xai_check_query, external_id=xai_analysis_data["external_id"])
-    existing_xai = xai_result.single()
-    
-    if not existing_xai:
-        xai_query = """
-        CREATE (xai:`Explainability Analysis` {
-            external_id: $external_id,
-            name: $name,
-            description: $description,
-            methodology: $methodology,
-            explanation_type: $explanation_type,
-            interpretability_score: $interpretability_score,
-            analysis_date: datetime($analysis_date),
-            key_features: $key_features,
-            visualization_methods: $visualization_methods,
-            confidence_threshold: $confidence_threshold,
-            tools_used: $tools_used
-        })
-        """
-        
-        session.run(xai_query, **xai_analysis_data)
-        logger.info(f"Created XAI Analysis with external_id: {xai_analysis_data['external_id']}")
-    else:
-        logger.info(f"XAI Analysis with external_id '{xai_analysis_data['external_id']}' already exists. Skipping creation.")
+
+    session.run(xai_query, **xai_analysis_data)
+    logger.info(f"Created XAI Analysis with external_id: {xai_analysis_data['external_id']}")
     # Create relationship between ModelCard and Bias Analysis
     bias_relationship_query = """
     MATCH (mc:ModelCard {external_id: $external_id})
     MATCH (ba:`Bias Analysis` {external_id: $bias_external_id})
-    WHERE NOT EXISTS((mc)-[:BIAS_ANALYSIS]->(ba))
     CREATE (mc)-[:BIAS_ANALYSIS]->(ba)
     """
-    
-    session.run(bias_relationship_query, 
-               external_id=model_card_data["external_id"], 
+
+    session.run(bias_relationship_query,
+               external_id=model_card_data["external_id"],
                bias_external_id=bias_analysis_data["external_id"])
-    
+
     # Create relationship between ModelCard and XAI Analysis
     xai_relationship_query = """
     MATCH (mc:ModelCard {external_id: $external_id})
     MATCH (xai:`Explainability Analysis` {external_id: $xai_external_id})
-    WHERE NOT EXISTS((mc)-[:XAI_ANALYSIS]->(xai))
     CREATE (mc)-[:XAI_ANALYSIS]->(xai)
     """
-    
-    session.run(xai_relationship_query, 
-               external_id=model_card_data["external_id"], 
+
+    session.run(xai_relationship_query,
+               external_id=model_card_data["external_id"],
                xai_external_id=xai_analysis_data["external_id"])
     
     return model_card_data, ai_model_data
 
 def create_experiment_nodes(session, ai_model_data: Dict[str, Any], author_username: str, num_experiments: int = 1) -> None:
     """Create experiment nodes with associated deployments/devices and tie each Experiment to the User."""
-    
-    logger.info(f"Creating {num_experiments} experiment nodes...")
-    
-    # First, check how many experiments already exist
-    count_query = "MATCH (exp:Experiment) RETURN count(exp) as existing_count"
-    result = session.run(count_query)
-    existing_count = result.single()["existing_count"]
-    
-    if existing_count >= num_experiments:
-        logger.info(f"Already have {existing_count} experiments. Skipping experiment creation.")
-        return
-    
-    experiments_to_create = num_experiments - existing_count
-    logger.info(f"Need to create {experiments_to_create} more experiments.")
-    
-    for i in range(existing_count + 1, num_experiments + 1):
-        if i % 100 == 0:
-            logger.info(f"Created {i - existing_count} new experiments...")
-        
+
+    logger.info(f"Creating {num_experiments} new experiment nodes...")
+
+    # Always create new experiments with unique IDs
+    for i in range(num_experiments):
+        # Generate unique ID for this experiment set
+        exp_unique_id = str(uuid.uuid4())[:8]
+
+        if i % 100 == 0 and i > 0:
+            logger.info(f"Created {i} new experiments...")
+
         # Generate random dates
         start_date = datetime.now() - timedelta(days=random.randint(30, 365))
         end_date = start_date + timedelta(days=random.randint(1, 30))
-        
-        # Create deployment data
+
+        # Create deployment data with unique ID
         deployment_data = {
-            "deployment_id": f"deployment_{i}",
+            "deployment_id": f"deployment_{exp_unique_id}",
             "name": f"MegaDetector Deployment {i}",
             "deployment_location": f"Location_{random.randint(1, 100)}",
             "deployment_environment": random.choice(DEPLOYMENT_ENVIRONMENTS),
@@ -337,10 +284,10 @@ def create_experiment_nodes(session, ai_model_data: Dict[str, Any], author_usern
             "duration_minutes": random.randint(1440, 43200)  # 1 day to 30 days
         }
         
-        # Create device data
+        # Create device data with unique ID
         device_data = {
-            "device_id": f"device_{i}",
-            "name": f"Wildlife Camera {i}",
+            "device_id": f"device_{exp_unique_id}",
+            "name": f"Wildlife Camera {exp_unique_id}",
             "description": f"{random.choice(DEVICE_TYPES).replace('_', ' ').title()} device for wildlife monitoring",
             "device_type": random.choice(DEVICE_TYPES),
             "weather_resistance": random.choice(["IP67", "IP65", "IP68", "IP54"]),
@@ -349,10 +296,10 @@ def create_experiment_nodes(session, ai_model_data: Dict[str, Any], author_usern
             "temperature_range": f"-{random.randint(10, 40)} to {random.randint(40, 80)}°C",
             "location": f"Forest_{random.randint(1, 50)}"
         }
-        
-        # Create experiment data
+
+        # Create experiment data with unique ID
         experiment_data = {
-            "experiment_id": f"exp_{i}",
+            "experiment_id": f"exp_{exp_unique_id}",
             "name": f"Wildlife Detection Experiment {i}",
             "description": f"Experiment to test MegaDetector performance in different environments",
             "results": f"Experiment {i} results: accuracy improved by {random.randint(0, 10)}%",
@@ -441,7 +388,6 @@ def create_experiment_nodes(session, ai_model_data: Dict[str, Any], author_usern
         exp_user_rel_query = """
         MATCH (exp:Experiment {experiment_id: $experiment_id})
         MATCH (u:User {username: $username})
-        WHERE NOT EXISTS((exp)-[:submittedBy]->(u))
         CREATE (exp)-[:submittedBy]->(u)
         """
         session.run(exp_user_rel_query, {"experiment_id": experiment_data["experiment_id"], "username": author_username})
