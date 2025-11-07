@@ -3,8 +3,8 @@ import os
 import json
 import sys
 import atexit
-from typing import Any, Dict, List
-from utils import get_model_card, search_model_cards
+from typing import Any, Dict
+from utils import get_model_card, search_model_cards, create_edge as create_edge_db
 import time
 import asyncio
 
@@ -64,18 +64,52 @@ async def get_modelcard(mc_id: str) -> str:
 
 
 @mcp.tool()
-async def search_modelcards(q: str) -> List[Dict[str, Any]]:
+async def search_modelcards(q: str) -> str:
     """
     Search for model cards using a text query.
-    
+
+    Tools are for performing actions like searches and queries.
+    This follows proper MCP semantics for active operations.
+
     Args:
         q: Search query string
+
+    Returns:
+        The search results as JSON string
+    """
+    start_time = time.perf_counter()
+    results = await search_model_cards(q)
+    end_time = time.perf_counter()
+    db_latency = (end_time - start_time) * 1000
+
+    # Store latency in memory
+    latency_data.append(db_latency)
+
+    return json.dumps(results)
+
+
+@mcp.tool()
+async def create_edge(source_node_id: str, target_node_id: str) -> Dict[str, Any]:
+    """
+    Create an edge/relationship between two nodes in the Neo4j graph.
+    The relationship type is automatically determined based on the node labels and VALID_LINK_CONSTRAINTS.
+    
+    Args:
+        source_node_id: Neo4j elementId of the source node
+        target_node_id: Neo4j elementId of the target node
         
     Returns:
-        List of matching model cards
+        Dictionary with success status, relationship type, and node information
     """
-    results = await search_model_cards(q)
-    return results
+    start_time = time.perf_counter()
+    result = await create_edge_db(source_node_id, target_node_id)
+    end_time = time.perf_counter()
+    db_latency = (end_time - start_time) * 1000
+    
+    # Store latency in memory
+    latency_data.append(db_latency)
+    
+    return result
 
 
 if __name__ == "__main__":

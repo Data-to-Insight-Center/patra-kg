@@ -202,3 +202,195 @@ async def search_model_cards(query: str) -> List[Dict[str, Any]]:
 async def close_driver():
     """Close the Neo4j driver connection."""
     await driver.close()
+
+# VALID_LINK_CONSTRAINTS mapping
+VALID_LINK_CONSTRAINTS = {
+    'ModelCard': ['Datasheet', 'ModelRequirements', 'BiasAnalysis', 'ExplainabilityAnalysis', 'Model'],
+    'Model': ['Deployment', 'Experiment'],
+    'Server': ['Deployment'],
+    'Deployment': ['Experiment', 'Device'],
+    'Experiment': ['RawImage', 'User', 'Device', 'Model'],
+    'Datasheet': ['ModelCard'],
+    'ModelRequirements': ['ModelCard'],
+    'BiasAnalysis': ['ModelCard'],
+    'ExplainabilityAnalysis': ['ModelCard'],
+    'User': ['Experiment'],
+    'RawImage': ['Experiment'],
+    'Device': ['Deployment', 'Experiment']
+}
+
+# Mapping from (source_label, target_label) to relationship type
+RELATIONSHIP_TYPE_MAP = {
+    ('ModelCard', 'Model'): 'USED',
+    ('ModelCard', 'Datasheet'): 'TRAINED_ON',
+    ('ModelCard', 'ModelRequirements'): 'REQUIREMENTS',
+    ('ModelCard', 'BiasAnalysis'): 'BIAS_ANALYSIS',
+    ('ModelCard', 'ExplainabilityAnalysis'): 'XAI_ANALYSIS',
+    ('Model', 'Deployment'): 'hasDeployment',
+    ('Model', 'Experiment'): 'used',
+    ('Server', 'Deployment'): 'hosts',
+    ('Deployment', 'Experiment'): 'deploymentInfo',
+    ('Deployment', 'Device'): 'deployedIn',
+    ('Experiment', 'RawImage'): 'processes',
+    ('Experiment', 'User'): 'submittedBy',
+    ('Experiment', 'Device'): 'executedOn',
+    ('Experiment', 'Model'): 'uses',
+    ('User', 'Experiment'): 'submits',
+    ('RawImage', 'Experiment'): 'processedBy',
+    ('Device', 'Deployment'): 'hosts',
+    ('Device', 'Experiment'): 'executes',
+}
+
+def normalize_label(label: str) -> str:
+    """Normalize node label to match constraint keys."""
+    # Remove spaces and handle common variations
+    label = label.replace(' ', '')
+    # Handle specific cases
+    if label == 'ModelCard':
+        return 'ModelCard'
+    elif label == 'DataSheet' or label == 'Datasheet':
+        return 'Datasheet'
+    elif label == 'BiasAnalysis' or label == 'Bias Analysis':
+        return 'BiasAnalysis'
+    elif label == 'ExplainabilityAnalysis' or label == 'Explainability Analysis':
+        return 'ExplainabilityAnalysis'
+    elif label == 'ModelRequirements' or label == 'Model Requirements':
+        return 'ModelRequirements'
+    elif label == 'RawImage' or label == 'Raw Image':
+        return 'RawImage'
+    return label
+
+def get_relationship_type(source_label: str, target_label: str) -> Optional[str]:
+    """
+    Determine the relationship type between two node labels based on constraints.
+    
+    Args:
+        source_label: Label of the source node
+        target_label: Label of the target node
+        
+    Returns:
+        Relationship type name, or None if no valid relationship exists
+    """
+    # Normalize labels
+    source_norm = normalize_label(source_label)
+    target_norm = normalize_label(target_label)
+    
+    # Check if relationship is valid according to constraints
+    if source_norm not in VALID_LINK_CONSTRAINTS:
+        return None
+    
+    if target_norm not in VALID_LINK_CONSTRAINTS[source_norm]:
+        return None
+    
+    # Get relationship type from map
+    rel_type = RELATIONSHIP_TYPE_MAP.get((source_norm, target_norm))
+    if rel_type:
+        return rel_type
+    
+    # Default: use uppercase version of target label if no specific mapping
+    return target_norm.upper()
+
+async def create_edge(source_node_id: str, target_node_id: str) -> Dict[str, Any]:
+    """
+    Create an edge between two nodes in the Neo4j graph.
+    
+    Args:
+        source_node_id: Neo4j elementId of the source node
+        target_node_id: Neo4j elementId of the target node
+        
+    Returns:
+        Dictionary with success status and relationship type, or error information
+    """
+    try:
+        async with driver.session() as session:
+            # First, get the labels of both nodes
+            query = """
+            MATCH (a), (b)
+            WHERE elementId(a) = $source_id AND elementId(b) = $target_id
+            RETURN labels(a) as source_labels, labels(b) as target_labels
+            """
+            result = await session.run(query, source_id=source_node_id, target_id=target_node_id)
+            record = await result.single()
+            
+            if not record:
+                return {
+                    "success": False,
+                    "error": "One or both nodes not found"
+                }
+            
+            source_labels = record["source_labels"]
+            target_labels = record["target_labels"]
+            
+            if not source_labels or not target_labels:
+                return {
+                    "success": False,
+                    "error": "Nodes have no labels"
+                }
+            
+            # Use the first label (nodes typically have one primary label)
+            source_label = source_labels[0]
+            target_label = target_labels[0]
+            
+            # Determine relationship type
+            relationship_type = get_relationship_type(source_label, target_label)
+            
+            if not relationship_type:
+                return {
+                    "success": False,
+                    "error": f"No valid relationship type between {source_label} and {target_label}",
+                    "source_label": source_label,
+                    "target_label": target_label
+                }
+            
+            # Check if edge already exists
+            check_query = f"""
+            MATCH (a), (b)
+            WHERE elementId(a) = $source_id AND elementId(b) = $target_id
+            MATCH (a)-[r:{relationship_type}]->(b)
+            RETURN r
+            LIMIT 1
+            """
+            check_result = await session.run(check_query, source_id=source_node_id, target_id=target_node_id)
+            existing = await check_result.single()
+            
+            if existing:
+                return {
+                    "success": True,
+                    "message": "Edge already exists",
+                    "relationship_type": relationship_type,
+                    "source_node_id": source_node_id,
+                    "target_node_id": target_node_id
+                }
+            
+            # Create the edge
+            create_query = f"""
+            MATCH (a), (b)
+            WHERE elementId(a) = $source_id AND elementId(b) = $target_id
+            CREATE (a)-[r:{relationship_type}]->(b)
+            RETURN r, type(r) as rel_type
+            """
+            create_result = await session.run(create_query, source_id=source_node_id, target_id=target_node_id)
+            created = await create_result.single()
+            
+            if created:
+                return {
+                    "success": True,
+                    "message": "Edge created successfully",
+                    "relationship_type": relationship_type,
+                    "source_node_id": source_node_id,
+                    "target_node_id": target_node_id,
+                    "source_label": source_label,
+                    "target_label": target_label
+                }
+            else:
+                return {
+                    "success": False,
+                    "error": "Failed to create edge"
+                }
+                
+    except Exception as e:
+        logging.error(f"Error creating edge: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e)
+        }

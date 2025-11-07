@@ -2,7 +2,7 @@ from mcp.server.fastmcp import FastMCP
 import os
 import sys
 import atexit
-from typing import Any, Dict, List
+from typing import Any, Dict
 import httpx
 import asyncio
 import time
@@ -64,18 +64,67 @@ async def get_modelcard(mc_id: str) -> str:
 
 
 @mcp.tool()
-async def search_modelcards(q: str) -> List[Dict[str, Any]]:
+async def search_modelcards(q: str) -> str:
     """
-    Search for model cards using a text query.
-    
+    Search for model cards using a text query (via REST layer).
+
+    Tools are for performing actions like searches and queries.
+    This MCP server wraps the REST API, demonstrating layered architecture.
+
     Args:
         q: Search query string
-        
+
     Returns:
-        List of matching model cards
+        The search results as JSON string
     """
+    start_time = time.perf_counter()
     async with httpx.AsyncClient() as client:
         response = await client.get(f"{REST_API_BASE_URL}/search", params={"q": q})
+    end_time = time.perf_counter()
+    rest_latency = (end_time - start_time) * 1000
+
+    # Store latency in memory
+    latency_data.append(rest_latency)
+
+    # Resources should return string content
+    return response.text
+
+
+@mcp.tool()
+async def create_edge(source_node_id: str, target_node_id: str) -> Dict[str, Any]:
+    """
+    Create an edge/relationship between two nodes in the Neo4j graph.
+    The relationship type is automatically determined based on the node labels and VALID_LINK_CONSTRAINTS.
+    
+    Args:
+        source_node_id: Neo4j elementId of the source node
+        target_node_id: Neo4j elementId of the target node
+        
+    Returns:
+        Dictionary with success status, relationship type, and node information
+    """
+    start_time = time.perf_counter()
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            f"{REST_API_BASE_URL}/create_edge",
+            json={
+                "source_node_id": source_node_id,
+                "target_node_id": target_node_id
+            }
+        )
+    end_time = time.perf_counter()
+    rest_latency = (end_time - start_time) * 1000
+    
+    # Store latency in memory
+    latency_data.append(rest_latency)
+    
+    # Handle error responses
+    if response.status_code >= 400:
+        return {
+            "success": False,
+            "error": response.json().get("error", f"HTTP {response.status_code}")
+        }
+    
     return response.json()
 
 

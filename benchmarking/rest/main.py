@@ -4,8 +4,9 @@ import os
 import time
 import atexit
 from fastapi import FastAPI, HTTPException, Query
+from pydantic import BaseModel
 sys.path.append('/app')
-from utils import get_model_card, search_model_cards, close_driver
+from utils import get_model_card, search_model_cards, close_driver, create_edge
 
 # Add project root to Python path for module imports
 PROJECT_ROOT = "/app"
@@ -81,6 +82,38 @@ async def search_modelcards(q: str = Query(..., description="Search query")):
 
     results = await search_model_cards(q)
     return results
+
+class CreateEdgeRequest(BaseModel):
+    source_node_id: str
+    target_node_id: str
+
+@app.post("/create_edge")
+async def create_edge_endpoint(request: CreateEdgeRequest):
+    """
+    Create an edge/relationship between two nodes in the Neo4j graph.
+    The relationship type is automatically determined based on the node labels and VALID_LINK_CONSTRAINTS.
+
+    Args:
+        request: JSON body with source_node_id and target_node_id
+
+    Returns:
+        Dictionary with success status, relationship type, and node information
+    """
+    start_time = time.perf_counter()
+    result = await create_edge(request.source_node_id, request.target_node_id)
+    end_time = time.perf_counter()
+    db_latency = (end_time - start_time) * 1000
+
+    # Store latency in memory
+    latency_data.append(db_latency)
+
+    if not result.get("success", False):
+        raise HTTPException(
+            status_code=400 if "not found" in result.get("error", "") or "No valid" in result.get("error", "") else 500,
+            detail=result.get("error", "Failed to create edge")
+        )
+    
+    return result
 
 # Startup and shutdown events
 @app.on_event("startup")
