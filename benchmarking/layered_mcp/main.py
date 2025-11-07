@@ -106,7 +106,7 @@ async def create_edge(source_node_id: str, target_node_id: str) -> Dict[str, Any
     start_time = time.perf_counter()
     async with httpx.AsyncClient() as client:
         response = await client.post(
-            f"{REST_API_BASE_URL}/create_edge",
+            f"{REST_API_BASE_URL}/edge",
             json={
                 "source_node_id": source_node_id,
                 "target_node_id": target_node_id
