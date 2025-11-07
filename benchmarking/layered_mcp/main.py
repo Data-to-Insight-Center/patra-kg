@@ -128,5 +128,43 @@ async def create_edge(source_node_id: str, target_node_id: str) -> Dict[str, Any
     return response.json()
 
 
+@mcp.tool()
+async def delete_edge(source_node_id: str, target_node_id: str) -> Dict[str, Any]:
+    """
+    Delete an edge/relationship between two nodes in the Neo4j graph.
+    The relationship type is automatically determined based on the node labels and VALID_LINK_CONSTRAINTS.
+    
+    Args:
+        source_node_id: Neo4j elementId of the source node
+        target_node_id: Neo4j elementId of the target node
+        
+    Returns:
+        Dictionary with success status, relationship type, and node information
+    """
+    start_time = time.perf_counter()
+    async with httpx.AsyncClient() as client:
+        response = await client.delete(
+            f"{REST_API_BASE_URL}/edge",
+            json={
+                "source_node_id": source_node_id,
+                "target_node_id": target_node_id
+            }
+        )
+    end_time = time.perf_counter()
+    rest_latency = (end_time - start_time) * 1000
+    
+    # Store latency in memory
+    latency_data.append(rest_latency)
+    
+    # Handle error responses
+    if response.status_code >= 400:
+        return {
+            "success": False,
+            "error": response.json().get("error", f"HTTP {response.status_code}")
+        }
+    
+    return response.json()
+
+
 if __name__ == "__main__":
     mcp.run(transport="sse")

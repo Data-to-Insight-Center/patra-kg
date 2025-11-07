@@ -394,3 +394,93 @@ async def create_edge(source_node_id: str, target_node_id: str) -> Dict[str, Any
             "success": False,
             "error": str(e)
         }
+
+async def delete_edge(source_node_id: str, target_node_id: str) -> Dict[str, Any]:
+    """
+    Delete an edge between two nodes in the Neo4j graph.
+    
+    Args:
+        source_node_id: Neo4j elementId of the source node
+        target_node_id: Neo4j elementId of the target node
+        
+    Returns:
+        Dictionary with success status and relationship type, or error information
+    """
+    try:
+        async with driver.session() as session:
+            # First, get the labels of both nodes
+            query = """
+            MATCH (a), (b)
+            WHERE elementId(a) = $source_id AND elementId(b) = $target_id
+            RETURN labels(a) as source_labels, labels(b) as target_labels
+            """
+            result = await session.run(query, source_id=source_node_id, target_id=target_node_id)
+            record = await result.single()
+            
+            if not record:
+                return {
+                    "success": False,
+                    "error": "One or both nodes not found"
+                }
+            
+            source_labels = record["source_labels"]
+            target_labels = record["target_labels"]
+            
+            if not source_labels or not target_labels:
+                return {
+                    "success": False,
+                    "error": "Nodes have no labels"
+                }
+            
+            # Use the first label (nodes typically have one primary label)
+            source_label = source_labels[0]
+            target_label = target_labels[0]
+            
+            # Determine relationship type
+            relationship_type = get_relationship_type(source_label, target_label)
+            
+            if not relationship_type:
+                return {
+                    "success": False,
+                    "error": f"No valid relationship type between {source_label} and {target_label}",
+                    "source_label": source_label,
+                    "target_label": target_label
+                }
+            
+            # Check if edge exists and delete it
+            delete_query = f"""
+            MATCH (a), (b)
+            WHERE elementId(a) = $source_id AND elementId(b) = $target_id
+            MATCH (a)-[r:{relationship_type}]->(b)
+            DELETE r
+            RETURN count(r) as deleted_count
+            """
+            delete_result = await session.run(delete_query, source_id=source_node_id, target_id=target_node_id)
+            deleted_record = await delete_result.single()
+            
+            if deleted_record and deleted_record["deleted_count"] > 0:
+                return {
+                    "success": True,
+                    "message": "Edge deleted successfully",
+                    "relationship_type": relationship_type,
+                    "source_node_id": source_node_id,
+                    "target_node_id": target_node_id,
+                    "source_label": source_label,
+                    "target_label": target_label
+                }
+            else:
+                # Idempotent behavior: return success if edge doesn't exist
+                return {
+                    "success": True,
+                    "message": "Edge not found (already deleted or never existed)",
+                    "relationship_type": relationship_type,
+                    "source_node_id": source_node_id,
+                    "target_node_id": target_node_id
+                }
+                
+    except Exception as e:
+        logging.error(f"Error deleting edge: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e)
+        }

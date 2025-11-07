@@ -6,7 +6,7 @@ import atexit
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
 sys.path.append('/app')
-from utils import get_model_card, search_model_cards, close_driver, create_edge
+from utils import get_model_card, search_model_cards, close_driver, create_edge, delete_edge
 
 # Add project root to Python path for module imports
 PROJECT_ROOT = "/app"
@@ -111,6 +111,34 @@ async def create_edge_endpoint(request: CreateEdgeRequest):
         raise HTTPException(
             status_code=400 if "not found" in result.get("error", "") or "No valid" in result.get("error", "") else 500,
             detail=result.get("error", "Failed to create edge")
+        )
+    
+    return result
+
+@app.delete("/edge")
+async def delete_edge_endpoint(request: CreateEdgeRequest):
+    """
+    Delete an edge/relationship between two nodes in the Neo4j graph.
+    The relationship type is automatically determined based on the node labels and VALID_LINK_CONSTRAINTS.
+
+    Args:
+        request: JSON body with source_node_id and target_node_id
+
+    Returns:
+        Dictionary with success status, relationship type, and node information
+    """
+    start_time = time.perf_counter()
+    result = await delete_edge(request.source_node_id, request.target_node_id)
+    end_time = time.perf_counter()
+    db_latency = (end_time - start_time) * 1000
+
+    # Store latency in memory
+    latency_data.append(db_latency)
+
+    if not result.get("success", False):
+        raise HTTPException(
+            status_code=404 if "not found" in result.get("error", "") else 400 if "not found" in result.get("error", "") or "No valid" in result.get("error", "") else 500,
+            detail=result.get("error", "Failed to delete edge")
         )
     
     return result
