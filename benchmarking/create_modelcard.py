@@ -247,26 +247,133 @@ def create_base_model_card(session) -> Dict[str, Any]:
     
     return model_card_data, ai_model_data
 
-def create_experiment_nodes(session, ai_model_data: Dict[str, Any], author_username: str, num_experiments: int = 1) -> None:
+def create_experiment_nodes(session, ai_model_data: Dict[str, Any], author_username: str, 
+                           num_experiments: int = 1000, num_deployments: int = 10000, num_devices: int = 100) -> None:
     """Create experiment nodes with associated deployments/devices and tie each Experiment to the User."""
-
-    logger.info(f"Creating {num_experiments} new experiment nodes...")
-
-    # Always create new experiments with unique IDs
+    
+    logger.info(f"Creating {num_devices} devices, {num_experiments} experiments, and {num_deployments} deployments...")
+    
+    # Step 1: Create 100 devices first (these will be reused)
+    device_ids = []
+    logger.info(f"Creating {num_devices} devices...")
+    for i in range(num_devices):
+        device_unique_id = str(uuid.uuid4())[:8]
+        device_data = {
+            "device_id": f"device_{device_unique_id}",
+            "name": f"Wildlife Camera {i}",
+            "description": f"{random.choice(DEVICE_TYPES).replace('_', ' ').title()} device for wildlife monitoring",
+            "device_type": random.choice(DEVICE_TYPES),
+            "weather_resistance": random.choice(["IP67", "IP65", "IP68", "IP54"]),
+            "power_consumption": random.randint(3, 15),
+            "battery_life": random.randint(24, 72),
+            "temperature_range": f"-{random.randint(10, 40)} to {random.randint(40, 80)}°C",
+            "location": f"Forest_{random.randint(1, 50)}"
+        }
+        
+        device_query = """
+        CREATE (dev:Device {
+            device_id: $device_id,
+            name: $name,
+            description: $description,
+            device_type: $device_type,
+            weather_resistance: $weather_resistance,
+            power_consumption: $power_consumption,
+            battery_life: $battery_life,
+            temperature_range: $temperature_range,
+            location: $location
+        })
+        """
+        session.run(device_query, **device_data)
+        device_ids.append(device_data["device_id"])
+        
+        if (i + 1) % 10 == 0:
+            logger.info(f"Created {i + 1} devices...")
+    
+    # Step 2: Create 1,000 experiments
+    experiment_ids = []
+    logger.info(f"Creating {num_experiments} experiments...")
+    
+    # Ensure User exists
+    user_query = """
+    MERGE (u:User {username: $username})
+    ON CREATE SET
+        u.email = $email,
+        u.full_name = $full_name,
+        u.organization = $organization,
+        u.role = $role,
+        u.created_at = datetime($created_at)
+    RETURN u.username as username
+    """
+    user_data = {
+        "username": author_username,
+        "email": f"{author_username}@conservation.org",
+        "full_name": "Joe Stubbs",
+        "organization": "ICICLE AI Institute",
+        "role": "Research Scientist",
+        "created_at": datetime.now().isoformat() + "+00:00"
+    }
+    session.run(user_query, user_data)
+    
     for i in range(num_experiments):
-        # Generate unique ID for this experiment set
         exp_unique_id = str(uuid.uuid4())[:8]
-
-        if i % 100 == 0 and i > 0:
-            logger.info(f"Created {i} new experiments...")
-
-        # Generate random dates
         start_date = datetime.now() - timedelta(days=random.randint(30, 365))
         end_date = start_date + timedelta(days=random.randint(1, 30))
-
-        # Create deployment data with unique ID
+        
+        experiment_data = {
+            "experiment_id": f"exp_{exp_unique_id}",
+            "name": f"Wildlife Detection Experiment {i}",
+            "description": f"Experiment to test MegaDetector performance in different environments",
+            "results": f"Experiment {i} results: accuracy improved by {random.randint(0, 10)}%",
+            "status": random.choice(EXPERIMENT_STATUSES),
+            "start_date": generate_random_date(start_date, end_date),
+            "end_date": generate_random_date(start_date, end_date)
+        }
+        
+        experiment_query = """
+        CREATE (exp:Experiment {
+            experiment_id: $experiment_id,
+            name: $name,
+            description: $description,
+            results: $results,
+            status: $status,
+            start_date: datetime($start_date),
+            end_date: datetime($end_date)
+        })
+        """
+        session.run(experiment_query, **experiment_data)
+        experiment_ids.append(experiment_data["experiment_id"])
+        
+        # Link experiment to user
+        exp_user_rel_query = """
+        MATCH (exp:Experiment {experiment_id: $experiment_id})
+        MATCH (u:User {username: $username})
+        CREATE (exp)-[:submittedBy]->(u)
+        """
+        session.run(exp_user_rel_query, {"experiment_id": experiment_data["experiment_id"], "username": author_username})
+        
+        if (i + 1) % 100 == 0:
+            logger.info(f"Created {i + 1} experiments...")
+    
+    # Step 3: Create 10,000 deployments
+    # Distribute: 10 deployments per experiment, 100 deployments per device
+    deployments_per_experiment = num_deployments // num_experiments  # 10
+    logger.info(f"Creating {num_deployments} deployments ({deployments_per_experiment} per experiment)...")
+    
+    for i in range(num_deployments):
+        deployment_unique_id = str(uuid.uuid4())[:8]
+        
+        # Assign to experiment (round-robin: 10 per experiment)
+        experiment_idx = i // deployments_per_experiment
+        experiment_id = experiment_ids[experiment_idx % len(experiment_ids)]
+        
+        # Assign to device (round-robin: 100 per device)
+        device_id = device_ids[i % len(device_ids)]
+        
+        start_date = datetime.now() - timedelta(days=random.randint(30, 365))
+        end_date = start_date + timedelta(days=random.randint(1, 30))
+        
         deployment_data = {
-            "deployment_id": f"deployment_{exp_unique_id}",
+            "deployment_id": f"deployment_{deployment_unique_id}",
             "name": f"MegaDetector Deployment {i}",
             "deployment_location": f"Location_{random.randint(1, 100)}",
             "deployment_environment": random.choice(DEPLOYMENT_ENVIRONMENTS),
@@ -281,34 +388,9 @@ def create_experiment_nodes(session, ai_model_data: Dict[str, Any], author_usern
             "mean_accuracy": round(random.uniform(0.75, 0.99), 2),
             "start_time": generate_random_date(start_date, end_date),
             "end_time": generate_random_date(start_date, end_date),
-            "duration_minutes": random.randint(1440, 43200)  # 1 day to 30 days
+            "duration_minutes": random.randint(1440, 43200)
         }
         
-        # Create device data with unique ID
-        device_data = {
-            "device_id": f"device_{exp_unique_id}",
-            "name": f"Wildlife Camera {exp_unique_id}",
-            "description": f"{random.choice(DEVICE_TYPES).replace('_', ' ').title()} device for wildlife monitoring",
-            "device_type": random.choice(DEVICE_TYPES),
-            "weather_resistance": random.choice(["IP67", "IP65", "IP68", "IP54"]),
-            "power_consumption": random.randint(3, 15),
-            "battery_life": random.randint(24, 72),
-            "temperature_range": f"-{random.randint(10, 40)} to {random.randint(40, 80)}°C",
-            "location": f"Forest_{random.randint(1, 50)}"
-        }
-
-        # Create experiment data with unique ID
-        experiment_data = {
-            "experiment_id": f"exp_{exp_unique_id}",
-            "name": f"Wildlife Detection Experiment {i}",
-            "description": f"Experiment to test MegaDetector performance in different environments",
-            "results": f"Experiment {i} results: accuracy improved by {random.randint(0, 10)}%",
-            "status": random.choice(EXPERIMENT_STATUSES),
-            "start_date": generate_random_date(start_date, end_date),
-            "end_date": generate_random_date(start_date, end_date)
-        }
-        
-        # Create Deployment node
         deployment_query = """
         CREATE (d:Deployment {
             deployment_id: $deployment_id,
@@ -329,70 +411,9 @@ def create_experiment_nodes(session, ai_model_data: Dict[str, Any], author_usern
             duration_minutes: $duration_minutes
         })
         """
-        
         session.run(deployment_query, **deployment_data)
         
-        # Create Device node
-        device_query = """
-        CREATE (dev:Device {
-            device_id: $device_id,
-            name: $name,
-            description: $description,
-            device_type: $device_type,
-            weather_resistance: $weather_resistance,
-            power_consumption: $power_consumption,
-            battery_life: $battery_life,
-            temperature_range: $temperature_range,
-            location: $location
-        })
-        """
-        
-        session.run(device_query, **device_data)
-        
-        # Create Experiment node
-        experiment_query = """
-        CREATE (exp:Experiment {
-            experiment_id: $experiment_id,
-            name: $name,
-            description: $description,
-            results: $results,
-            status: $status,
-            start_date: datetime($start_date),
-            end_date: datetime($end_date)
-        })
-        """
-        
-        session.run(experiment_query, **experiment_data)
-        
-        # Ensure User exists with full details and tie Experiment to User
-        user_query = """
-        MERGE (u:User {username: $username})
-        ON CREATE SET
-            u.email = $email,
-            u.full_name = $full_name,
-            u.organization = $organization,
-            u.role = $role,
-            u.created_at = datetime($created_at)
-        RETURN u.username as username
-        """
-        user_data = {
-            "username": author_username,
-            "email": f"{author_username}@conservation.org",
-            "full_name": "Joe Stubbs",
-            "organization": "ICICLE AI Institute",
-            "role": "Research Scientist",
-            "created_at": datetime.now().isoformat() + "+00:00"
-        }
-        session.run(user_query, user_data)
-        
-        exp_user_rel_query = """
-        MATCH (exp:Experiment {experiment_id: $experiment_id})
-        MATCH (u:User {username: $username})
-        CREATE (exp)-[:submittedBy]->(u)
-        """
-        session.run(exp_user_rel_query, {"experiment_id": experiment_data["experiment_id"], "username": author_username})
-        
-        # Create relationships
+        # Create relationships: Model -> Deployment -> Device, Deployment -> Experiment
         relationships_query = """
         MATCH (m:Model {model_id: $model_id})
         MATCH (d:Deployment {deployment_id: $deployment_id})
@@ -406,8 +427,13 @@ def create_experiment_nodes(session, ai_model_data: Dict[str, Any], author_usern
         session.run(relationships_query, 
                    model_id=ai_model_data["model_id"],
                    deployment_id=deployment_data["deployment_id"],
-                   device_id=device_data["device_id"],
-                   experiment_id=experiment_data["experiment_id"])
+                   device_id=device_id,
+                   experiment_id=experiment_id)
+        
+        if (i + 1) % 1000 == 0:
+            logger.info(f"Created {i + 1} deployments...")
+    
+    logger.info(f"Successfully created {num_devices} devices, {num_experiments} experiments, and {num_deployments} deployments!")
 
 def cleanup_duplicate_modelcards(session) -> None:
     """Remove duplicate ModelCard nodes, keeping only the first one."""
@@ -483,9 +509,9 @@ def create_fulltext_index(session) -> None:
         logger.warning(f"Could not create fulltext index: {e}")
 
 def main():
-    """Main function to create 1 model card with 1 experiment node."""
+    """Main function to create 1 model card with 1000 experiments, 10000 deployments, and 100 devices."""
     
-    logger.info("Starting creation of 1 model card with 1 experiment node...")
+    logger.info("Starting creation of 1 model card with 1000 experiments, 10000 deployments, and 100 devices...")
     
     try:
         with driver.session() as session:
@@ -505,10 +531,11 @@ def main():
             logger.info("Creating base model card...")
             model_card_data, ai_model_data = create_base_model_card(session)
             
-            # Create 1 experiment node and tie it to the author as User
-            create_experiment_nodes(session, ai_model_data, model_card_data["author"], 1)
+            # Create 1000 experiments, 10000 deployments, and 100 devices
+            create_experiment_nodes(session, ai_model_data, model_card_data["author"], 
+                                  num_experiments=1000, num_deployments=10000, num_devices=100)
             
-            logger.info("Successfully created 1 model card with 1 experiment node!")
+            logger.info("Successfully created model card with experiments, deployments, and devices!")
             
             # Verify creation
             count_queries = [
