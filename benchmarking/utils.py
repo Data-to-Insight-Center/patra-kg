@@ -1,4 +1,5 @@
 import os
+import time
 import logging
 from neo4j import AsyncGraphDatabase
 from typing import Dict, Optional, Any, List
@@ -6,7 +7,7 @@ from typing import Dict, Optional, Any, List
 # Environment variables
 NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
 NEO4J_USERNAME = os.getenv("NEO4J_USER", "neo4j")
-NEO4J_PWD = os.getenv("NEO4J_PWD", "password")
+NEO4J_PWD = os.getenv("NEO4J_PWD", "PWD_HERE")
 
 # Initialize Neo4j async driver
 try:
@@ -129,27 +130,42 @@ async def get_model_card(model_card_id: str) -> Optional[Dict[str, Any]]:
     try:
         async with driver.session() as session:
             # Get base model card
+            start_time = time.perf_counter()
             model_card = await get_base_model_card(session, model_card_id)
+            end_time = time.perf_counter()
             if not model_card:
                 return None
+            model_card["model_card_ms"] = (end_time - start_time) * 1000
 
             # Get AI model
+            start_time = time.perf_counter()
             ai_model = await get_ai_model(session, model_card_id)
+            end_time = time.perf_counter()
+            model_card["ai_model_ms"] = (end_time - start_time) * 1000
             if ai_model:
                 model_card["ai_model"] = ai_model
 
             # Get bias analysis
+            start_time = time.perf_counter()
             bias_analysis = await get_bias_analysis(session, model_card_id)
+            end_time = time.perf_counter()
+            model_card["bias_analysis_ms"] = (end_time - start_time) * 1000
             if bias_analysis:
                 model_card["bias_analysis"] = bias_analysis
 
             # Get XAI analysis
+            start_time = time.perf_counter()
             xai_analysis = await get_xai_analysis(session, model_card_id)
+            end_time = time.perf_counter()
+            model_card["xai_analysis_ms"] = (end_time - start_time) * 1000
             if xai_analysis:
                 model_card["xai_analysis"] = xai_analysis
 
             # Get deployment information
+            start_time = time.perf_counter()
             deployments = await get_deployments(session, model_card_id)
+            end_time = time.perf_counter()
+            model_card["deployments_ms"] = (end_time - start_time) * 1000
             if deployments:
                 model_card["deployments"] = deployments
 
@@ -343,24 +359,24 @@ async def create_edge(source_node_id: str, target_node_id: str) -> Dict[str, Any
                 }
             
             # Check if edge already exists
-            check_query = f"""
-            MATCH (a), (b)
-            WHERE elementId(a) = $source_id AND elementId(b) = $target_id
-            MATCH (a)-[r:{relationship_type}]->(b)
-            RETURN r
-            LIMIT 1
-            """
-            check_result = await session.run(check_query, source_id=source_node_id, target_id=target_node_id)
-            existing = await check_result.single()
+            # check_query = f"""
+            # MATCH (a), (b)
+            # WHERE elementId(a) = $source_id AND elementId(b) = $target_id
+            # MATCH (a)-[r:{relationship_type}]->(b)
+            # RETURN r
+            # LIMIT 1
+            # """
+            # check_result = await session.run(check_query, source_id=source_node_id, target_id=target_node_id)
+            # existing = await check_result.single()
             
-            if existing:
-                return {
-                    "success": True,
-                    "message": "Edge already exists",
-                    "relationship_type": relationship_type,
-                    "source_node_id": source_node_id,
-                    "target_node_id": target_node_id
-                }
+            # if existing:
+            #     return {
+            #         "success": True,
+            #         "message": "Edge already exists",
+            #         "relationship_type": relationship_type,
+            #         "source_node_id": source_node_id,
+            #         "target_node_id": target_node_id
+            #     }
             
             # Create the edge
             create_query = f"""
@@ -372,6 +388,8 @@ async def create_edge(source_node_id: str, target_node_id: str) -> Dict[str, Any
             create_result = await session.run(create_query, source_id=source_node_id, target_id=target_node_id)
             created = await create_result.single()
             
+            # output should be a json 
+
             if created:
                 return {
                     "success": True,
@@ -390,96 +408,6 @@ async def create_edge(source_node_id: str, target_node_id: str) -> Dict[str, Any
                 
     except Exception as e:
         logging.error(f"Error creating edge: {str(e)}")
-        return {
-            "success": False,
-            "error": str(e)
-        }
-
-async def delete_edge(source_node_id: str, target_node_id: str) -> Dict[str, Any]:
-    """
-    Delete an edge between two nodes in the Neo4j graph.
-    
-    Args:
-        source_node_id: Neo4j elementId of the source node
-        target_node_id: Neo4j elementId of the target node
-        
-    Returns:
-        Dictionary with success status and relationship type, or error information
-    """
-    try:
-        async with driver.session() as session:
-            # First, get the labels of both nodes
-            query = """
-            MATCH (a), (b)
-            WHERE elementId(a) = $source_id AND elementId(b) = $target_id
-            RETURN labels(a) as source_labels, labels(b) as target_labels
-            """
-            result = await session.run(query, source_id=source_node_id, target_id=target_node_id)
-            record = await result.single()
-            
-            if not record:
-                return {
-                    "success": False,
-                    "error": "One or both nodes not found"
-                }
-            
-            source_labels = record["source_labels"]
-            target_labels = record["target_labels"]
-            
-            if not source_labels or not target_labels:
-                return {
-                    "success": False,
-                    "error": "Nodes have no labels"
-                }
-            
-            # Use the first label (nodes typically have one primary label)
-            source_label = source_labels[0]
-            target_label = target_labels[0]
-            
-            # Determine relationship type
-            relationship_type = get_relationship_type(source_label, target_label)
-            
-            if not relationship_type:
-                return {
-                    "success": False,
-                    "error": f"No valid relationship type between {source_label} and {target_label}",
-                    "source_label": source_label,
-                    "target_label": target_label
-                }
-            
-            # Check if edge exists and delete it
-            delete_query = f"""
-            MATCH (a), (b)
-            WHERE elementId(a) = $source_id AND elementId(b) = $target_id
-            MATCH (a)-[r:{relationship_type}]->(b)
-            DELETE r
-            RETURN count(r) as deleted_count
-            """
-            delete_result = await session.run(delete_query, source_id=source_node_id, target_id=target_node_id)
-            deleted_record = await delete_result.single()
-            
-            if deleted_record and deleted_record["deleted_count"] > 0:
-                return {
-                    "success": True,
-                    "message": "Edge deleted successfully",
-                    "relationship_type": relationship_type,
-                    "source_node_id": source_node_id,
-                    "target_node_id": target_node_id,
-                    "source_label": source_label,
-                    "target_label": target_label
-                }
-            else:
-                # Idempotent behavior: return success if edge doesn't exist
-                return {
-                    "success": True,
-                    "message": "Edge not found (already deleted or never existed)",
-                    "relationship_type": relationship_type,
-                    "source_node_id": source_node_id,
-                    "target_node_id": target_node_id
-                }
-                
-    except Exception as e:
-        logging.error(f"Error deleting edge: {str(e)}")
         return {
             "success": False,
             "error": str(e)
