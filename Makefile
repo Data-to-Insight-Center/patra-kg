@@ -14,7 +14,7 @@ up:
 	$(DOCKER_COMPOSE) up -d
 
 	$(MAKE) check-neo4j-server
-	docker cp server/kg_config/constraints.cypher patra_neo4j_server:/constraints.cypher
+	docker cp kg_config/constraints.cypher patra_neo4j_server:/constraints.cypher
 	docker exec -it patra_neo4j_server cypher-shell -u neo4j -p PWD_HERE -f /constraints.cypher
 
 # Bring down services
