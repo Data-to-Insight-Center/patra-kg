@@ -37,7 +37,7 @@ For more information, please refer to the [Patra ModelCards paper](https://ieeex
 
 ### Patra Servers
 
-Patra provides two server implementations for different use cases:
+Patra provides multiple server implementations for different use cases:
 
 #### 1. REST Server
 The REST server is built using Flask and exposes a RESTful API for interaction with the Patra Knowledge Graph (KG).
@@ -63,18 +63,27 @@ The REST server is built using Flask and exposes a RESTful API for interaction w
 
 For more information on the REST endpoints, please refer to the [API documentation.](docs/patra_openapi.json)
 
-#### 2. MCP Server (Model Context Protocol)
-Patra provides two MCP server implementations:
+#### 2. MCP (Model Context Protocol) Server
+The MCP server provides a complete interface for AI-native interactions with the Patra Knowledge Graph.
 
-##### a. Direct MCP Server
-The direct MCP server connects directly to Neo4j and provides an AI-native interface using the [Model Context Protocol](https://modelcontextprotocol.io/).
+| Endpoint                                    | Type     | Description                                                                                                  |
+|-------------------------------------------------|----------|--------------------------------------------------------------------------------------------------------------|
+| `modelcard://{id}`                               | Resource | Retrieve a model card by ID.                                                                                 |
+| `modelcard://{id}/download_url`                  | Resource | Retrieve the download URL for a model artifact.                                                              |
+| `modelcard://{id}/deployments`                   | Resource | Retrieve deployments for a model.                                                                            |
+| `modelcard://{id}/linkset`                       | Resource | Retrieve linkset relations for a model card.                                                                 |
+| `upload_modelcard`                               | Tool     | Upload (create) a model card.                                                                                |
+| `update_modelcard`                               | Tool     | Update an existing model card.                                                                               |
+| `upload_datasheet`                               | Tool     | Upload a datasheet.                                                                                          |
+| `search_modelcards`                              | Tool     | Full-text search for model cards.                                                                            |
+| `list_modelcards`                                | Tool     | List all model cards.                                                                                        |
+| `update_model_location`                          | Tool     | Update the model's location.                                                                                 |
+| `generate_pid`                                   | Tool     | Generate a persistent model ID (PID) for author, name, version.                                              |
+| `register_device`                                | Tool     | Register an edge device.                                                                                     |
+| `register_user`                                  | Tool     | Register a user.                                                                                              |
+| `create_edge`                                    | Tool     | Create an edge/relationship between two nodes in the Neo4j graph.                                            |
 
-**Available Tools:**
-- `get_modelcard(mc_id)` - Retrieve a model card by its ID
-- `search_modelcards(query)` - Search for model cards using semantic queries
-
-##### b. Layered MCP Server
-The Layered MCP server wraps all Patra REST API endpoints as MCP tools, providing a complete set of capabilities for AI assistants.
+The MCP server runs on port `8050` and uses Server-Sent Events (SSE) transport for communication.
 
 ---
 
@@ -90,8 +99,7 @@ The Layered MCP server wraps all Patra REST API endpoints as MCP tools, providin
   - `7474` (Neo4j Web UI)
   - `7687` (Neo4j Bolt)
   - `5002` (REST Server)
-  - `8050` (Direct MCP Server - optional)
-  - `8051` (Layered MCP Server - optional)
+  - `8050` (MCP Server)
 
 #### Dependencies
 - **Neo4j**: Version **5.21.0-community** is deployed via Docker (manual installation is not required).
@@ -131,8 +139,7 @@ make up
   
 The services will be running at:
 - **REST Server**: `http://localhost:5002` - View Swagger documentation at `http://localhost:5002/swagger`
-- **Direct MCP Server**: `http://localhost:8050` - SSE endpoint for AI agent integration (direct Neo4j access)
-- **Layered MCP Server**: `http://localhost:8051` - SSE endpoint for AI agent integration (via REST API)
+- **MCP Server**: `http://localhost:8050` - SSE endpoint for AI agent integration
 - **Neo4j Browser**: `http://localhost:7474/browser/` - View and query the knowledge graph
 
 Open [neo4j browser](http://localhost:7474/browser/) and log in with the credentials mentioned in the docker-compose file to view the model card data.   
@@ -142,74 +149,45 @@ Open [neo4j browser](http://localhost:7474/browser/) and log in with the credent
     make down
     ```
 
-### 3. Using the MCP Servers (Optional)
+### 3. Using the MCP Server (Optional)
 
-The MCP servers enable AI assistants to interact with the Patra Knowledge Graph. Choose based on your needs:
-- **Direct MCP Server** (`8050`): Fast, read-only access (2 tools)
-- **Layered MCP Server** (`8051`): Full CRUD operations (17 tools)
+The MCP server enables AI assistants to interact with the Patra Knowledge Graph using the Model Context Protocol. The production MCP server provides:
+- **4 Resources** for reading model card data by identifier
+- **10 Tools** for operations, queries, and state modifications
 
 **For Claude Desktop:**
 1. Add to your Claude Desktop configuration (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
 
-For Direct MCP Server (faster, read-only):
+For the production MCP Server:
 ```json
 {
   "mcpServers": {
-    "patra-kg-direct": {
+    "patra-kg": {
       "url": "http://localhost:8050/sse"
-    }
-  }
-}
-```
-
-For Layered MCP Server (full operations):
-```json
-{
-  "mcpServers": {
-    "patra-kg-rest": {
-      "url": "http://localhost:8051/sse"
-    }
-  }
-}
-```
-
-Or use both:
-```json
-{
-  "mcpServers": {
-    "patra-kg-direct": {
-      "url": "http://localhost:8050/sse"
-    },
-    "patra-kg-rest": {
-      "url": "http://localhost:8051/sse"
     }
   }
 }
 ```
 
 **For Custom AI Agents:**
-Connect to your preferred endpoint:
-- Direct MCP: `http://localhost:8050/sse` (2 read tools)
-- Layered MCP: `http://localhost:8051/sse` (17 full CRUD tools)
+Connect to the MCP server endpoint:
+- MCP Server: `http://localhost:8050/sse` (4 resources, 10 tools)
 
 **Example Usage:**
 
-*With Direct MCP Server:*
+*With MCP Server:*
 ```
-User: "Find model cards for image classification models"
-AI Assistant: [Uses search_modelcards tool]
-Result: Returns relevant model cards from the knowledge graph
-```
-
-*With Layered MCP Server:*
-```
-User: "Upload this model card and then find similar models"
-AI Assistant: [Uses upload_modelcard, then search_modelcards]
+User: "Upload this model card and then search for similar models"
+AI Assistant: [Uses upload_modelcard tool, then search_modelcards tool]
 Result: Model card uploaded and similar models found
 ```
 
-This enables conversational AI systems to access and reason about model card information, enhancing transparency and accountability in AI model selection and deployment.
-
+*Reading model card data:*
+```
+User: "Get information about model card test-mc-123"
+AI Assistant: [Reads modelcard://test-mc-123 resource]
+Result: Returns complete model card data
+```
 ---
 
 ## License
