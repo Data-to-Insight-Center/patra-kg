@@ -72,16 +72,15 @@ The MCP server provides a complete interface for AI-native interactions with the
 | `modelcard://{id}/download_url`                  | Resource | Retrieve the download URL for a model artifact.                                                              |
 | `modelcard://{id}/deployments`                   | Resource | Retrieve deployments for a model.                                                                            |
 | `modelcard://{id}/linkset`                       | Resource | Retrieve linkset relations for a model card.                                                                 |
-| `upload_modelcard`                               | Tool     | Upload (create) a model card.                                                                                |
-| `update_modelcard`                               | Tool     | Update an existing model card.                                                                               |
-| `upload_datasheet`                               | Tool     | Upload a datasheet.                                                                                          |
+| `create_edge`                                    | Tool     | Create an edge between two nodes in the Patra Knowledge graph.                                            |
 | `search_modelcards`                              | Tool     | Full-text search for model cards.                                                                            |
 | `list_modelcards`                                | Tool     | List all model cards.                                                                                        |
+| `upload_modelcard`                               | Tool     | Upload a model card.                                                                                |
+| `update_modelcard`                               | Tool     | Update an existing model card.                                                                               |
+| `upload_datasheet`                               | Tool     | Upload a datasheet.                                                                                          |
 | `update_model_location`                          | Tool     | Update the model's location.                                                                                 |
-| `generate_pid`                                   | Tool     | Generate a persistent model ID (PID) for author, name, version.                                              |
 | `register_device`                                | Tool     | Register an edge device.                                                                                     |
 | `register_user`                                  | Tool     | Register a user.                                                                                              |
-| `create_edge`                                    | Tool     | Create an edge/relationship between two nodes in the Neo4j graph.                                            |
 
 The MCP server runs on port `8050` and uses Server-Sent Events (SSE) transport for communication.
 
