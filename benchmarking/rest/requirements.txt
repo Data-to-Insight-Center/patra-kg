@@ -1,3 +1,0 @@
-fastapi
-uvicorn[standard]
-neo4j>=5.20.0
