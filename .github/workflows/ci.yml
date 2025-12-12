@@ -28,6 +28,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r rest_server/requirements.txt
 
+      - name: Install dependencies (mcp_server)
+        run: |
+          pip install -r mcp_server/requirements.txt
+
       - name: Install dependencies (tests)
         run: |
           pip install -r tests/requirements.txt
@@ -38,3 +42,10 @@ jobs:
         run: |
           # Run full test suite; rely on test neo4j stub in tests/neo4j.py
           pytest -q
+
+      - name: Run MCP server tests
+        env:
+          ENABLE_MC_SIMILARITY: "False"
+        run: |
+          # Run MCP server specific tests
+          pytest tests/test_mcp_server.py -v
